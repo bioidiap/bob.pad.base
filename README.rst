@@ -6,21 +6,21 @@
 Scripts to run anti-spoofing experiments
 ========================================
 
-This package is part of the ``bob.spoof`` packages, which allow to run comparable and reproducible anti-spoofing experiments on publicly available databases.
+This package is part of the ``bob.pad`` packages, which allow to run comparable and reproducible presentation attack detection (PAD) experiments on publicly available databases.
 
-This package contains basic functionality to run anti-spoofing experiments.
+This package contains basic functionality to run PAD experiments.
 It provides a generic ``./bin/spoof.py`` script that takes several parameters, including:
 
 * A database and its evaluation protocol
 * A data preprocessing algorithm
 * A feature extraction algorithm
-* An anti-spoofing algorithm
+* A PAD algorithm
 
-All these steps of the biometric recognition system are given as configuration files.
+All these steps of the PAD system are given as configuration files.
 
-In this base class implementation, only a core functionality is implemented. The specialized algorithms should be provided by other packages, which are usually in the ``bob.spoof`` namespace, such as:
+In this base class implementation, only a core functionality is implemented. The specialized algorithms should be provided by other packages, which are usually in the ``bob.pad`` namespace, such as:
 
-* `bob.spoof.speech for speech anti-spoofing set of algorithms
+* `bob.pad.speech for speech-related PAD algorithms
 
 
 Installation
