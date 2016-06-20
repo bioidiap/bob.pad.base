@@ -252,7 +252,7 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
 
     # protocol command line override
     if args.protocol is not None:
-        args.database.set_protocol(args.protocol)  # set the protocol if it is specified
+        args.database.protocol = args.protocol  # set the protocol if it is specified
 
     protocol = 'None' if args.database.protocol is None else args.database.protocol
 
