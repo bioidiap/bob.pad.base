@@ -72,6 +72,7 @@ def _detect(parameters, cur_test_dir, sub_dir, score_types=('dev-real',), scores
             assert numpy.allclose(data2check[0][:, 3].astype(float), data2check[1][:, 3].astype(float), 1e-5)
 
     finally:
+        # print ("empty")
         shutil.rmtree(cur_test_dir)
 
 

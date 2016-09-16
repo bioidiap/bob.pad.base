@@ -21,10 +21,57 @@
 import os
 import unittest
 import bob.pad.base
+from bob.pad.base.test.dummy.database_sql import create_database
 
 import pkg_resources
 
+import tempfile
+import shutil
+
 dummy_dir = pkg_resources.resource_filename('bob.pad.base', 'test/dummy')
+
+regenerate_database = False
+
+class DummyDatabaseSqlTest(unittest.TestCase):
+
+    def test01_database(self):
+        # check that the database API works
+        if regenerate_database:
+            create_database()
+
+        db = bob.pad.base.test.dummy.database_sql.TestDatabaseSql()
+
+        def check_file(fs, l=1):
+            assert len(fs) == l
+            if l == 1:
+                f = fs[0]
+            else:
+                f = fs[0][0]
+            assert isinstance(f, bob.pad.base.test.dummy.database_sql.TestFileSql)
+            assert f.id == 1
+            assert f.client_id == 5
+            assert f.path == "test/path"
+
+        check_file(db.objects())
+        check_file(db.all_files(), 2)
+        check_file(db.training_files(), 2)
+        check_file(db.files([1]))
+        check_file(db.reverse(["test/path"]))
+
+        file = db.objects()[0]
+        assert db.original_file_name(file) == "original/directory/test/path.orig"
+        assert db.file_names([file], "another/directory", ".other")[0] == "another/directory/test/path.other"
+        assert db.paths([1], "another/directory", ".other")[0] == "another/directory/test/path.other"
+
+        # try file save
+        temp_dir = tempfile.mkdtemp(prefix="bob_db_test_")
+        data = [1., 2., 3.]
+        file.save(data, temp_dir)
+        assert os.path.exists(file.make_path(temp_dir, ".hdf5"))
+        read_data = bob.io.base.load(file.make_path(temp_dir, ".hdf5"))
+        for i in range(3):
+            assert data[i] == read_data[i]
+        shutil.rmtree(temp_dir)
 
 
 class DummyDatabaseTest(unittest.TestCase):
