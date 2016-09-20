@@ -112,14 +112,11 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     for i, toscore_object in enumerate(toscore_objects):
         id_str = (str(toscore_object.client_id)).zfill(3)
         sample_name = str(toscore_object.make_path())
-        print("i=%d, scores=%s" % (i, str(scores)))
         for score in scores[i]:
             if not toscore_object.attack_type or toscore_object.attack_type=="None":
-                print("- Scoring: %s, id: %s, real" %(sample_name, id_str))
                 _write(f, "%s %s %s %.12f\n" % (id_str, id_str, sample_name, score), write_compressed)
             else:
                 attackname = toscore_object.attack_type
-                print("- Scoring: %s, id: %s, attack: %s" %(sample_name, id_str, attackname))
                 _write(f, "%s %s %s %.12f\n" % (id_str, attackname, sample_name, score), write_compressed)
 
     _close_written(score_file, f, write_compressed)

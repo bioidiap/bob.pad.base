@@ -57,8 +57,6 @@ def preprocess(preprocessor, groups=None, indices=None, force=False):
     # get the file lists
     data_files, original_directory, original_extension = fs.original_data_list_files(groups=groups)
     preprocessed_data_files = fs.preprocessed_data_list(groups=groups)
-    print("len of data files: %s" %(str(len(data_files))))
-    print("len of preprocessed data files (paths): %s" %(str(len(preprocessed_data_files))))
 
     # select a subset of keys to iterate
     if indices is not None:
