@@ -53,7 +53,7 @@ For a list of supported databases including their download URLs, please refer to
 
 After downloading the original data for the databases, you will need to tell ``bob.pad``, where these databases can be found.
 For this purpose, we have decided to implement a special file, where you can set your directories.
-By default, this file is located in ``~/.bob_spoof_databases.txt``, and it contains several lines, each line looking somewhat like:
+Similar to ``bob.bio.base``, by default, this file is located in ``~/.bob_bio_databases.txt``, and it contains several lines, each line looking somewhat like:
 
 .. code-block:: text
 

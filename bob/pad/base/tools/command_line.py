@@ -107,7 +107,7 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
     # directories differ between idiap and extern
     temp = "/idiap/temp/%s/database-name/sub-directory" % os.environ["USER"] if is_idiap() else "temp"
     results = "/idiap/user/%s/database-name/sub-directory" % os.environ["USER"] if is_idiap() else "results"
-    database_replacement = "%s/.bob_spoof_databases.txt" % os.environ["HOME"]
+    database_replacement = "%s/.bob_bio_databases.txt" % os.environ["HOME"]
 
     dir_group = parser.add_argument_group('\nDirectories that can be changed according to your requirements')
     dir_group.add_argument('-T', '--temp-directory', metavar='DIR',
