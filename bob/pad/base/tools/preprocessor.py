@@ -55,8 +55,10 @@ def preprocess(preprocessor, groups=None, indices=None, force=False):
     fs = FileSelector.instance()
 
     # get the file lists
-    data_files = fs.original_data_list(groups=groups)
+    data_files, original_directory, original_extension = fs.original_data_list_files(groups=groups)
     preprocessed_data_files = fs.preprocessed_data_list(groups=groups)
+    print("len of data files: %s" %(str(len(data_files))))
+    print("len of preprocessed data files (paths): %s" %(str(len(preprocessed_data_files))))
 
     # select a subset of keys to iterate
     if indices is not None:
@@ -71,18 +73,23 @@ def preprocess(preprocessor, groups=None, indices=None, force=False):
     # iterate over the selected files
     for i in index_range:
         preprocessed_data_file = str(preprocessed_data_files[i])
+        file_object = data_files[i]
+        file_name = file_object.make_path(original_directory, original_extension)
 
         # check for existence
         if not utils.check_file(preprocessed_data_file, force, 1000):
-            file_name = data_files[i]
-            data = preprocessor.read_original_data(file_name)
+            logger.info("... Processing original data file '%s'", file_name)
+            data = preprocessor.read_original_data(file_object, original_directory, original_extension)
+            # create output directory before reading the data file (is sometimes required, when relative directories are specified, especially, including a .. somewhere)
+            bob.io.base.create_directories_safe(os.path.dirname(preprocessed_data_file))
 
             # call the preprocessor
-            logger.info("- Preprocessor: processing file: %s", file_name)
             preprocessed_data = preprocessor(data, None)
+            if preprocessed_data is None:
+                logger.error("Preprocessing of file '%s' was not successful", file_name)
+                continue
 
             # write the data
-            bob.io.base.create_directories_safe(os.path.dirname(preprocessed_data_file))
             preprocessor.write_data(preprocessed_data, preprocessed_data_file)
 
 

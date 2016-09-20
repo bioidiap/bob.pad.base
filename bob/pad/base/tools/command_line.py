@@ -26,6 +26,8 @@ import bob.core
 
 logger = bob.core.log.setup("bob.pad.base")
 
+from bob.pad.base.database import PadDatabase
+
 from bob.bio.base import utils
 from . import FileSelector
 from .. import database
@@ -264,7 +266,7 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     projector_sub_dir = extractor_sub_dir
 
     # Database directories, which should be automatically replaced
-    if isinstance(args.database, database.DatabaseBobSpoof):
+    if isinstance(args.database, PadDatabase):
         args.database.replace_directories(args.database_directories_file)
 
     # initialize the file selector
