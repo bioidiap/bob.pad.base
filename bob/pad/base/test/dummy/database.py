@@ -21,8 +21,8 @@ import os
 import sys
 import six
 
-from bob.pad.db import PadFile
-from bob.pad.db import PadDatabase
+from bob.pad.base.database import PadFile
+from bob.pad.base.database import PadDatabase
 
 import bob.io.base
 from bob.db.base.driver import Interface as BaseInterface
@@ -35,6 +35,11 @@ dummy_train_list = ['train_real', 'train_attack']
 dummy_devel_list = ['dev_real', 'dev_attack']
 dummy_test_list = ['eval_real', 'eval_attack']
 
+dummy_data = {'train_real': 1.0, 'train_attack': 2.0,
+              'dev_real': 3.0, 'dev_attack': 4.0,
+              'eval_real': 5.0, 'eval_attack': 6.0}
+
+
 class TestFile(PadFile):
     def __init__(self, path, id):
         attack_type = None
@@ -42,6 +47,27 @@ class TestFile(PadFile):
             attack_type = "attack"
         PadFile.__init__(self, client_id=1, path=path, file_id=id, attack_type=attack_type)
 
+    def load(self, directory=None, extension='.hdf5'):
+        """Loads the data at the specified location and using the given extension.
+        Override it if you need to load differently.
+
+        Keyword Parameters:
+
+        data
+          The data blob to be saved (normally a :py:class:`numpy.ndarray`).
+
+        directory
+          [optional] If not empty or None, this directory is prefixed to the final
+          file destination
+
+        extension
+          [optional] The extension of the filename - this will control the type of
+          output and the codec for saving the input blob.
+
+        """
+        # get the path
+        path = self.make_path(directory or '', extension or '')
+        return dummy_data[os.path.basename(path)]
 
 def dumplist(args):
     """Dumps lists of files based on your criteria"""

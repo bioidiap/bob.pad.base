@@ -113,6 +113,7 @@ setup(
 
         'bob.pad.database': [
             'dummy             = bob.pad.base.test.dummy.database:database',  # for test purposes only
+            'dummysql             = bob.pad.base.test.dummy.database_sql:database',  # for test purposes only
         ],
 
         'bob.pad.preprocessor': [

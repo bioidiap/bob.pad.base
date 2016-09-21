@@ -33,8 +33,5 @@ class DummyPreprocessor(Preprocessor):
         """Does nothing, simply converts the data type of the data, ignoring any annotation."""
         return data
 
-    def read_original_data(self, original_file_name):
-        return dummy_data[os.path.basename(original_file_name)]
-
 
 preprocessor = DummyPreprocessor()

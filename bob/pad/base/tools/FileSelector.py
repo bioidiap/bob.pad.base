@@ -107,8 +107,17 @@ class FileSelector:
 
     # List of files that will be used for all files
     def original_data_list(self, groups=None):
-        """Returns the tuple of lists of original (real, attack) data that can be used for preprocessing."""
+        """Returns the the joint list of original (real and attack) file names."""
         return self.database.original_file_names(self.database.all_files(groups=groups))
+
+    def original_data_list_files(self, groups=None):
+        """Returns the joint list of original (real and attack) data files that can be used for preprocessing."""
+        files = self.database.all_files(groups=groups)
+        if len(files) != 2:
+            fileset = files
+        else:
+            fileset = files[0]+files[1]
+        return fileset, self.database.original_directory, self.database.original_extension
 
     def preprocessed_data_list(self, groups=None):
         """Returns the tuple of lists (real, attacks) of preprocessed data files."""
