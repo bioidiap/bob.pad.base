@@ -24,7 +24,7 @@ from bob.bio.base import utils
 
 
 @utils.Singleton
-class FileSelector:
+class FileSelector(object):
     """This class provides shortcuts for selecting different files for different stages of the snti-spoofing process.
 
     It communicates with the database and provides lists of file names for all steps of the tool chain.
