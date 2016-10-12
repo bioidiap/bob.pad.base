@@ -24,15 +24,15 @@ There, in the ``eggs`` section of the ``buildout.cfg`` file, simply list the ``b
 .. code-block:: python
 
    eggs = bob.pad.base
-          bob.pad.speech
+          bob.pad.voice
           bob.db.avspoof
           gridtk
 
 in order to download and install all packages that are required for your experiments.
 In the example above, you might want to run a simple speech presentation attack detection
-experiment using the :py:class:`bob.pad.speech.preprocessor.EnergyBandsPreprocessor` and
-the :py:class:`bob.pad.speech.extractor.LBPExtractor` feature extractor
-defined in :ref:`bob.pad.speech <bob.pad.speech>`, using the AVspoof database interface defined in :ref:`bob.db.avspoof <bob.db.avspoof>`.
+experiment using the :py:class:`bob.pad.voice.preprocessor.EnergyBandsPreprocessor` and
+the :py:class:`bob.pad.voice.extractor.LBPExtractor` feature extractor
+defined in :ref:`bob.pad.voice <bob.pad.voice>`, using the AVspoof database interface defined in :ref:`bob.db.avspoof <bob.db.avspoof>`.
 Running the simple command line:
 
 .. code-block:: sh
@@ -49,7 +49,7 @@ Databases
 With ``bob.pad`` you will run biometric recognition experiments using databases that contain presentation attacks.
 Though the PAD protocols are implemented in ``bob.pad``, the original data are **not included**.
 To download the original data of the databases, please refer to the according Web-pages.
-For a list of supported databases including their download URLs, please refer to the :ref:`spoofing_databases`.
+For a list of supported databases including their download URLs, please refer to the `spoofing_databases <https://gitlab.idiap.ch/bob/bob/wikis/Packages>`_.
 
 After downloading the original data for the databases, you will need to tell ``bob.pad``, where these databases can be found.
 For this purpose, we have decided to implement a special file, where you can set your directories.
@@ -67,7 +67,7 @@ Please use ``./bin/databases.py`` for a list of known databases, where you can s
 
 
 .. note::
-   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other packages, such as :ref:`bob.pad.speech <bob.pad.speech>`.
+   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other packages, such as :ref:`bob.pad.voice <bob.pad.voice>`.
 
 
 Test your Installation
@@ -79,7 +79,7 @@ To verify your installation, you should run the script running the nose tests fo
 .. code-block:: sh
 
   $ ./bin/nosetests -vs bob.pad.base
-  $ ./bin/nosetests -vs bob.pad.speech
+  $ ./bin/nosetests -vs bob.pad.voice
   ...
 
 In case any of the tests fail for unexplainable reasons, please file a bug report through the `GitHub bug reporting system`_.

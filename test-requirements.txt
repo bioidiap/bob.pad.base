@@ -1,4 +1,3 @@
 bob.io.image
-bob.io.base
 matplotlib
 gridtk

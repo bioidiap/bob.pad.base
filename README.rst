@@ -20,7 +20,7 @@ All these steps of the PAD system are given as configuration files.
 
 In this base class implementation, only a core functionality is implemented. The specialized algorithms should be provided by other packages, which are usually in the ``bob.pad`` namespace, such as:
 
-* `bob.pad.speech for speech-related PAD algorithms
+* `bob.pad.voice for speech-related PAD algorithms
 
 
 Installation

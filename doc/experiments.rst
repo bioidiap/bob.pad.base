@@ -94,7 +94,7 @@ So, a typical PAD experiment (in this case, attacks detection in speech) could l
    $ ./bin/spoof.py --database avspoof --preprocessor vad_energy --extractor lbp_hist --algorithm logregr --sub-directory pad_speech -vv
 
 .. note::
-   To be able to run exactly the command line from above, it requires to have :ref:`bob.pad.speech <bob.pad.speech>` installed.
+   To be able to run exactly the command line from above, it requires to have :ref:`bob.pad.voice <bob.pad.voice>` installed.
 
 Before running an experiment, it is recommended to add the ``--dry-run`` option, so that it will only print, which steps would be executed, without actually executing them, and make sure that everything works as expected.
 

@@ -7,9 +7,39 @@
 
 import abc
 import bob.bio.base.database
+import bob.pad.base.database
 
 
 class PadDatabase(bob.bio.base.database.BioDatabase):
+    """This class represents the basic API for database access.
+    Please use this class as a base class for your database access classes.
+    Do not forget to call the constructor of this base class in your derived class.
+
+    **Parameters:**
+
+    name : str
+    A unique name for the database.
+
+    all_files_options : dict
+    Dictionary of options passed to the second-level database query when retrieving all data.
+
+    check_original_files_for_existence : bool
+    Enables to test for the original data files when querying the database.
+
+    original_directory : str
+    The directory where the original data of the database are stored.
+
+    original_extension : str
+    The file name extension of the original data.
+
+    protocol : str or ``None``
+    The name of the protocol that defines the default experimental setup for this database.
+
+    kwargs : ``key=value`` pairs
+    The arguments of the :py:class:`bob.bio.base.database.BioDatabase` base class constructor.
+
+    """
+
     def __init__(
             self,
             name,
@@ -20,34 +50,6 @@ class PadDatabase(bob.bio.base.database.BioDatabase):
             protocol='Default',
             **kwargs  # The rest of the default parameters of the base class
     ):
-        """This class represents the basic API for database access.
-        Please use this class as a base class for your database access classes.
-        Do not forget to call the constructor of this base class in your derived class.
-
-        **Parameters:**
-
-        name : str
-        A unique name for the database.
-
-        all_files_options : dict
-        Dictionary of options passed to the second-level database query when retrieving all data.
-
-        check_original_files_for_existence : bool
-        Enables to test for the original data files when querying the database.
-
-        original_directory : str
-        The directory where the original data of the database are stored.
-
-        original_extension : str
-        The file name extension of the original data.
-
-        protocol : str or ``None``
-        The name of the protocol that defines the default experimental setup for this database.
-
-        kwargs : ``key=value`` pairs
-        The arguments of the :py:class:`bob.bio.base.BioDatabase` base class constructor.
-
-        """
         super(PadDatabase, self).__init__(name=name, all_files_options=all_files_options, check_original_files_for_existence=check_original_files_for_existence, original_directory=original_directory, original_extension=original_extension, protocol=protocol, **kwargs)
 
     def original_file_names(self, files):
@@ -57,7 +59,7 @@ class PadDatabase(bob.bio.base.database.BioDatabase):
 
         **Parameters:**
 
-        files : [[:py:class:`bob.pad.db.PadFile`], [:py:class:`bob.pad.db.PadFile`]
+        files : [[:py:class:`bob.pad.base.database.PadFile`], [:py:class:`bob.pad.base.database.PadFile`]
           The list of lists ([real, attack]) of file object to retrieve the original data file names for.
 
         **Returns:**
@@ -130,7 +132,7 @@ class PadDatabase(bob.bio.base.database.BioDatabase):
 
         **Returns:**
 
-        files : [:py:class:`File`]
+        files : [:py:class:`bob.pad.base.database.PadFile`]
           The sorted and unique list of all files of the database.
         """
         realset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='real', **self.all_files_options))
@@ -148,7 +150,7 @@ class PadDatabase(bob.bio.base.database.BioDatabase):
 
         **Returns:**
 
-        files : [:py:class:`File`] or [[:py:class:`File`]]
+        files : [:py:class:`bob.pad.base.database.PadFile`] or [[:py:class:`bob.pad.base.database.PadFile`]]
           The (arranged) list of files used for the training.
         """
 

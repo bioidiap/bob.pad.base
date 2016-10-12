@@ -93,7 +93,7 @@ Implemented Tools
 Example implementations of the base classes can be found in all of the ``bob.pad`` packages.
 Here is the current list of implementations:
 
-* :ref:`bob.pad.speech <bob.pad.speech>` : :ref:`bob.pad.speech.implemented`
+* :ref:`bob.pad.voice <bob.pad.voice>` : :ref:`bob.pad.voice`
 
 
 .. todo:: complete this list, once the other packages are documented as well.
@@ -112,20 +112,20 @@ Anti-spoofing Database Interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For most of the data sets, we rely on the database interfaces from Bob_.
-Particularly, all databases that are derived from the :py:class:`bob.pad.db` (click :ref:`here <spoofing_databases>` for a list of implemented databases) are supported.
+Particularly, all databases that are derived from the :py:class:`bob.pad.base.database.PadDatabase` (click `here <https://gitlab.idiap.ch/bob/bob/wikis/Packages>`_ for a list of implemented databases) are supported.
 
 Defining your own Database
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to define you own database, you are welcome to write your own database wrapper class.
-In this case, you have to derive your class from the :py:class:`bob.pad.db`,
+In this case, you have to derive your class from the :py:class:`bob.pad.base.database.PadDatabase`,
 and provide only the following functions:
 
 * ``__init__(self, <your-parameters>, **kwargs)``: Constructor of your database interface.
-  Please call the base class constructor, providing all the required parameters, e.g. by ``bob.pad.db.PadDatabase.__init__(self, **kwargs)``.
-* ``objects(self, , groups=None, protocol=None, purposes=None, model_ids=None, **kwargs)``: Expected to return a list of :py:class:`bob.pad.db.PadFile` objects of the database given the specified parameters.
+  Please call the base class constructor, providing all the required parameters, e.g. by ``bob.pad.base.database.PadDatabase.__init__(self, **kwargs)``.
+* ``objects(self, , groups=None, protocol=None, purposes=None, model_ids=None, **kwargs)``: Expected to return a list of :py:class:`bob.pad.base.database.PadFile` objects of the database given the specified parameters.
   The list needs to be sorted by the file id (you can use the ``self.sort(files)`` function for sorting).
-* ``training_files(self, step, arrange_by_client = False)``: A sorted list of the :py:class:`bob.bio.base.database.File` objects that is used for training.
+* ``training_files(self, step, arrange_by_client = False)``: A sorted list of the :py:class:`bob.bio.base.database.BioFile` objects that is used for training.
   You should have ``arrange_by_clients`` disabled.
 
 
@@ -141,7 +141,7 @@ In ``bob.pad`` (similarly to ``bob.bio``) this is achieved by providing these pa
 In these files, an *instance* of one of the tools is generated, and assigned to a variable with a specific name.
 These variable names are:
 
-* ``database`` for an instance of a (derivation of a) :py:class:`bob.pad.db.PadDatabase`
+* ``database`` for an instance of a (derivation of a) :py:class:`bob.pad.base.database.PadDatabase`
 * ``preprocessor`` for an instance of a (derivation of a) :py:class:`bob.bio.base.preprocessor.Preprocessor`
 * ``extractor`` for an instance of a (derivation of a) :py:class:`bob.bio.base.extractor.Extractor`
 * ``algorithm`` for an instance of a (derivation of a) :py:class:`bob.pad.base.algorithm.Algorithm`
@@ -153,14 +153,14 @@ These variable names are:
 Resources
 ---------
 
-Finally, some of the configuration files, which sit in the ``bob/spoof/*/config`` directories, are registered as *resources*.
+Finally, some of the configuration files, which sit in the ``bob/pad/*/config`` directories, are registered as *resources*.
 This means that a resource is nothing else than a short name for a registered instance of one of the tools (database, preprocessor, extractor, algorithm or grid configuration) of ``bob.pad``, which has a pre-defined set of parameters.
 
 The process of registering a resource is relatively easy.
 We use the SetupTools_ mechanism of registering so-called entry points in the ``setup.py`` file of the according ``bob.pad`` package.
 Particularly, we use a specific list of entry points, which are:
 
-* ``bob.pad.db`` to register an instance of a (derivation of a) :py:class:`bob.pad.db.PadDatabase`
+* ``bob.pad.base.database.PadDatabase`` to register an instance of a (derivation of a) :py:class:`bob.pad.base.database.PadDatabase`
 * ``bob.bio.preprocessor`` to register an instance of a (derivation of a) :py:class:`bob.bio.base.preprocessor.Preprocessor`
 * ``bob.bio.extractor`` to register an instance of a (derivation of a) :py:class:`bob.bio.base.extractor.Extractor`
 * ``bob.pad.algorithm`` to register an instance of a (derivation of a) :py:class:`bob.pad.base.algorithm.Algorithm`

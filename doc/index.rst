@@ -25,7 +25,7 @@ This results in a nearly infinite amount of possible experiments that can be run
 But it is also possible to use your own database, preprocessor, feature extractor, or PAD algorithm and test this against the baseline algorithms implemented in the our packages.
 
 .. note::
-    The ``bob.pad`` packages are derived from the `bob.bio <http://pypi.python.org/pypi/bob.bio.base>`__, packages that are designed for biometric recognition experiments.
+    The ``bob.pad.*`` packages are derived from the `bob.bio.* <http://pypi.python.org/pypi/bob.bio.base>`__, packages that are designed for biometric recognition experiments.
 
 This package :py:mod:`bob.pad.base` includes the basic definition of a PAD experiment, as well as a generic script, which can execute the full experiment in a single command line.
 Changing the employed tolls such as the database, protocol, preprocessor, feature extractor or a PAD algorithm is as simple as changing a command line parameter.
@@ -34,7 +34,7 @@ The implementation of (most of) the tools is separated into other packages in th
 All these packages can be easily combined.
 Here is a growing list of derived packages:
 
-* :ref:`bob.pad.speech <bob.pad.speech>` Tools to run presentation attack detection experiments for speech, including Cepstral-based feature and LBP-based feature extraction, GMM-based and logistic regression based algorithms, plot processing and score fusion scripts.
+* :ref:`bob.pad.voice <bob.pad.voice>` Tools to run presentation attack detection experiments for speech, including Cepstral-based feature and LBP-based feature extraction, GMM-based and logistic regression based algorithms, plot processing and score fusion scripts.
 
 If you are interested, please continue reading:
 

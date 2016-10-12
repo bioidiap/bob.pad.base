@@ -18,6 +18,12 @@ Only one base class that is presentation attack detection specific, ``Algorithm`
 .. autosummary::
    bob.pad.base.algorithm.Algorithm
 
+Implementations
+~~~~~~~~~~~~~~~
+
+.. autosummary::
+   bob.pad.base.database.PadDatabase
+   bob.pad.base.database.PadFile
 
 Preprocessors
 -------------
@@ -38,6 +44,10 @@ Algorithms
 
 .. automodule:: bob.pad.base.algorithm
 
+Databases
+---------
+
+.. automodule:: bob.pad.base.database
 
 Grid Configuration
 ------------------
