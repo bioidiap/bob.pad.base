@@ -1,11 +1,7 @@
 python
 numpy
-bob.bio.face
-bob.bio.speaker
-bob.bio.gmm
-bob.bio.video
-bob.bio.csu
+bob.pad.voice
+bob.bio.base
 bob.bio.spear
-bob.learn.linear
 gridtk
 bob.db.base
