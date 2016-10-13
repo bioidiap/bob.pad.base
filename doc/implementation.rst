@@ -32,8 +32,8 @@ This will assure that all parameters of the experiments are stored into the ``Ex
 If you plan to write your own tools, please assure that you are following the following structure.
 
 
-.. _bob.bio.base.preprocessors:
-.. _bob.bio.base.extractors:
+.. _bob.pad.base.preprocessors:
+.. _bob.pad.base.extractors:
 
 Preprocessors and Extractors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -148,7 +148,7 @@ These variable names are:
 * ``grid`` for an instance of the :py:class:`bob.bio.base.grid.Grid`
 
 
-.. _bob.bio.base.resources:
+.. _bob.pad.base.resources:
 
 Resources
 ---------

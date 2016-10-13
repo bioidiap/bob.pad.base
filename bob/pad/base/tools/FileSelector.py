@@ -31,7 +31,7 @@ class FileSelector(object):
 
     **Parameters:**
 
-    database : :py:class:`antispoofing.utils.db` or derived.
+    database : :py:class:`bob.pad.base.database.PadDatabase` or derived.
       The database object that provides the list of files.
 
     preprocessed_directory : str

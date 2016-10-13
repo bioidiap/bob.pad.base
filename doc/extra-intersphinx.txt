@@ -1,7 +1,7 @@
 python
 numpy
-bob.pad.voice
-bob.bio.base
 bob.bio.spear
 gridtk
 bob.db.base
+bob.db.avspoof
+bob.pad.voice
