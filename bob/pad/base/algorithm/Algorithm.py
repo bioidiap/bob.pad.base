@@ -41,7 +41,7 @@ class Algorithm:
       Set this flag to ``False``, when the projection is applied, but the projector does not need to be trained.
 
     kwargs : ``key=value`` pairs
-      A list of keyword arguments to be written in the :py:meth:`__str__` function.
+      A list of keyword arguments to be written in the `__str__` function.
 
     """
 

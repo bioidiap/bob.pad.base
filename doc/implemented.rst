@@ -1,4 +1,4 @@
-.. _bob.bio.base.implemented:
+.. _bob.pad.base.implemented:
 
 =================================
 Tools implemented in bob.pad.base

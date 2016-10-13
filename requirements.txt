@@ -1,5 +1,5 @@
 setuptools
 bob.extension
 bob.db.base
-bob.bio.base
 bob.io.base
+bob.bio.base

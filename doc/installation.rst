@@ -30,8 +30,8 @@ There, in the ``eggs`` section of the ``buildout.cfg`` file, simply list the ``b
 
 in order to download and install all packages that are required for your experiments.
 In the example above, you might want to run a simple speech presentation attack detection
-experiment using the :py:class:`bob.pad.voice.preprocessor.EnergyBandsPreprocessor` and
-the :py:class:`bob.pad.voice.extractor.LBPExtractor` feature extractor
+experiment using the :py:class:`bob.bio.spear.preprocessor.Mod_4Hz` and
+the :py:class:`bob.pad.voice.extractor.LBPHistograms` feature extractor
 defined in :ref:`bob.pad.voice <bob.pad.voice>`, using the AVspoof database interface defined in :ref:`bob.db.avspoof <bob.db.avspoof>`.
 Running the simple command line:
 

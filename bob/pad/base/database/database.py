@@ -6,11 +6,12 @@
 #
 
 import abc
-import bob.bio.base.database
-import bob.pad.base.database
+import bob.bio.base
+import bob.pad.base
+from bob.bio.base.database import BioDatabase
 
 
-class PadDatabase(bob.bio.base.database.BioDatabase):
+class PadDatabase(BioDatabase):
     """This class represents the basic API for database access.
     Please use this class as a base class for your database access classes.
     Do not forget to call the constructor of this base class in your derived class.
