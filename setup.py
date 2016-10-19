@@ -51,7 +51,7 @@ setup(
     version=open("version.txt").read().rstrip(),
     description='A framework for executing the chain of presentation attack detection (PAD) experiments',
 
-    url='https://www.github.com/bioidiap/bob.pad.base',
+    url='https://gitlab.idiap.ch/bob/bob.pad.base',
     license='GPLv3',
     author='Pavel Korshunov',
     author_email='pavel.korshunov@idiap.ch',

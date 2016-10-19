@@ -93,7 +93,7 @@ Implemented Tools
 Example implementations of the base classes can be found in all of the ``bob.pad`` packages.
 Here is the current list of implementations:
 
-* `bob.pad.voice`
+* ``bob.pad.voice``
 
 
 .. todo:: complete this list, once the other packages are documented as well.
