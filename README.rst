@@ -34,7 +34,7 @@ It provides a generic ``./bin/spoof.py`` script that takes several parameters, i
 All these steps of the PAD system are given as configuration files.
 
 In this base class implementation, only a core functionality is implemented. The specialized algorithms should
-be provided by other packages, which are usually in the ``bob.pad`` namespace, like ``bob.pad.voice``
+be provided by other packages, which are usually in the ``bob.pad`` namespace, like a ``bob.pad.voice`` package.
 
 Installation
 ------------
