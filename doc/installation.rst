@@ -63,7 +63,7 @@ Please use ``./bin/databases.py`` for a list of known databases, where you can s
 
 
 .. note::
-   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other extension packages, such as :ref:`bob.pad.voice <bob.pad.voice>`.
+   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other extension packages, such as `bob.pad.voice`.
 
 
 Test your Installation

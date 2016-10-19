@@ -4,4 +4,3 @@ bob.bio.spear
 gridtk
 bob.db.base
 bob.db.avspoof
-bob.pad.voice
