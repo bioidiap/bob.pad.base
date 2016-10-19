@@ -4,5 +4,4 @@ py:class bob.bio.base.database.database.BioDatabase
 py:class bob.bio.base.preprocessor.Preprocessor.Preprocessor
 py:class bob.bio.base.extractor.Extractor.Extractor
 py:class bob.bio.base.database.file.BioFile
-py:class bob.pad.voice.extractor.LBPHistograms
 py:exc ValueError
