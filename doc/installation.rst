@@ -29,10 +29,6 @@ There, in the ``eggs`` section of the ``buildout.cfg`` file, simply list the ``b
           gridtk
 
 in order to download and install all packages that are required for your experiments.
-In the example above, you might want to run a simple speech presentation attack detection
-experiment using the :py:class:`bob.bio.spear.preprocessor.Mod_4Hz` and
-the :py:class:`bob.pad.voice.extractor.LBPHistograms` feature extractor
-defined in :ref:`bob.pad.voice <bob.pad.voice>`, using the AVspoof database interface defined in :ref:`bob.db.avspoof <bob.db.avspoof>`.
 Running the simple command line:
 
 .. code-block:: sh
@@ -67,7 +63,7 @@ Please use ``./bin/databases.py`` for a list of known databases, where you can s
 
 
 .. note::
-   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other packages, such as :ref:`bob.pad.voice <bob.pad.voice>`.
+   If you have installed only ``bob.pad.base``, there is no database listed -- as all databases are included in other extension packages, such as :ref:`bob.pad.voice <bob.pad.voice>`.
 
 
 Test your Installation

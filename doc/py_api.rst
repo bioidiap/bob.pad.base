@@ -40,10 +40,6 @@ Details
 
 .. automodule:: bob.pad.base
 
-   .. attribute:: valid_keywords
-
-      Valid keywords, for which resources are defined, are ``('database', 'preprocessor', 'extractor', 'algorithm', 'grid')``
-
 
 .. automodule:: bob.pad.base.tools
 

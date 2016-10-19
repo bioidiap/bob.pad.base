@@ -86,15 +86,12 @@ To change this behavior, you can use the ``--verbose`` option several times to i
 2) Informative messages
 3) Debug messages
 
-When running experiments, my personal preference is verbose level 2, which can be enabled by using the short version: ``-vv``.
-So, a typical PAD experiment (in this case, attacks detection in speech) could look something like:
+When running experiments, it is a good idea to set verbose level 2, which can be enabled by using the short version: ``-vv``.
+So, a typical PAD experiment (in this case, attacks detection in speech) would look like the following:
 
 .. code-block:: sh
 
-   $ ./bin/spoof.py --database avspoof --preprocessor vad_energy --extractor lbp_hist --algorithm logregr --sub-directory pad_speech -vv
-
-.. note::
-   To be able to run exactly the command line from above, it requires to have :ref:`bob.pad.voice <bob.pad.voice>` installed.
+   $ ./bin/spoof.py --database <database-name> --preprocessor <preprocessor> --extractor <extractor> --algorithm <algorithm> --sub-directory <folder_name> -vv
 
 Before running an experiment, it is recommended to add the ``--dry-run`` option, so that it will only print, which steps would be executed, without actually executing them, and make sure that everything works as expected.
 
@@ -151,7 +148,7 @@ Hence, to run the same experiment as above using four parallel threads on the lo
 
 .. code-block:: sh
 
-   $ ./bin/spoof.py --database avspoof --preprocessor vad_energy --extractor lbp_hist --algorithm logregr --sub-directory pad_speech -vv --grid local-p4 --run-local-scheduler --nice 10
+   $ ./bin/spoof.py --database <database-name> --preprocessor <preprocessor> --extractor <extractor> --algorithm <algorithm> --sub-directory <folder_name> -vv --grid local-p4 --run-local-scheduler --nice 10
 
 .. note::
    You might realize that the second execution of the same experiment is much faster than the first one.
@@ -198,7 +195,7 @@ To change the protocol, you can either modify the configuration file, or simply 
 
 Some databases define several kinds of evaluation setups.
 For example, often two groups of data are defined, a so-called *development set* and an *evaluation set*.
-The scores of the two groups will be concatenated into two files called **scores-dev** and **scores-eval**, which are located in the score directory (see above).
+The scores of the two groups will be concatenated into several files called **scores-dev** and **scores-eval**, which are located in the score directory (see above).
 In this case, by default only the development set is employed.
 To use both groups, just specify ``--groups dev eval`` (of course, you can also only use the ``'eval'`` set by calling ``--groups eval``).
 
