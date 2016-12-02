@@ -18,6 +18,8 @@ class PadIsoMetrics():
         self.attack_name = 'attack' #attack_presentation_name #'attack'
         
     def save_scores_hdf5(self, outfile, scores_dict):
+        """ saves input scores_dict dictionary in a hdf5 formatted file"""
+
         h5out = bob.io.base.HDF5File(outfile, "w")
     
         for p in scores_dict.keys():
@@ -33,6 +35,8 @@ class PadIsoMetrics():
         del h5out
 
     def load_scores_hdf5(self, infile):
+        """ loads a hdf5 file, and trys to construct a dictionary of scores. Returns the score-dictionary."""
+
         h5in = bob.io.base.HDF5File(infile, "r")
          
         scores_dict = {}         
@@ -55,15 +59,16 @@ class PadIsoMetrics():
         """ computes EER threshold using the scores in the supplied dictionary 
         Input:
         scores_dict: dictionary where each key is the name of the presentation ('real' or one attack-type), 
-                            and the corresponding value is a tuple: (scores, attack_potential).
-                            'scores' should be a 1D numpy-array of floats containing scores
-                            'attack_potential' should be one of the 3 letters 'A', 'B', or 'C')
-                            Scores for 'real' presentations will not have an associated 'attack_potential',
-                            so, if the value of a key is a tuple of length 1, the key-value pair is assumed
-                            to represent a 'real'-presentation set.
+        and the corresponding value is a tuple: (scores, attack_potential).
+        'scores' should be a 1D numpy-array of floats containing scores
+        'attack_potential' should be one of the 3 letters 'A', 'B', or 'C')
+        Scores for 'real' presentations will not have an associated 'attack_potential',
+        so, if the value of a key is a tuple of length 1, the key-value pair is assumed
+        to represent a 'real'-presentation set.
         Return:
         tuple of three floats: (eer_threshold, far, frr). These are computed using functions from bob.measure.
         """
+
         real_scores = None
         attack_scores = None
         assert scores_dict is not None, 'no development score-set provided for computing EER'    
@@ -93,16 +98,17 @@ class PadIsoMetrics():
         """ computes HTER on test-set scores, using the supplied score-threshold.
         Inputs: 
         scores_dict: dictionary where each key is the name of the presentation ('real' or one attack-type), 
-                            and the corresponding value is a tuple: (scores, attack_potential).
-                            'scores' should be a 1D numpy-array of floats containing scores
-                            'attack_potential' should be one of the 3 letters 'A', 'B', or 'C')
-                            Scores for 'real' presentations will not have an associated 'attack_potential',
-                            so, if the value of a key is a tuple of length 1, the key-value pair is assumed
-                            to represent a 'real'-presentation set.
+        and the corresponding value is a tuple: (scores, attack_potential).
+        'scores' should be a 1D numpy-array of floats containing scores
+        'attack_potential' should be one of the 3 letters 'A', 'B', or 'C')
+        Scores for 'real' presentations will not have an associated 'attack_potential',
+        so, if the value of a key is a tuple of length 1, the key-value pair is assumed
+        to represent a 'real'-presentation set.
         score_threshold: (float) value to be used for thresholding scores.
         Return:
         tuple of three floats: (hter, far, frr). These are computed using functions from bob.measure.
         """
+
         assert ((score_threshold is not None) and isinstance(score_threshold, (int, long, float)) ), 'input score_threshold should be a number (float or integer).'
         
         real_scores = None
@@ -132,6 +138,7 @@ class PadIsoMetrics():
 
     def _check_attack_potential(self, attack_potential):
         """ For now, we assume three levels of attack-potential: 'C'>'B'>'A' """
+
         if attack_potential is None:
             attack_potential = 'C'
         if attack_potential not in ['A', 'B', 'C']:
@@ -144,13 +151,13 @@ class PadIsoMetrics():
         """ computes BPCER  on test-set scores, using either the supplied score-threshold, 
         or the threshold computed from the EER of the development set 
         Inputs:
-            scores: a 1D numpy-array of scores corresponding to genuine (bona-fide) presentations.
-            
-            score_threshold: a floating point number specifying the score-threshold to be used for deciding accept/reject.
+        scores: a 1D numpy-array of scores corresponding to genuine (bona-fide) presentations.
+        score_threshold: a floating point number specifying the score-threshold to be used for deciding accept/reject.
         
         Return:
-            floating-point number representing the bpcer computed for the input score-set
+        floating-point number representing the bpcer computed for the input score-set
         """
+
         bonafide_scores = None
         if isinstance(scores, dict):
             #extract 'real' scores from dictionary
@@ -175,19 +182,18 @@ class PadIsoMetrics():
         """computes APCER as defined in ISO standard. For now, we assume three levels of attack-potential: 'C'>'B'>'A' 
         
         Inputs:
-            scores_dict: a dictionary where each key corresponds to a specific PAI (presentation-attack-instrument)
-                         Keys corresponding to PAIs will have as value a list of 2 elements: 
-                             1st element: a 1D numpy-array of scores
-                             2nd element: a single letter 'A', 'B', or 'C', specifying the attack-potential of the PAI.
+        scores_dict: a dictionary where each key corresponds to a specific PAI (presentation-attack-instrument)
+        Keys corresponding to PAIs will have as value a list of 2 elements: 
+        1st element: a 1D numpy-array of scores
+        2nd element: a single letter 'A', 'B', or 'C', specifying the attack-potential of the PAI.
                              
-            attack_potential: a letter 'A', 'B', or 'C', specifying the attack_potential at which the APCER is to be computed
-            
-            score_threshold: a floating point number specifying the score-threshold to be used for deciding accept/reject.
+        attack_potential: a letter 'A', 'B', or 'C', specifying the attack_potential at which the APCER is to be computed
+        score_threshold: a floating point number specifying the score-threshold to be used for deciding accept/reject.
              
         Returns:
-            tuple consisting of 2 elements:
-            1st element: apcer at specified attack-potential
-            2nd element: dictionary of hter of individual PAIs that have attack-potential at or below input-parameter attack_potential.
+        tuple consisting of 2 elements:
+        1st element: apcer at specified attack-potential
+        2nd element: dictionary of hter of individual PAIs that have attack-potential at or below input-parameter attack_potential.
         """
         
         attack_potential = self._check_attack_potential( attack_potential)
