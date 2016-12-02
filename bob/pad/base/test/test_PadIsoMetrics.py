@@ -20,7 +20,8 @@ def main(command_line_parameters=None):
 
 #     PAI_labels = [('mattescreen-photo', 'A'), ('mattescreen-video', 'A'), ('print-fixed', 'A'), ('print-hand','A') ]
 
-    rms = PadIsoMetrics.PadIsoMetrics() # PadIsoMetrics(PAI_labels)
+    #rms = PadIsoMetrics.PadIsoMetrics() # PadIsoMetrics(PAI_labels)
+    rms = PadIsoMetrics()
 
     devel_dict = rms.load_scores_hdf5(scorefile_devel)
     test_dict  = rms.load_scores_hdf5(scorefile_test)
@@ -33,9 +34,9 @@ def main(command_line_parameters=None):
     print('EER (%%): %.3f%%'  % eer_devel)
     
     test_hter, test_far, test_frr = rms.hter(test_dict, threshEER_dev)
-    print "     * FAR : %.3f%%" % (100*test_far)
-    print "     * FRR : %.3f%%" % (100*test_frr)
-    print "     * HTER: %.3f%%" % (100*test_hter)
+    print("     * FAR : %.3f%%" % (100*test_far))
+    print("     * FRR : %.3f%%" % (100*test_frr))
+    print("     * HTER: %.3f%%" % (100*test_hter))
     
     test_bpcer = 100.0*rms.bpcer(test_dict, threshEER_dev)
     print('BPCER from dict: %.3f%%'  % test_bpcer )
