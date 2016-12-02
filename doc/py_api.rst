@@ -35,6 +35,12 @@ Scoring
 .. autosummary::
    bob.bio.base.tools.compute_scores
 
+Evaluation
+~~~~~~~~~~
+
+.. autosummary::
+   bob.pad.base.evaluation.PadIsoMetrics
+
 Details
 -------
 

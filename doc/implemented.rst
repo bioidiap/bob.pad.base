@@ -44,6 +44,12 @@ Algorithms
 
 .. automodule:: bob.pad.base.algorithm
 
+Evaluation
+~~~~~~~~~~
+
+.. automodule:: bob.pad.base.evaluation
+
+
 Databases
 ---------
 

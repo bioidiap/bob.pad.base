@@ -39,6 +39,7 @@ nitpicky = True
 
 # Ignores stuff we can't easily resolve on other project's sphinx manuals
 nitpick_ignore = []
+keep_warnings = True
 
 # Allows the user to override warnings from a separate file
 if os.path.exists('nitpick-exceptions.txt'):
