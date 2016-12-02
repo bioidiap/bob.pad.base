@@ -86,6 +86,24 @@ Finally, the :py:class:`bob.pad.base.algorithm.Algorithm` class provides default
 
 * ``score_for_multiple_projections(self, toscore)``: In case your object store several features or scores, **call** this function to compute the average (or min, max, ...) of the scores.
 
+Evaluation
+~~~~~~~~~~
+This package includes a class `bob.pad.base.evaluation.PadIsoMetrics`, that can be used to compute the PAD metrics APCER and BPCER as defined in the ISO/IEC 30107 part3 standard.
+The most important methods in the class are: ``eer()``,  ``hter()``,  ``apcer()``, and  ``bpcer()``. 
+The main point to note about these methods is that the input-scores should be organized in a dictionary.
+One dictionary should be created for each group ('devel', 'test', etc.). 
+The keys of the dictionary refer to the presentation-type ('bona-fide' or some presentation-attack-instrument (PAI)). 
+The value associated with each key is a tuple, containing either one or two elements. 
+For each key corresponding to a PAI, the value should be a tuple of 2 elements: (scores, attack_potential), where 'scores' is a 1D numpy-array of scores corresponding to presentations of that PAI, and 'attack_potential' is a single letter, either 'A', or 'B', or 'C', signifying the attack-potential of the PAI.
+For bona-fide presentations, no attack-potential is defined. Therefore, for a key representing bona-fide presentations, the value will be a tuple consisting of only one element: a 1D numpy-array of scores.
+Consequently, a key for which the value is a tuple of length 1 is interpretted as representing a bona-fide presentation.
+
+The methods ``eer()`` and ``hter()`` call the corresponding functions in `bob.measure` to compute the relevant thresholds and performance-measures, based on the input score-dictionary. 
+
+The class also provides methods for saving the score-dictionaries in a hdf5-file (``save_scores_hdf5()``), and for loading such a file (``load_scores_hdf5()``).
+
+For an example of how to use this class to evaluate a score-distribution, see the code provided in file `bob.pad.base/bob/pad/base/test/test_PadIsoMetrics.py/test/test_PadIsoMetrics.py`.
+
 
 Implemented Tools
 -----------------

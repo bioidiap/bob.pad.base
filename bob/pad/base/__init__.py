@@ -1,6 +1,7 @@
 from . import database
 from . import algorithm
 from . import tools
+from . import evaluation
 
 from . import script
 from . import test
