@@ -39,7 +39,7 @@ Evaluation
 ~~~~~~~~~~
 
 .. autosummary::
-   bob.bio.base.evaluation.PadIsoMetrics
+   bob.pad.base.evaluation.PadIsoMetrics
 
 Details
 -------
