@@ -83,8 +83,7 @@ class Interface(BaseInterface):
         return '0.0.1'
 
     def files(self):
-        files = dummy_train_list + dummy_devel_list + dummy_test_list
-        return files
+        return ()
 
     def type(self):
         return 'rawfiles'
