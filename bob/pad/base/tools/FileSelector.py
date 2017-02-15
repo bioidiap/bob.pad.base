@@ -25,6 +25,9 @@ class FileSelector(object):
     preprocessed_directory : str
       The directory, where preprocessed data should be written to.
 
+    extractor_file : str
+      The filename, where the extractor should be written to (if any).
+
     extracted_directory : str
       The directory, where extracted features should be written to.
 
@@ -51,6 +54,7 @@ class FileSelector(object):
             self,
             database,
             preprocessed_directory,
+            extractor_file,
             extracted_directory,
             projector_file,
             projected_directory,
@@ -61,6 +65,7 @@ class FileSelector(object):
 
         """Initialize the file selector object with the current configuration."""
         self.database = database
+        self.extractor_file = extractor_file
         self.projector_file = projector_file
 
         self.score_directories = score_directories

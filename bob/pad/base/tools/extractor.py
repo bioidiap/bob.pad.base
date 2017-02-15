@@ -15,9 +15,55 @@ logger = logging.getLogger("bob.pad.base")
 
 from .FileSelector import FileSelector
 from bob.bio.base import utils
+from .preprocessor import read_preprocessed_data
 
 
-def extract(extractor, preprocessor, groups=None, indices=None, force=False):
+def train_extractor(extractor, preprocessor, allow_missing_files=False, force=False):
+    """Trains the feature extractor using preprocessed data of the ``'train'`` group,
+    if the feature extractor requires training.
+
+    This function should only be called, when the ``extractor`` actually requires training.
+    The given ``extractor`` is trained using preprocessed data.
+    It writes the extractor to the file specified by the :py:class:`bob.pad.base.tools.FileSelector`.
+    By default, if the target file already exist, it is not re-created.
+
+    **Parameters:**
+
+    extractor : py:class:`bob.bio.base.extractor.Extractor` or derived
+      The extractor to be trained.
+
+    preprocessor : py:class:`bob.bio.base.preprocessor.Preprocessor` or derived
+      The preprocessor, used for reading the preprocessed data.
+
+    allow_missing_files : bool
+      If set to ``True``, preprocessed data files that are not found are silently ignored during training.
+
+    force : bool
+      If given, the extractor file is regenerated, even if it already exists.
+    """
+
+    if not extractor.requires_training:
+        logger.warn(
+            "The train_extractor function should not have been called, since the extractor does not need training.")
+        return
+
+    # the file selector object
+    fs = FileSelector.instance()
+    # the file to write
+    if utils.check_file(fs.extractor_file, force,
+                        extractor.min_extractor_file_size):
+        logger.info("- Extraction: extractor '%s' already exists.", fs.extractor_file)
+    else:
+        bob.io.base.create_directories_safe(os.path.dirname(fs.extractor_file))
+        # read training files
+        train_files = fs.training_list('preprocessed', 'train_extractor')
+        train_data = read_preprocessed_data(train_files, preprocessor)
+        logger.info("- Extraction: training extractor '%s' using %d training files:", fs.extractor_file,
+                    len(train_files))
+        # train model
+        extractor.train(train_data, fs.extractor_file)
+
+def extract(extractor, preprocessor, groups=None, indices=None, allow_missing_files=False, force=False):
     """Extracts features from the preprocessed data using the given extractor.
 
     The given ``extractor`` is used to extract all features required for the current experiment.
@@ -46,6 +92,7 @@ def extract(extractor, preprocessor, groups=None, indices=None, force=False):
     """
     # the file selector object
     fs = FileSelector.instance()
+    extractor.load(fs.extractor_file)
     data_files = fs.preprocessed_data_list(groups=groups)
     feature_files = fs.feature_list(groups=groups)
 

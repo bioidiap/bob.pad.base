@@ -31,14 +31,17 @@ def is_idiap():
 def command_line_parser(description=__doc__, exclude_resources_from=[]):
     """command_line_parser(description=__doc__, exclude_resources_from=[]) -> parsers
 
-    Creates an :py:class:`argparse.ArgumentParser` object that includes the minimum set of command line options (which is not so few).
+    Creates an :py:class:`argparse.ArgumentParser` object that includes the minimum set of command line
+    options (which is not so few).
     The ``description`` can be overwritten, but has a (small) default.
 
     Included in the parser, several groups are defined.
     Each group specifies a set of command line options.
-    For the configurations, registered resources are listed, which can be limited by the ``exclude_resources_from`` list of extensions.
+    For the configurations, registered resources are listed, which can be limited by the
+    ``exclude_resources_from`` list of extensions.
 
-    It returns a dictionary, containing the parser object itself (in the ``'main'`` keyword), and a list of command line groups.
+    It returns a dictionary, containing the parser object itself (in the ``'main'`` keyword), and
+    a list of command line groups.
 
     **Parameters:**
 
@@ -60,7 +63,8 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
     #######################################################################################
     ############## options that are required to be specified #######################
     config_group = parser.add_argument_group(
-        '\nParameters defining the experiment. Most of these parameters can be a registered resource, a configuration file, or even a string that defines a newly created object')
+        '\nParameters defining the experiment. Most of these parameters can be a registered resource, a '
+        'configuration file, or even a string that defines a newly created object')
     config_group.add_argument('-d', '--database', metavar='x', nargs='+', required=True,
                               help='Database and the protocol; registered databases are: %s' % utils.resource_keys(
                                   'database', exclude_resources_from, package_prefix='bob.pad.'))
@@ -83,8 +87,8 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
                               help='The sub-directory where the files of the current experiment should be stored. '
                                    'Please specify a directory name with a name describing your experiment.')
     config_group.add_argument('--groups', metavar='GROUP', nargs='+', default=['dev'],
-                              help="The groups (i.e., 'train', 'dev', 'eval') for which the models and scores should be "
-                                   "generated; by default, only the 'dev' group is evaluated")
+                              help="The groups (i.e., 'train', 'dev', 'eval') for which the models and scores "
+                                   "should be generated; by default, only the 'dev' group is evaluated")
     config_group.add_argument('-P', '--protocol', metavar='PROTOCOL',
                               help='Overwrite the protocol that is stored in the database by the given one '
                                    '(might not by applicable for all databases).')
@@ -104,18 +108,27 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
                            help='The directory for resulting score files, default is: %s.' % results)
 
     file_group = parser.add_argument_group(
-        '\nName (maybe including a path relative to the --temp-directory, if not specified otherwise) of files that will be generated. Note that not all files will be used by all algorithms')
+        '\nName (maybe including a path relative to the --temp-directory, if not specified otherwise) of files '
+        'that will be generated. Note that not all files will be used by all algorithms')
+    file_group.add_argument('--extractor-file', metavar='FILE', default='Extractor.hdf5',
+                            help='Name of the file to write the feature extractor into '
+                                 '(used only if the extractor requires training).')
     file_group.add_argument('--projector-file', metavar='FILE', default='Projector.hdf5',
                             help='Name of the file to write the feature projector into.')
     file_group.add_argument('-G', '--gridtk-database-file', metavar='FILE', default='submitted.sql3',
-                            help='The database file in which the submitted jobs will be written; relative to the current directory (only valid with the --grid option).')
+                            help='The database file in which the submitted jobs will be written; relative to the '
+                                 'current directory (only valid with the --grid option).')
     file_group.add_argument('--experiment-info-file', metavar='FILE', default='Experiment.info',
-                            help='The file where the configuration of all parts of the experiments are written; relative to te --result-directory.')
+                            help='The file where the configuration of all parts of the experiments are written; '
+                                 'relative to te --result-directory.')
     file_group.add_argument('-D', '--database-directories-file', metavar='FILE', default=database_replacement,
-                            help='An optional file, where database directories are stored (to avoid changing the database configurations)')
+                            help='An optional file, where database directories are stored (to avoid changing the '
+                                 'database configurations)')
 
     sub_dir_group = parser.add_argument_group(
-        '\nSubdirectories of certain parts of the tool chain. You can specify directories in case you want to reuse parts of the experiments (e.g. extracted features) in other experiments. Please note that these directories are relative to the --temp-directory, but you can also specify absolute paths')
+        '\nSubdirectories of certain parts of the tool chain. You can specify directories in case you want to '
+        'reuse parts of the experiments (e.g. extracted features) in other experiments. Please note that these '
+        'directories are relative to the --temp-directory, but you can also specify absolute paths')
     sub_dir_group.add_argument('--preprocessed-directory', metavar='DIR', default='preprocessed',
                                help='Name of the directory of the preprocessed data.')
     sub_dir_group.add_argument('--extracted-directory', metavar='DIR', default='extracted',
@@ -123,9 +136,11 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
     sub_dir_group.add_argument('--projected-directory', metavar='DIR', default='projected',
                                help='Name of the directory where the projected data should be stored.')
     sub_dir_group.add_argument('--score-directories', metavar='DIR', nargs='+', default=['scores'],
-                               help='Name of the directory (relative to --result-directory) where to write the results to')
+                               help='Name of the directory (relative to --result-directory) where to write '
+                                    'the results to')
     sub_dir_group.add_argument('--grid-log-directory', metavar='DIR', default='gridtk_logs',
-                               help='Name of the directory (relative to --temp-directory) where to log files are written; only used with --grid')
+                               help='Name of the directory (relative to --temp-directory) where to log files '
+                                    'are written; only used with --grid')
 
     flag_group = parser.add_argument_group('\nFlags that change the behavior of the experiment')
     bob.core.log.add_command_line_option(flag_group)
@@ -136,18 +151,25 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
     flag_group.add_argument('-Z', '--write-compressed-score-files', action='store_true',
                             help='Writes score files which are compressed with tar.bz2.')
     flag_group.add_argument('-S', '--stop-on-failure', action='store_true',
-                            help='Try to recursively stop the dependent jobs from the SGE grid queue, when a job failed')
+                            help='Try to recursively stop the dependent jobs from the SGE grid queue, '
+                                 'when a job failed')
     flag_group.add_argument('-X', '--external-dependencies', type=int, default=[], nargs='+',
                             help='The jobs submitted to the grid have dependencies on the given job ids.')
     flag_group.add_argument('-B', '--timer', choices=('real', 'system', 'user'), nargs='*',
-                            help='Measure and report the time required by the execution of the tool chain (only on local machine)')
+                            help='Measure and report the time required by the execution of the tool chain '
+                                 '(only on local machine)')
     flag_group.add_argument('-L', '--run-local-scheduler', action='store_true',
-                            help='Starts the local scheduler after submitting the jobs to the local queue (by default, local jobs must be started by hand, e.g., using ./bin/jman --local -vv run-scheduler -x)')
+                            help='Starts the local scheduler after submitting the jobs to the local queue '
+                                 '(by default, local jobs must be started by hand, e.g., using ./bin/jman '
+                                 '--local -vv run-scheduler -x)')
     flag_group.add_argument('-N', '--nice', type=int, default=10,
                             help='Runs the local scheduler with the given nice value')
     flag_group.add_argument('-D', '--delete-jobs-finished-with-status', choices=('all', 'failure', 'success'),
                             help='If selected, local scheduler jobs that finished with the given status are deleted '
                                  'from the --gridtk-database-file; otherwise the jobs remain in the database')
+    flag_group.add_argument('-A', '--allow-missing-files', action='store_true',
+                            help="If given, missing files will not stop the processing; this is helpful if not "
+                                 "all files of the database can be processed; missing scores will be NaN.")
     flag_group.add_argument('-t', '--environment', dest='env', nargs='*', default=[],
                             help='Passes specific environment variables to the job.')
 
@@ -191,7 +213,8 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     args : namespace
       A namespace of arguments as read from the command line.
 
-      .. note:: The database, preprocessor, extractor, algorithm and grid (if specified) are actual instances of the according classes.
+      .. note:: The database, preprocessor, extractor, algorithm and grid (if specified) are actual
+      instances of the according classes.
     """
 
     # execute-only
@@ -222,10 +245,14 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
         args.timer = ('real', 'system', 'user')
 
     # load configuration resources
-    args.database = utils.load_resource(' '.join(args.database), 'database', imports=args.imports, package_prefix='bob.pad.')
-    args.preprocessor = utils.load_resource(' '.join(args.preprocessor), 'preprocessor', imports=args.imports, package_prefix='bob.pad.')
-    args.extractor = utils.load_resource(' '.join(args.extractor), 'extractor', imports=args.imports, package_prefix='bob.pad.')
-    args.algorithm = utils.load_resource(' '.join(args.algorithm), 'algorithm', imports=args.imports, package_prefix='bob.pad.')
+    args.database = utils.load_resource(' '.join(args.database), 'database', imports=args.imports,
+                                        package_prefix='bob.pad.')
+    args.preprocessor = utils.load_resource(' '.join(args.preprocessor), 'preprocessor', imports=args.imports,
+                                            package_prefix='bob.pad.')
+    args.extractor = utils.load_resource(' '.join(args.extractor), 'extractor', imports=args.imports,
+                                         package_prefix='bob.pad.')
+    args.algorithm = utils.load_resource(' '.join(args.algorithm), 'algorithm', imports=args.imports,
+                                         package_prefix='bob.pad.')
     if args.grid is not None:
         args.grid = utils.load_resource(' '.join(args.grid), 'grid', imports=args.imports, package_prefix='bob.pad.')
 
@@ -234,7 +261,7 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
         args.temp_directory = "/idiap/temp/%s/%s" % (os.environ["USER"], args.database.name) if is_idiap() else "temp"
     if args.result_directory is None:
         args.result_directory = "/idiap/user/%s/%s" % (
-        os.environ["USER"], args.database.name) if is_idiap() else "results"
+            os.environ["USER"], args.database.name) if is_idiap() else "results"
 
     args.temp_directory = os.path.join(args.temp_directory, args.sub_directory)
     args.result_directory = os.path.join(args.result_directory, args.sub_directory)
@@ -250,8 +277,10 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     args.info_file = os.path.join(args.result_directory, protocol, args.experiment_info_file)
 
     # sub-directorues that depend on the database
-    extractor_sub_dir = '.'
-    projector_sub_dir = extractor_sub_dir
+    extractor_sub_dir = protocol if args.database.training_depends_on_protocol and \
+                                    args.extractor.requires_training else '.'
+    projector_sub_dir = protocol if args.database.training_depends_on_protocol and \
+                                    args.algorithm.requires_projector_training else extractor_sub_dir
 
     # Database directories, which should be automatically replaced
     if isinstance(args.database, PadDatabase):
@@ -260,6 +289,7 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     # initialize the file selector
     FileSelector.create(
         database=args.database,
+        extractor_file=os.path.join(args.temp_directory, extractor_sub_dir, args.extractor_file),
         projector_file=os.path.join(args.temp_directory, projector_sub_dir, args.projector_file),
         preprocessed_directory=os.path.join(args.temp_directory, args.preprocessed_directory),
         extracted_directory=os.path.join(args.temp_directory, extractor_sub_dir, args.extracted_directory),
@@ -299,7 +329,8 @@ def command_line(cmdline):
     """command_line(cmdline) -> str
 
     Converts the given options to a string that can be executed in a terminal.
-    Parameters are enclosed into ``'...'`` quotes so that the command line can interpret them (e.g., if they contain spaces or special characters).
+    Parameters are enclosed into ``'...'`` quotes so that the command line can interpret them (e.g., if they
+    contain spaces or special characters).
 
     **Parameters:**
 

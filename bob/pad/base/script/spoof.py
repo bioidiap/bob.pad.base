@@ -31,15 +31,16 @@ def parse_arguments(command_line_parameters, exclude_resources_from=[]):
     # Add sub-tasks that can be executed by this script
     parser = parsers['main']
     parser.add_argument('--sub-task',
-                        choices=('preprocess', 'extract', 'train-projector', 'project', 'compute-scores'),
+                        choices=('preprocess', 'train-extractor', 'extract', 'train-projector', 'project',
+                                 'compute-scores'),
                         help=argparse.SUPPRESS)  # 'Executes a subtask (FOR INTERNAL USE ONLY!!!)'
     parser.add_argument('--group',
                         help=argparse.SUPPRESS)  # 'The group for which the current action should be performed'
 
     # now that we have set up everything, get the command line arguments
     return tools.initialize(parsers, command_line_parameters,
-                            skips=['preprocessing', 'extraction', 'projector-training', 'projection',
-                                   'score-computation'])
+                            skips=['preprocessing', 'extractor-training', 'extraction', 'projector-training',
+                                   'projection', 'score-computation'])
 
 
 def add_jobs(args, submitter):
@@ -64,6 +65,18 @@ def add_jobs(args, submitter):
                 dependencies=deps,
                 **args.grid.preprocessing_queue)
             deps.append(job_ids['preprocessing'])
+
+    # feature extraction training
+    if not args.skip_extractor_training and args.extractor.requires_training:
+        if args.grid is None:
+            jobs_to_execute.append(('train-extractor',))
+        else:
+            job_ids['extractor-training'] = submitter.submit(
+                '--sub-task train-extractor',
+                name='train-f',
+                dependencies=deps,
+                **args.grid.training_queue)
+            deps.append(job_ids['extractor-training'])
 
     # feature extraction
     if not args.skip_extraction:
@@ -151,6 +164,15 @@ def execute(args):
             groups=tools.groups(args),
             indices=biotools.indices(fs.original_data_list(groups=tools.groups(args)),
                                      None if args.grid is None else args.grid.number_of_preprocessing_jobs),
+            allow_missing_files=args.allow_missing_files,
+            force=args.force)
+
+    # train the feature extractor
+    elif args.sub_task == 'train-extractor':
+        tools.train_extractor(
+            args.extractor,
+            args.preprocessor,
+            allow_missing_files=args.allow_missing_files,
             force=args.force)
 
     # extract the features
@@ -161,6 +183,7 @@ def execute(args):
             groups=tools.groups(args),
             indices=biotools.indices(fs.preprocessed_data_list(groups=tools.groups(args)),
                                      None if args.grid is None else args.grid.number_of_extraction_jobs),
+            allow_missing_files=args.allow_missing_files,
             force=args.force)
 
     # train the feature projector
@@ -168,6 +191,7 @@ def execute(args):
         tools.train_projector(
             args.algorithm,
             args.extractor,
+            allow_missing_files=args.allow_missing_files,
             force=args.force)
 
     # project the features
@@ -178,6 +202,7 @@ def execute(args):
             groups=tools.groups(args),
             indices=biotools.indices(fs.preprocessed_data_list(groups=tools.groups(args)),
                                      None if args.grid is None else args.grid.number_of_projection_jobs),
+            allow_missing_files=args.allow_missing_files,
             force=args.force)
 
     # compute scores
@@ -185,6 +210,7 @@ def execute(args):
         tools.compute_scores(
             args.algorithm,
             groups=[args.group],
+            allow_missing_files=args.allow_missing_files,
             force=args.force,
             write_compressed=args.write_compressed_score_files)
 

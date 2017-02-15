@@ -147,7 +147,7 @@ def _scores_all(algorithm, group, force, write_compressed=False):
                      current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
 
 
-def compute_scores(algorithm, force=False, groups=['dev', 'eval'], write_compressed=False):
+def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing_files=False, write_compressed=False):
     """Computes the scores for the given groups.
 
     This function computes all scores for the experiment and writes them to score files.

@@ -18,7 +18,7 @@ from .extractor import read_features
 from bob.bio.base import utils
 
 
-def train_projector(algorithm, extractor, force=False):
+def train_projector(algorithm, extractor, allow_missing_files=False, force=False):
     """Trains the feature projector using extracted features of the ``'train'`` group, if the algorithm requires projector training.
 
     This function should only be called, when the ``algorithm`` actually requires projector training.
@@ -60,7 +60,7 @@ def train_projector(algorithm, extractor, force=False):
         algorithm.train_projector(train_features, fs.projector_file)
 
 
-def project(algorithm, extractor, groups=None, indices=None, force=False):
+def project(algorithm, extractor, groups=None, indices=None, allow_missing_files=False, force=False):
     """Projects the features for all files of the database.
 
     The given ``algorithm`` is used to project all features required for the current experiment.

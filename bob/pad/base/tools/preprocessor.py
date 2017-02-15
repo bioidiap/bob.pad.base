@@ -17,7 +17,7 @@ from .FileSelector import FileSelector
 from bob.bio.base import utils
 
 
-def preprocess(preprocessor, groups=None, indices=None, force=False):
+def preprocess(preprocessor, groups=None, indices=None, allow_missing_files=False, force=False):
     """Preprocesses the original data of the database with the given preprocessor.
 
     The given ``preprocessor`` is used to preprocess all data required for the current experiment.
