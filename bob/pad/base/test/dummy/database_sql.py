@@ -56,4 +56,7 @@ class TestDatabaseSql (bob.pad.base.database.PadDatabase, bob.db.base.SQLiteData
     def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, **kwargs):
         return list(self.query(TestFileSql))
 
+    def annotations(self, file):
+        return None
+
 database = TestDatabaseSql()

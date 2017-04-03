@@ -190,5 +190,8 @@ class TestDatabase(PadDatabase):
                 fileset += [TestFile(dummy_test_list[1], 6)]
         return fileset
 
+    def annotations(self, file):
+        return None
+
 
 database = TestDatabase(original_directory=data_dir, original_extension='')

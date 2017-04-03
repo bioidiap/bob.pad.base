@@ -149,7 +149,11 @@ class FileSelector(object):
 
     def annotation_list(self, groups=None):
         """Returns the list of annotations objects."""
-        return self.database.all_files(groups=groups)
+        files = self.database.all_files(groups=groups)
+        if len(files) != 2:
+            return files
+        else:
+            return files[0] + files[1]
 
     def get_annotations(self, annotation_file):
         """Returns the annotations of the given file."""
