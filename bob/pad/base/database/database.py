@@ -85,12 +85,24 @@ class PadDatabase(BioDatabase):
         """
         return []
 
+    @abc.abstractmethod
     def annotations(self, file):
         """
-        Annotations are not supported by PAD interface
+        Returns the annotations for the given File object, if available.
+        You need to override this method in your high-level implementation.
+        If your database does not have annotations, it should return ``None``.
 
+        **Parameters:**
+
+        file : :py:class:`bob.pad.base.database.PadFile`
+          The file for which annotations should be returned.
+
+        **Returns:**
+
+        annots : dict or None
+          The annotations for the file, if available.
         """
-        return None
+        raise NotImplementedError("This function must be implemented in your derived class.")
 
     @abc.abstractmethod
     def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, **kwargs):

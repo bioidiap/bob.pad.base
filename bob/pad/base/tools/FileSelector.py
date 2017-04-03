@@ -147,3 +147,10 @@ class FileSelector(object):
         no_norm_dir = self.score_directories[0]
         return os.path.join(no_norm_dir, "scores-" + group + "-" + obj_type) + self.compressed_extension
 
+    def annotation_list(self, groups=None):
+        """Returns the list of annotations objects."""
+        return self.database.all_files(groups=groups)
+
+    def get_annotations(self, annotation_file):
+        """Returns the annotations of the given file."""
+        return self.database.annotations(annotation_file)

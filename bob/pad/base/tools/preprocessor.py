@@ -46,6 +46,9 @@ def preprocess(preprocessor, groups=None, indices=None, allow_missing_files=Fals
     data_files, original_directory, original_extension = fs.original_data_list_files(groups=groups)
     preprocessed_data_files = fs.preprocessed_data_list(groups=groups)
 
+    # read annotation files
+    annotation_list = fs.annotation_list(groups=groups)
+
     # select a subset of keys to iterate
     if indices is not None:
         index_range = range(indices[0], indices[1])
@@ -55,6 +58,7 @@ def preprocess(preprocessor, groups=None, indices=None, allow_missing_files=Fals
 
     logger.info("- Preprocessing: processing %d data files from directory '%s' to directory '%s'", len(index_range),
                 fs.directories['original'], fs.directories['preprocessed'])
+
 
     # iterate over the selected files
     for i in index_range:
@@ -69,8 +73,11 @@ def preprocess(preprocessor, groups=None, indices=None, allow_missing_files=Fals
             # create output directory before reading the data file (is sometimes required, when relative directories are specified, especially, including a .. somewhere)
             bob.io.base.create_directories_safe(os.path.dirname(preprocessed_data_file))
 
+            # get the annotations; might be None
+            annotations = fs.get_annotations(annotation_list[i])
+
             # call the preprocessor
-            preprocessed_data = preprocessor(data, None)
+            preprocessed_data = preprocessor(data, annotations)
             if preprocessed_data is None:
                 logger.error("Preprocessing of file '%s' was not successful", file_name)
                 continue
