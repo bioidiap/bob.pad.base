@@ -99,17 +99,22 @@ class FileSelector(object):
             return [realpaths, attackpaths]
 
     # List of files that will be used for all files
-    def original_data_list(self, groups=None):
-        """Returns the the joint list of original (real and attack) file names."""
-        return self.database.original_file_names(self.database.all_files(groups=groups))
-
-    def original_data_list_files(self, groups=None):
-        """Returns the joint list of original (real and attack) data files that can be used for preprocessing."""
+    def original_data_list(self, groups = None):
+        """Returns the list of original ``PadFile`` objects that can be used for preprocessing."""
         files = self.database.all_files(groups=groups)
         if len(files) != 2:
             fileset = files
         else:
             fileset = files[0]+files[1]
+        return fileset
+
+    def original_directory_and_extension(self):
+        """Returns the directory and extension of the original files."""
+        return self.database.original_directory, self.database.original_extension
+
+    def original_data_list_files(self, groups=None):
+        """Returns the joint list of original (real and attack) data files that can be used for preprocessing."""
+        fileset = self.original_data_list(groups=groups)
         return fileset, self.database.original_directory, self.database.original_extension
 
     def preprocessed_data_list(self, groups=None):
@@ -125,12 +130,15 @@ class FileSelector(object):
         return self.get_paths(self.database.all_files(groups=groups), "projected")
 
     # Training lists
-    def training_list(self, directory_type, step):
-        """Returns the tuple of lists (real, attacks) of features that should be used for projector training.
-        The directory_type might be any of 'preprocessed', 'extracted', or 'projected'.
-        The step might by any of 'train_extractor', 'train_projector', or 'train_enroller'.
+    def training_list(self, directory_type, step, combined=False):
         """
-        return self.get_paths(self.database.training_files(step), directory_type, False)
+        Returns a list of lists (real, attacks) or just list of all real and
+        attack features depending on combined that should be used for projector
+        training. The directory_type might be any of 'preprocessed',
+        'extracted', or 'projected'. The step might by any of
+        'train_extractor', 'train_projector', or 'train_enroller'.
+        """
+        return self.get_paths(self.database.training_files(step), directory_type, combined)
 
     def toscore_objects(self, group):
         """Returns the File objects used to compute the raw scores."""

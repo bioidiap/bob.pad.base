@@ -52,7 +52,7 @@ def train_projector(algorithm, extractor, allow_missing_files=False, force=False
         # train projector
         logger.info("- Projection: loading training data")
         train_files = fs.training_list('extracted', 'train_projector')
-        train_features = read_features(train_files, extractor)
+        train_features = read_features(train_files, extractor, True, allow_missing_files)
         logger.info("- Projection: training projector '%s' using %d training files: ", fs.projector_file,
                     len(train_files))
 

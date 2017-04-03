@@ -18,4 +18,7 @@ class DummyExtractor(Extractor):
         assert (data in _data)
         return data + 1.0
 
+    def train(self, training_data, extractor_file):
+        pass
+
 extractor = DummyExtractor()
