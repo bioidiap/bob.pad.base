@@ -114,6 +114,15 @@ def project(algorithm, extractor, groups=None, indices=None, allow_missing_files
     for i in index_range:
         feature_file = str(feature_files[i])
         projected_file = str(projected_files[i])
+        if not os.path.exists(feature_file):
+            if allow_missing_files:
+                logger.debug(
+                    "... Cannot find extracted feature file %s; skipping",
+                    feature_file)
+                continue
+            else:
+                logger.error("Cannot find extracted feature file %s",
+                             feature_file)
 
         if not os.path.exists(feature_file):
             if allow_missing_files:
