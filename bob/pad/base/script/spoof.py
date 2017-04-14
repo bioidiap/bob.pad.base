@@ -114,7 +114,6 @@ def add_jobs(args, submitter):
                 **args.grid.projection_queue)
             deps.append(job_ids['projection'])
 
-    concat_deps = {}
     for group in args.groups:
         # compute scores
         if not args.skip_score_computation:
@@ -124,14 +123,8 @@ def add_jobs(args, submitter):
                 job_ids['score-%s' % group] = submitter.submit(
                     '--sub-task compute-scores --group %s' % group,
                     name="score-%s" % group,
-                    number_of_parallel_jobs=args.grid.number_of_scoring_jobs,
                     dependencies=deps,
                     **args.grid.scoring_queue)
-                concat_deps[group] = [job_ids['score-%s' % group]]
-
-
-        else:
-            concat_deps[group] = []
 
     if args.grid is None:
         # return the list of jobs that need to be executed in series
