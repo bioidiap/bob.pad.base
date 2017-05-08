@@ -4,10 +4,9 @@
 # @date:   Wed May 18 10:09:22 CET 2016
 #
 
-from bob.bio.base.database import BioFile
+import bob.bio.base.database
 
-
-class PadFile(BioFile):
+class PadFile(bob.bio.base.database.BioFile):
     """A simple base class that defines basic properties of File object for the use in PAD experiments"""
 
     def __init__(self, client_id, path, attack_type=None, file_id=None):

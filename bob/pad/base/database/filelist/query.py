@@ -219,7 +219,7 @@ class FileListPadDatabase(FileListBioDatabase, PadDatabase):
         return self.__client_id_list__(groups, 'for_real', protocol)
 
     def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, **kwargs):
-        """Returns a set of :py:class:`File` objects for the specific query by the user.
+        """Returns a set of :py:class:`PadFile` objects for the specific query by the user.
 
         Keyword Parameters:
 
@@ -239,7 +239,7 @@ class FileListPadDatabase(FileListBioDatabase, PadDatabase):
         model_ids : [various type]
           This parameter is not supported in PAD databases yet
 
-        Returns: A list of :py:class:`File` objects considering all the filtering criteria.
+        Returns: A list of :py:class:`PadFile` objects considering all the filtering criteria.
         """
 
         purposes = self.check_parameters_for_validity(purposes, "purpose", ('real', 'attack'))
@@ -273,3 +273,9 @@ class FileListPadDatabase(FileListBioDatabase, PadDatabase):
 
     def annotations(self, file):
         return super(FileListPadDatabase, self).annotations(file)
+
+    def tobjects(self, groups=None, protocol=None, model_ids=None, **kwargs):
+        pass
+
+    def zobjects(self, groups=None, protocol=None, **kwargs):
+        pass
