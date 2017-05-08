@@ -16,6 +16,7 @@ logger = logging.getLogger("bob.pad.base")
 from .FileSelector import FileSelector
 from bob.bio.base import utils
 from .preprocessor import read_preprocessed_data
+from bob.bio.base.tools.extractor import read_features
 
 
 def train_extractor(extractor, preprocessor, allow_missing_files=False, force=False):
@@ -41,7 +42,6 @@ def train_extractor(extractor, preprocessor, allow_missing_files=False, force=Fa
     force : bool
       If given, the extractor file is regenerated, even if it already exists.
     """
-
     if not extractor.requires_training:
         logger.warn(
             "The train_extractor function should not have been called, since the extractor does not need training.")
@@ -52,16 +52,24 @@ def train_extractor(extractor, preprocessor, allow_missing_files=False, force=Fa
     # the file to write
     if utils.check_file(fs.extractor_file, force,
                         extractor.min_extractor_file_size):
-        logger.info("- Extraction: extractor '%s' already exists.", fs.extractor_file)
+        logger.info("- Extraction: extractor '%s' already exists.",
+                    fs.extractor_file)
     else:
         bob.io.base.create_directories_safe(os.path.dirname(fs.extractor_file))
         # read training files
-        train_files = fs.training_list('preprocessed', 'train_extractor')
-        train_data = read_preprocessed_data(train_files, preprocessor)
-        logger.info("- Extraction: training extractor '%s' using %d training files:", fs.extractor_file,
-                    len(train_files))
+        train_files = fs.training_list(
+            'preprocessed', 'train_extractor', combined=~extractor.split_training_data_by_client)
+        train_data = read_preprocessed_data(
+            train_files, preprocessor, extractor.split_training_data_by_client, allow_missing_files)
+        if extractor.split_training_data_by_client:
+            logger.info("- Extraction: training extractor '%s' using %d classes:",
+                        fs.extractor_file, len(train_files))
+        else:
+            logger.info("- Extraction: training extractor '%s' using %d training files:",
+                        fs.extractor_file, len(train_files))
         # train model
         extractor.train(train_data, fs.extractor_file)
+
 
 def extract(extractor, preprocessor, groups=None, indices=None, allow_missing_files=False, force=False):
     """Extracts features from the preprocessed data using the given extractor.
@@ -87,6 +95,9 @@ def extract(extractor, preprocessor, groups=None, indices=None, allow_missing_fi
       If specified, only the features for the given index range ``range(begin, end)`` should be extracted.
       This is usually given, when parallel threads are executed.
 
+    allow_missing_files : bool
+      If set to ``True``, preprocessed data files that are not found are silently ignored.
+
     force : bool
       If given, files are regenerated, even if they already exist.
     """
@@ -97,7 +108,7 @@ def extract(extractor, preprocessor, groups=None, indices=None, allow_missing_fi
     feature_files = fs.feature_list(groups=groups)
 
     # select a subset of indices to iterate
-    if indices != None:
+    if indices is not None:
         index_range = range(indices[0], indices[1])
         logger.info("- Extraction: splitting of index range %s" % str(indices))
     else:
@@ -106,44 +117,42 @@ def extract(extractor, preprocessor, groups=None, indices=None, allow_missing_fi
     logger.info("- Extraction: extracting %d features from directory '%s' to directory '%s'", len(index_range),
                 fs.directories['preprocessed'], fs.directories['extracted'])
     for i in index_range:
-        data_file = str(data_files[i])
-        feature_file = str(feature_files[i])
+        data_file = data_files[i]
+        feature_file = feature_files[i]
 
-        if not utils.check_file(feature_file, force, 1000):
+        if not os.path.exists(data_file) and preprocessor.writes_data:
+            if allow_missing_files:
+                logger.debug(
+                    "... Cannot find preprocessed data file %s; skipping", data_file)
+                continue
+            else:
+                logger.error(
+                    "Cannot find preprocessed data file %s", data_file)
+
+        if not utils.check_file(feature_file, force,
+                                extractor.min_feature_file_size):
+            logger.debug(
+                "... Extracting features for data file '%s'", data_file)
+            # create output directory before reading the data file (is
+            # sometimes required, when relative directories are specified,
+            # especially, including a .. somewhere)
+            bob.io.base.create_directories_safe(os.path.dirname(feature_file))
             # load data
             data = preprocessor.read_data(data_file)
             # extract feature
-            try:
-                logger.info("- Extraction: extracting from file: %s", data_file)
-                feature = extractor(data)
-            except ValueError:
-                logger.warn("WARNING: empty data in file %s", data_file)
-                feature = 0
+            feature = extractor(data)
+
+            if feature is None:
+                if allow_missing_files:
+                    logger.debug(
+                        "... Feature extraction for data file %s failed; skipping", data_file)
+                    continue
+                else:
+                    raise RuntimeError(
+                        "Feature extraction  of file '%s' was not successful", data_file)
+
             # write feature
-            if feature is not None:
-                bob.io.base.create_directories_safe(os.path.dirname(feature_file))
-                extractor.write_feature(feature, feature_file)
-
-
-def read_features(file_names, extractor):
-    """read_features(file_names, extractor) -> extracted
-
-    Reads the extracted features from ``file_names`` using the given ``extractor``.
-
-    **Parameters:**
-
-    file_names : [[str], [str]]
-      A list of lists of file names (real, attack) to be read.
-
-    extractor : py:class:`bob.bio.base.extractor.Extractor` or derived
-      The extractor, used for reading the extracted features.
-
-    **Returns:**
-
-    extracted : [object] or [[object]]
-      The list of extracted features, in the same order as in the ``file_names``.
-    """
-    real_files = file_names[0]
-    attack_files = file_names[1]
-    return [[extractor.read_feature(str(f)) for f in real_files],
-            [extractor.read_feature(str(f)) for f in attack_files]]
+            extractor.write_feature(feature, feature_file)
+        else:
+            logger.debug(
+                "... Skipping preprocessed data '%s' since feature file '%s' exists", data_file, feature_file)

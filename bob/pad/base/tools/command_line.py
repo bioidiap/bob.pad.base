@@ -213,8 +213,10 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     args : namespace
       A namespace of arguments as read from the command line.
 
-      .. note:: The database, preprocessor, extractor, algorithm and grid (if specified) are actual
-      instances of the according classes.
+      .. note::
+
+         The database, preprocessor, extractor, algorithm and grid (if specified) are actual
+         instances of the according classes.
     """
 
     # execute-only
