@@ -29,5 +29,5 @@ class PadFile(BioFile):
             assert isinstance(attack_type, str)
 
         # just copy the information
+        # The attack type of the sample, None if it is a genuine sample.
         self.attack_type = attack_type
-        """The attack type of the sample, None if it is a genuine sample."""

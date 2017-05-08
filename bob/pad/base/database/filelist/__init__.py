@@ -1,8 +1,7 @@
-from .file import PadFile
-from .database import PadDatabase
-from .filelist.query import FileListPadDatabase
-from .filelist.models import Client
-from . import filelist
+from .models import ListReader, Client, FileListFile
+from .query import FileListPadDatabase
+from .driver import Interface
+
 
 # gets sphinx autodoc done right - don't remove it
 def __appropriate__(*args):
@@ -21,9 +20,10 @@ def __appropriate__(*args):
 
 
 __appropriate__(
-    PadFile,
-    PadDatabase,
-    FileListPadDatabase,
+    ListReader,
     Client,
+    FileListFile,
+    FileListPadDatabase,
+    Interface,
 )
 __all__ = [_ for _ in dir() if not _.startswith('_')]

@@ -21,20 +21,14 @@ class PadDatabase(BioDatabase):
     name : str
     A unique name for the database.
 
-    all_files_options : dict
-    Dictionary of options passed to the second-level database query when retrieving all data.
-
-    check_original_files_for_existence : bool
-    Enables to test for the original data files when querying the database.
+    protocol : str or ``None``
+    The name of the protocol that defines the default experimental setup for this database.
 
     original_directory : str
     The directory where the original data of the database are stored.
 
     original_extension : str
     The file name extension of the original data.
-
-    protocol : str or ``None``
-    The name of the protocol that defines the default experimental setup for this database.
 
     kwargs : ``key=value`` pairs
     The arguments of the :py:class:`bob.bio.base.database.BioDatabase` base class constructor.
@@ -44,14 +38,18 @@ class PadDatabase(BioDatabase):
     def __init__(
             self,
             name,
-            all_files_options={},  # additional options for the database query that can be used to extract all files
-            check_original_files_for_existence=False,
+            protocol='Default',
             original_directory=None,
             original_extension=None,
-            protocol='Default',
             **kwargs  # The rest of the default parameters of the base class
     ):
-        super(PadDatabase, self).__init__(name=name, all_files_options=all_files_options, check_original_files_for_existence=check_original_files_for_existence, original_directory=original_directory, original_extension=original_extension, protocol=protocol, **kwargs)
+        super(PadDatabase, self).__init__(
+            name=name,
+            protocol=protocol,
+            original_directory=original_directory,
+            original_extension=original_extension,
+            **kwargs)
+
 
     def original_file_names(self, files):
         """original_file_names(files) -> paths
@@ -124,7 +122,7 @@ class PadDatabase(BioDatabase):
           Usually it is either 'real' or 'attack'.
 
         model_ids : [various type]
-          This parameter is not suported in PAD databases yet
+          This parameter is not supported in PAD databases yet
         """
         raise NotImplementedError("This function must be implemented in your derived class.")
 
