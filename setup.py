@@ -109,6 +109,7 @@ setup(
         # bob database declaration
         'bob.db': [
             'dummy = bob.pad.base.test.dummy.database:Interface', # driver for bobdb_manage
+            'pad_filelist = bob.pad.base.database.filelist.driver:Interface',
         ],
 
         'bob.pad.database': [
