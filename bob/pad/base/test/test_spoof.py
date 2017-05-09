@@ -16,7 +16,6 @@ import tempfile
 import numpy
 
 import bob.io.base.test_utils
-import bob.io.image
 import bob.bio.base
 import bob.pad.base
 from bob.bio.base.test import utils
