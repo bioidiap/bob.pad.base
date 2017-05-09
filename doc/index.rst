@@ -49,6 +49,7 @@ Users Guide
     installation
     experiments
     implementation
+    high_level_db_interface_guide
 
 ================
 Reference Manual
