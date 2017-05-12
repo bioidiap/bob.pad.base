@@ -30,7 +30,7 @@ from .. import PadFile
 from .. import PadDatabase
 from bob.bio.base.database import FileListBioDatabase
 
-class FileListPadDatabase(FileListBioDatabase, PadDatabase):
+class FileListPadDatabase(PadDatabase, FileListBioDatabase):
     """This class provides a user-friendly interface to databases that are given as file lists.
 
     Keyword parameters:
@@ -160,7 +160,7 @@ class FileListPadDatabase(FileListBioDatabase, PadDatabase):
         return [self.pad_file_class(client_id=f.client_id, path=f.path, attack_type=f.attack_type, file_id=f.id)
                 for f in files]
 
-    def groups(self, protocol=None):
+    def groups(self, protocol=None, add_world=False, add_subworld=False):
         """This function returns the list of groups for this database.
 
         protocol : str or ``None``
@@ -272,7 +272,7 @@ class FileListPadDatabase(FileListBioDatabase, PadDatabase):
         return self._make_pad(retval)
 
     def annotations(self, file):
-        return super(FileListPadDatabase, self).annotations(file)
+        return FileListBioDatabase.annotations(self, file)
 
     def tobjects(self, groups=None, protocol=None, model_ids=None, **kwargs):
         pass

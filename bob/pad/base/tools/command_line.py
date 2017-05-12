@@ -5,6 +5,10 @@
 # @date: Wed 19 Aug 13:43:21 2015
 #
 
+"""
+Execute PAD algorithms on a database with presentation attacks.
+"""
+
 
 import argparse
 import os
@@ -16,12 +20,9 @@ logger = bob.core.log.setup("bob.pad.base")
 
 from bob.pad.base.database import PadDatabase
 
-from bob.bio.base import utils
 from . import FileSelector
 from .. import database
-
-"""Execute spoofmetric recognition algorithms on a certain spoofmetric database.
-"""
+from bob.bio.base import tools
 
 
 def is_idiap():
@@ -62,36 +63,8 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
 
     #######################################################################################
     ############## options that are required to be specified #######################
-    config_group = parser.add_argument_group(
-        '\nParameters defining the experiment. Most of these parameters can be a registered resource, a '
-        'configuration file, or even a string that defines a newly created object')
-    config_group.add_argument('-d', '--database', metavar='x', nargs='+', required=True,
-                              help='Database and the protocol; registered databases are: %s' % utils.resource_keys(
-                                  'database', exclude_resources_from, package_prefix='bob.pad.'))
-    config_group.add_argument('-p', '--preprocessor', metavar='x', nargs='+', required=True,
-                              help='Data preprocessing; registered preprocessors are: %s' % utils.resource_keys(
-                                  'preprocessor', exclude_resources_from, package_prefix='bob.pad.'))
-    config_group.add_argument('-e', '--extractor', metavar='x', nargs='+', required=True,
-                              help='Feature extraction; registered feature extractors are: %s' % utils.resource_keys(
-                                  'extractor', exclude_resources_from, package_prefix='bob.pad.'))
-    config_group.add_argument('-a', '--algorithm', metavar='x', nargs='+', required=True,
-                              help='Anti-spoofing registered algorithms are: %s' % utils.resource_keys(
-                                  'algorithm', exclude_resources_from, package_prefix='bob.pad.'))
-    config_group.add_argument('-g', '--grid', metavar='x', nargs='+',
-                              help='Configuration for the grid setup; if not specified, the commands are '
-                                   'executed sequentially on the local machine.')
-    config_group.add_argument('--imports', metavar='LIB', nargs='+', default=['bob.pad.base'],
-                              help='If one of your configuration files is an actual command, please specify the '
-                                   'lists of required libraries (imports) to execute this command')
-    config_group.add_argument('-s', '--sub-directory', metavar='DIR', required=True,
-                              help='The sub-directory where the files of the current experiment should be stored. '
-                                   'Please specify a directory name with a name describing your experiment.')
-    config_group.add_argument('--groups', metavar='GROUP', nargs='+', default=['dev'],
-                              help="The groups (i.e., 'train', 'dev', 'eval') for which the models and scores "
-                                   "should be generated; by default, only the 'dev' group is evaluated")
-    config_group.add_argument('-P', '--protocol', metavar='PROTOCOL',
-                              help='Overwrite the protocol that is stored in the database by the given one '
-                                   '(might not by applicable for all databases).')
+    config_group = tools.command_line_config_group(parser, package_prefix='bob.pad.',
+                                                   exclude_resources_from=exclude_resources_from)
 
     #######################################################################################
     ############## options to modify default directories or file names ####################
@@ -170,6 +143,12 @@ def command_line_parser(description=__doc__, exclude_resources_from=[]):
     flag_group.add_argument('-A', '--allow-missing-files', action='store_true',
                             help="If given, missing files will not stop the processing; this is helpful if not "
                                  "all files of the database can be processed; missing scores will be NaN.")
+    flag_group.add_argument('-r', '--parallel', type=int,
+                            help='This flag is a shortcut for running the commands on the local machine with '
+                                 'the given amount of parallel threads; equivalent to --grid '
+                                 'bob.bio.base.grid.Grid("local", number_of_parallel_threads=X) '
+                                 '--run-local-scheduler --stop-on-failure.')
+
     flag_group.add_argument('-t', '--environment', dest='env', nargs='*', default=[],
                             help='Passes specific environment variables to the job.')
 
@@ -213,61 +192,50 @@ def initialize(parsers, command_line_parameters=None, skips=[]):
     args : namespace
       A namespace of arguments as read from the command line.
 
-      .. note::
-
-         The database, preprocessor, extractor, algorithm and grid (if specified) are actual
-         instances of the according classes.
+    .. note:: The database, preprocessor, extractor, algorithm and grid (if specified) are actual
+      instances of the according classes.
     """
 
-    # execute-only
-    if skips is not None:
-        #######################################################################################
-        ################# options for skipping parts of the toolchain #########################
-        skip_group = parsers['main'].add_argument_group(
-            '\nFlags that allow to skip certain parts of the experiments. This does only make sense when the '
-            'generated files are already there (e.g. when reusing parts of other experiments)')
-        for skip in skips:
-            skip_group.add_argument('--skip-%s' % skip, action='store_true', help='Skip the %s step.' % skip)
-        skip_group.add_argument('-o', '--execute-only', nargs='+', choices=skips,
-                                help='If specified, executes only the given parts of the tool chain.')
+    args = tools.command_line_skip_group(parsers, command_line_parameters, skips)
+    args_dictionary = {'required': ['database', 'preprocessor', 'extractor', 'algorithm', 'sub_directory'],
+                       'common': ['protocol', 'grid', 'parallel', 'verbose', 'groups', 'temp_directory',
+                                  'result_directory', 'allow_missing_files', 'dry_run', 'force'],
+                       'optional': ['preprocessed_directory', 'extracted_directory', 'projected_directory',
+                                    'extractor_file', 'projector_file']
+                       }
+    keywords = (
+        "protocol",
+        "groups",
+        "parallel",
+        "preferred_package",
+        "temp_directory",
+        "result_directory",
+        "extractor_file",
+        "projector_file",
+        "gridtk_database_file",
+        "experiment_info_file",
+        "database_directories_file",
+        "preprocessed_directory",
+        "extracted_directory",
+        "projected_directory",
+        "score_directories",
+        "grid_log_directory",
+        "verbose",
+        "dry_run",
+        "force",
+        "write_compressed_score_files",
+        "stop_on_failure",
+        "run_local_scheduler",
+        "external_dependencies",
+        "timer",
+        "nice",
+        "delete_jobs_finished_with_status",
+        "allow_missing_files",
+        "env",
+    )
+    args = tools.parse_config_file(parsers, args, args_dictionary, keywords, skips)
 
-    args = parsers['main'].parse_args(command_line_parameters)
-
-    # evaluate skips
-    if skips is not None and args.execute_only is not None:
-        for skip in skips:
-            if skip not in args.execute_only:
-                exec ("args.skip_%s = True" % (skip.replace("-", "_")))
-
-    # logging
-    bob.core.log.set_verbosity_level(logger, args.verbose)
-
-    # timer
-    if args.timer is not None and not len(args.timer):
-        args.timer = ('real', 'system', 'user')
-
-    # load configuration resources
-    args.database = utils.load_resource(' '.join(args.database), 'database', imports=args.imports,
-                                        package_prefix='bob.pad.')
-    args.preprocessor = utils.load_resource(' '.join(args.preprocessor), 'preprocessor', imports=args.imports,
-                                            package_prefix='bob.pad.')
-    args.extractor = utils.load_resource(' '.join(args.extractor), 'extractor', imports=args.imports,
-                                         package_prefix='bob.pad.')
-    args.algorithm = utils.load_resource(' '.join(args.algorithm), 'algorithm', imports=args.imports,
-                                         package_prefix='bob.pad.')
-    if args.grid is not None:
-        args.grid = utils.load_resource(' '.join(args.grid), 'grid', imports=args.imports, package_prefix='bob.pad.')
-
-    # set base directories
-    if args.temp_directory is None:
-        args.temp_directory = "/idiap/temp/%s/%s" % (os.environ["USER"], args.database.name) if is_idiap() else "temp"
-    if args.result_directory is None:
-        args.result_directory = "/idiap/user/%s/%s" % (
-            os.environ["USER"], args.database.name) if is_idiap() else "results"
-
-    args.temp_directory = os.path.join(args.temp_directory, args.sub_directory)
-    args.result_directory = os.path.join(args.result_directory, args.sub_directory)
-    args.grid_log_directory = os.path.join(args.temp_directory, args.grid_log_directory)
+    args = tools.set_extra_flags(args)
 
     # protocol command line override
     if args.protocol is not None:
