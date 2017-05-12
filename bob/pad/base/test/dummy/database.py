@@ -33,7 +33,7 @@ class TestFile(PadFile):
         attack_type = None
         if "attack" in path:
             attack_type = "attack"
-        PadFile.__init__(self, client_id=1, path=path, file_id=id, attack_type=attack_type)
+        super(TestFile, self).__init__(client_id=1, path=path, file_id=id, attack_type=attack_type)
 
     def load(self, directory=None, extension='.hdf5'):
         """Loads the data at the specified location and using the given extension.
@@ -96,11 +96,13 @@ class Interface(BaseInterface):
 
         dumpparser = subparsers.add_parser('dumplist', help="")
         dumpparser.add_argument('-d', '--directory', dest="directory", default='',
-                            help="if given, this path will be prepended to every entry returned (defaults to '%(default)s')")
+                                help="if given, this path will be prepended to every entry returned "
+                                     "(defaults to '%(default)s')")
         dumpparser.add_argument('-e', '--extension', dest="extension", default='',
-                            help="if given, this extension will be appended to every entry returned (defaults to '%(default)s')")
+                                help="if given, this extension will be appended to every entry returned "
+                                     "(defaults to '%(default)s')")
         dumpparser.add_argument('--self-test', dest="selftest", default=False,
-                            action='store_true', help=SUPPRESS)
+                                action='store_true', help=SUPPRESS)
 
         dumpparser.set_defaults(func=dumplist)  # action
 
@@ -110,9 +112,9 @@ class TestDatabase(PadDatabase):
 
     def __init__(self, protocol='Default', original_directory=data_dir, original_extension='', **kwargs):
         # call base class constructors to open a session to the database
-        PadDatabase.__init__(self, name='testspoof', protocol=protocol,
-                             original_directory=original_directory,
-                             original_extension=original_extension, **kwargs)
+        super(TestDatabase, self).__init__(name='testspoof', protocol=protocol,
+                                           original_directory=original_directory,
+                                           original_extension=original_extension, **kwargs)
 
     ################################################
     # Low level support methods for the database #
@@ -194,4 +196,4 @@ class TestDatabase(PadDatabase):
         return None
 
 
-database = TestDatabase(original_directory=data_dir, original_extension='')
+database = TestDatabase()
