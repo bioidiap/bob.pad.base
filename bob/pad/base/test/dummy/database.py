@@ -29,6 +29,7 @@ dummy_data = {'train_real': 1.0, 'train_attack': 2.0,
 
 
 class TestFile(PadFile):
+
     def __init__(self, path, id):
         attack_type = None
         if "attack" in path:
@@ -57,6 +58,7 @@ class TestFile(PadFile):
         path = self.make_path(directory or '', extension or '')
         return dummy_data[os.path.basename(path)]
 
+
 def dumplist(args):
     """Dumps lists of files based on your criteria"""
 
@@ -76,6 +78,7 @@ def dumplist(args):
 
 
 class Interface(BaseInterface):
+
     def name(self):
         return dummy_name
 
@@ -170,6 +173,7 @@ class TestDatabase(PadDatabase):
 
         # does not implement the given access protocol
         return False
+
     def get_all_data(self):
         return self.all_files()
 
