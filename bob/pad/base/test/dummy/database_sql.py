@@ -46,8 +46,10 @@ def create_database():
 
 
 class TestDatabaseSql (bob.pad.base.database.PadDatabase, bob.db.base.SQLiteBaseDatabase):
+
     def __init__(self):
-        bob.pad.base.database.PadDatabase.__init__(self, 'pad_test', original_directory="original/directory", original_extension=".orig")
+        bob.pad.base.database.PadDatabase.__init__(self, 'pad_test',
+                                                   original_directory="original/directory", original_extension=".orig")
         bob.db.base.SQLiteBaseDatabase.__init__(self, dbfile, TestFileSql)
 
     def groups(self, protocol=None):
