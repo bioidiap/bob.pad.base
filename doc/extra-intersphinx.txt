@@ -5,3 +5,5 @@ gridtk
 bob.db.base
 bob.db.avspoof
 bob.bio.base
+bob.pad.voice
+bob.db.voicepa
