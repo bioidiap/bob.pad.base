@@ -19,3 +19,5 @@
 .. _sge: http://wiki.idiap.ch/linux/SunGridEngine
 .. _virtualbox: https://www.virtualbox.org
 .. _hdf5: http://www.hdfgroup.org/HDF5
+.. _bobinstall: https://www.idiap.ch/software/bob/install
+.. _conda: https://conda.io
