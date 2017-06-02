@@ -6,10 +6,10 @@
    :target: http://pythonhosted.org/bob.pad.base/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.png
    :target: https://www.idiap.ch/software/bob/docs/latest/bob/bob.pad.base/master/index.html
-.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/v1.0.8/build.svg
-   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/v1.0.8
-.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/v1.0.8/coverage.svg
-   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/v1.0.8
+.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/build.svg
+   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
+.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/coverage.svg
+   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base
 .. image:: http://img.shields.io/pypi/v/bob.pad.base.png
