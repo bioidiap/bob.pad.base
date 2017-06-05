@@ -1,6 +1,7 @@
 setuptools
+bob.blitz
+bob.core
 bob.extension
-bob.db.base
 bob.io.base
 bob.bio.base
 bob.bio.video
