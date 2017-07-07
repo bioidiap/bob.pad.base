@@ -3,9 +3,9 @@
 .. Wed 19 Oct 22:36:22 2016 CET
 
 .. image:: http://img.shields.io/badge/docs-stable-yellow.png
-   :target: http://pythonhosted.org/bob.pad.base/index.html
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/stable/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.png
-   :target: https://www.idiap.ch/software/bob/docs/latest/bob/bob.pad.base/master/index.html
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/master/index.html
 .. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/build.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
 .. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/coverage.svg
@@ -13,8 +13,6 @@
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base
 .. image:: http://img.shields.io/pypi/v/bob.pad.base.png
-   :target: https://pypi.python.org/pypi/bob.pad.base
-.. image:: http://img.shields.io/pypi/dm/bob.pad.base.png
    :target: https://pypi.python.org/pypi/bob.pad.base
 
 ========================================
@@ -41,7 +39,7 @@ be provided by other packages, which are usually in the ``bob.pad`` namespace, l
 Installation
 ------------
 
-Complete Bob's `installation`_ instructions. Then, to install this pacakge,
+Complete Bob's `installation`_ instructions. Then, to install this package,
 run::
 
   $ conda install bob.pad.base
