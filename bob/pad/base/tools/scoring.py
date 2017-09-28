@@ -32,7 +32,8 @@ def _compute_scores(algorithm, toscore_objects, allow_missing_files):
     for i, toscore_element in enumerate(toscore_objects):
         # filter missing files
         if allow_missing_files and not os.path.exists(toscore_element):
-            # we keep the NaN score
+            # we keep NaN score for such elements
+            scores.insert(i, [numpy.nan])
             continue
         # read toscore
         toscore = algorithm.read_toscore_object(toscore_element)
@@ -105,10 +106,6 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     for i, toscore_object in enumerate(toscore_objects):
         id_str = (str(toscore_object.client_id)).zfill(3)
         sample_name = str(toscore_object.make_path())
-
-        # we can have empty score list if allow_missing_files was true in _compute_scores()
-        if not scores[i]:
-            scores[i] = [numpy.nan]  # create a NaN score for such
 
         # scores[i] is a list, so
         # each sample is allowed to have multiple scores
