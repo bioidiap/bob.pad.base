@@ -22,20 +22,26 @@ from .FileSelector import FileSelector
 from bob.bio.base import utils
 
 
-def _compute_scores(algorithm, toscore_objects):
-    """Compute scores for the given list of objectis using provided algorithm.
+def _compute_scores(algorithm, toscore_objects, allow_missing_files):
+    """Compute scores for the given list of objects using provided algorithm.
     """
-    # the scores to be computed
-    scores = []
+    # the scores to be computed; initialized with NaN
+    scores = numpy.ones((1, len(toscore_objects)), numpy.float64) * numpy.nan
+    scores = numpy.reshape(scores, [len(toscore_objects)])
+
     # Loops over the toscore sets
     for i, toscore_element in enumerate(toscore_objects):
+        # filter missing files
+        if allow_missing_files and not os.path.exists(toscore_element):
+            # we keep the NaN score
+            continue
         # read toscore
         toscore = algorithm.read_toscore_object(toscore_element)
         # compute score
         if isinstance(toscore, list) or isinstance(toscore[0], numpy.ndarray):
-            scores.insert(i, algorithm.score_for_multiple_projections(toscore))
+            scores[i] = algorithm.score_for_multiple_projections(toscore)
         else:
-            scores.insert(i, algorithm.score(toscore))
+            scores[i] = algorithm.score(toscore)
     # Returns the scores
     return scores
 
@@ -100,8 +106,11 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     for i, toscore_object in enumerate(toscore_objects):
         id_str = (str(toscore_object.client_id)).zfill(3)
         sample_name = str(toscore_object.make_path())
+
+        # scores[i] is a list, so
+        # each sample is allowed to have multiple scores
         for score in scores[i]:
-            if not toscore_object.attack_type or toscore_object.attack_type=="None":
+            if not toscore_object.attack_type or toscore_object.attack_type == "None":
                 _write(f, "%s %s %s %.12f\n" % (id_str, id_str, sample_name, score), write_compressed)
             else:
                 attackname = toscore_object.attack_type
@@ -110,7 +119,7 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     _close_written(score_file, f, write_compressed)
 
 
-def _scores_all(algorithm, group, force, write_compressed=False):
+def _scores_all(algorithm, group, force, allow_missing_files=False, write_compressed=False):
     """Computes scores for all (real, attack) files in a given group using the provided algorithm."""
     # the file selector object
     fs = FileSelector.instance()
@@ -136,7 +145,7 @@ def _scores_all(algorithm, group, force, write_compressed=False):
             # get the attack files
             current_files = fs.get_paths(current_objects, 'projected' if algorithm.performs_projection else 'extracted')
             # compute scores for the list of File objects
-            cur_scores = _compute_scores(algorithm, current_files)
+            cur_scores = _compute_scores(algorithm, current_files, allow_missing_files)
             total_scores += cur_scores
             # Save scores to text file
             _save_scores(score_file, cur_scores, current_objects, write_compressed)
@@ -175,4 +184,4 @@ def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing
         algorithm.load_projector(fs.projector_file)
 
     for group in groups:
-        _scores_all(algorithm, group, force, write_compressed)
+        _scores_all(algorithm, group, force, allow_missing_files, write_compressed)
