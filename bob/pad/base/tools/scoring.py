@@ -25,9 +25,8 @@ from bob.bio.base import utils
 def _compute_scores(algorithm, toscore_objects, allow_missing_files):
     """Compute scores for the given list of objects using provided algorithm.
     """
-    # the scores to be computed; initialized with NaN
-    scores = numpy.ones((1, len(toscore_objects)), numpy.float64) * numpy.nan
-    scores = numpy.reshape(scores, [len(toscore_objects)])
+    # the scores to be computed
+    scores = []
 
     # Loops over the toscore sets
     for i, toscore_element in enumerate(toscore_objects):
@@ -39,9 +38,9 @@ def _compute_scores(algorithm, toscore_objects, allow_missing_files):
         toscore = algorithm.read_toscore_object(toscore_element)
         # compute score
         if isinstance(toscore, list) or isinstance(toscore[0], numpy.ndarray):
-            scores[i] = algorithm.score_for_multiple_projections(toscore)
+            scores.insert(i, algorithm.score_for_multiple_projections(toscore))
         else:
-            scores[i] = algorithm.score(toscore)
+            scores.insert(i, algorithm.score(toscore))
     # Returns the scores
     return scores
 
@@ -106,6 +105,10 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     for i, toscore_object in enumerate(toscore_objects):
         id_str = (str(toscore_object.client_id)).zfill(3)
         sample_name = str(toscore_object.make_path())
+
+        # we can have empty score list if allow_missing_files was true in _compute_scores()
+        if not scores[i]:
+            scores[i] = [numpy.nan]  # create a NaN score for such
 
         # scores[i] is a list, so
         # each sample is allowed to have multiple scores
