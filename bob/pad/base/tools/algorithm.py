@@ -115,13 +115,31 @@ def project(algorithm, extractor, groups=None, indices=None, allow_missing_files
         feature_file = str(feature_files[i])
         projected_file = str(projected_files[i])
 
+        if not os.path.exists(feature_file):
+            if allow_missing_files:
+                logger.debug("... Cannot find extracted feature file %s; skipping", feature_file)
+                continue
+            else:
+                logger.error("Cannot find extracted feature file %s", feature_file)
+
         if not utils.check_file(projected_file, force, 1000):
-            logger.info("- Projection: projecting file: %s", feature_file)
+            logger.debug("... Projecting features for file '%s'", feature_file)
+
             # load feature
             feature = extractor.read_feature(feature_file)
             # project feature
             projected = algorithm.project(feature)
+
+            if projected is None:
+                if allow_missing_files:
+                    logger.debug("... Projection for extracted file %s failed; skipping", feature_file)
+                    continue
+                else:
+                    raise RuntimeError("Projection of file '%s' was not successful" % feature_file)
             # write it
             bob.io.base.create_directories_safe(os.path.dirname(projected_file))
             algorithm.write_feature(projected, projected_file)
+
+        else:
+            logger.debug("... Skipping feature file '%s' since projected file '%s' exists", feature_file, projected_file)
 

@@ -22,13 +22,19 @@ from .FileSelector import FileSelector
 from bob.bio.base import utils
 
 
-def _compute_scores(algorithm, toscore_objects):
-    """Compute scores for the given list of objectis using provided algorithm.
+def _compute_scores(algorithm, toscore_objects, allow_missing_files):
+    """Compute scores for the given list of objects using provided algorithm.
     """
     # the scores to be computed
     scores = []
+
     # Loops over the toscore sets
     for i, toscore_element in enumerate(toscore_objects):
+        # filter missing files
+        if allow_missing_files and not os.path.exists(toscore_element):
+            # we keep NaN score for such elements
+            scores.insert(i, [numpy.nan])
+            continue
         # read toscore
         toscore = algorithm.read_toscore_object(toscore_element)
         # compute score
@@ -100,8 +106,11 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     for i, toscore_object in enumerate(toscore_objects):
         id_str = (str(toscore_object.client_id)).zfill(3)
         sample_name = str(toscore_object.make_path())
+
+        # scores[i] is a list, so
+        # each sample is allowed to have multiple scores
         for score in scores[i]:
-            if not toscore_object.attack_type or toscore_object.attack_type=="None":
+            if not toscore_object.attack_type or toscore_object.attack_type == "None":
                 _write(f, "%s %s %s %.12f\n" % (id_str, id_str, sample_name, score), write_compressed)
             else:
                 attackname = toscore_object.attack_type
@@ -110,7 +119,7 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     _close_written(score_file, f, write_compressed)
 
 
-def _scores_all(algorithm, group, force, write_compressed=False):
+def _scores_all(algorithm, group, force, allow_missing_files=False, write_compressed=False):
     """Computes scores for all (real, attack) files in a given group using the provided algorithm."""
     # the file selector object
     fs = FileSelector.instance()
@@ -122,6 +131,7 @@ def _scores_all(algorithm, group, force, write_compressed=False):
     type_objects = ['real', 'attack']
 
     total_scores = []
+    one_score_file_exists = False
     for i in range(0, 2):
         current_objects = current_toscore_objects[i]
         obj_type = type_objects[i]
@@ -132,19 +142,25 @@ def _scores_all(algorithm, group, force, write_compressed=False):
         if utils.check_file(score_file, force):
             logger.warn("Score file '%s' already exists.", score_file)
             total_scores = []
+            one_score_file_exists = True
         else:
             # get the attack files
             current_files = fs.get_paths(current_objects, 'projected' if algorithm.performs_projection else 'extracted')
             # compute scores for the list of File objects
-            cur_scores = _compute_scores(algorithm, current_files)
+            cur_scores = _compute_scores(algorithm, current_files, allow_missing_files)
             total_scores += cur_scores
             # Save scores to text file
             _save_scores(score_file, cur_scores, current_objects, write_compressed)
 
     if total_scores != [] and not utils.check_file(fs.score_file_combined(group), force):
         # save all scores together in one file
-        _save_scores(fs.score_file_combined(group), total_scores,
-                     current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
+        if one_score_file_exists:
+            logger.warn("Since at least one score file already pre-existed, "
+                        "we skip combining individual score files together. "
+                        "You can do it manually, using 'cat' or similar utilities.")
+        else:
+            _save_scores(fs.score_file_combined(group), total_scores,
+                         current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
 
 
 def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing_files=False, write_compressed=False):
@@ -175,4 +191,4 @@ def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing
         algorithm.load_projector(fs.projector_file)
 
     for group in groups:
-        _scores_all(algorithm, group, force, write_compressed)
+        _scores_all(algorithm, group, force, allow_missing_files, write_compressed)
