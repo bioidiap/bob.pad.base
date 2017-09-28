@@ -131,6 +131,7 @@ def _scores_all(algorithm, group, force, allow_missing_files=False, write_compre
     type_objects = ['real', 'attack']
 
     total_scores = []
+    one_score_file_exists = False
     for i in range(0, 2):
         current_objects = current_toscore_objects[i]
         obj_type = type_objects[i]
@@ -141,6 +142,7 @@ def _scores_all(algorithm, group, force, allow_missing_files=False, write_compre
         if utils.check_file(score_file, force):
             logger.warn("Score file '%s' already exists.", score_file)
             total_scores = []
+            one_score_file_exists = True
         else:
             # get the attack files
             current_files = fs.get_paths(current_objects, 'projected' if algorithm.performs_projection else 'extracted')
@@ -152,8 +154,13 @@ def _scores_all(algorithm, group, force, allow_missing_files=False, write_compre
 
     if total_scores != [] and not utils.check_file(fs.score_file_combined(group), force):
         # save all scores together in one file
-        _save_scores(fs.score_file_combined(group), total_scores,
-                     current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
+        if one_score_file_exists:
+            logger.warn("Since at least one score file already pre-existed, "
+                        "we skip combining individual score files together. "
+                        "You can do it manually, using 'cat' or similar utilities.")
+        else:
+            _save_scores(fs.score_file_combined(group), total_scores,
+                         current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
 
 
 def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing_files=False, write_compressed=False):
