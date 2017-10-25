@@ -25,19 +25,12 @@ Implementations
    bob.pad.base.database.PadDatabase
    bob.pad.base.database.PadFile
 
-Preprocessors
--------------
-Preprocessor is the same as in :ref:`bob.bio.base <bob.bio.base>` package.
+Preprocessors and Extractors
+----------------------------
 
-.. automodule:: bob.bio.base.preprocessor
-
-
-Extractors
-----------
-Extractor is the same as in :ref:`bob.bio.base <bob.bio.base>` package.
-
-.. automodule:: bob.bio.base.extractor
-
+Preprocessors and Extractors from the :ref:`bob.bio.base <bob.bio.base>`
+package can also be used in this package. Please see
+:any:`bob.bio.base.implemented` for more details.
 
 Algorithms
 ----------
