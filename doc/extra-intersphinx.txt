@@ -1,9 +1,12 @@
 python
 numpy
-bob.bio.spear
 gridtk
+bob.io.base
 bob.db.base
 bob.db.avspoof
 bob.bio.base
 bob.pad.voice
 bob.db.voicepa
+bob.bio.spear
+bob.bio.face
+bob.pad.face

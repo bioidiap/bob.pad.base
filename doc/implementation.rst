@@ -3,9 +3,9 @@
 .. author: Pavel Korshunov <pavel.korshunov@idiap.ch>
 .. date: Wed Apr 27 14:58:21 CEST 2016
 
-======================
-Implementation Details
-======================
+========================
+ Implementation Details
+========================
 
 The ``bob.pad`` set of modules are specifically designed to be as flexible as possible while trying to keep things simple.
 Therefore, python is used to implement tools such as preprocessors, feature extractors and the PAD algorithms.

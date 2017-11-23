@@ -3,9 +3,9 @@
 .. @date:   May 2017
 
 
-=============================================
-High Level Database Interface How-To Guide
-=============================================
+============================================
+ High Level Database Interface How-To Guide
+============================================
 
 The *high level database interface* (HLDI) is needed to run biometric experiments using non-filelist databases (e.g. if one wants to use SQL-based database package).
 
@@ -36,7 +36,7 @@ the ``bob.pad.face`` framework are: ``ReplayPadFile`` and
 ``ReplayPadDatabase``.
 
 Implementation of the ``*File`` class
----------------------------------------------------
+-------------------------------------
 
 First of all, the ``*File`` class must inherit from the **base file
 class** of the corresponding biometric framework. An example:
@@ -106,7 +106,7 @@ type of input. With this, we are done configuring the high level
 implementation of the ``*File`` class.
 
 Implementation of the ``*Database`` class
----------------------------------------------------
+-----------------------------------------
 
 The second unit to be implemented in HLDI is the ``*Database`` class.
 First of all the ``*Database`` class must inherit from the **base
