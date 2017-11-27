@@ -28,14 +28,16 @@ class TestFileSql (Base, bob.pad.base.database.PadFile):
     path = Column(String(100), unique=True)
 
     def __init__(self):
-        bob.pad.base.database.PadFile.__init__(self, client_id=5, path="test/path")
+        bob.pad.base.database.PadFile.__init__(
+            self, client_id=5, path="test/path")
 
 
 def create_database():
     if os.path.exists(dbfile):
         os.remove(dbfile)
     import bob.db.base.utils
-    engine = bob.db.base.utils.create_engine_try_nolock('sqlite', dbfile, echo=True)
+    engine = bob.db.base.utils.create_engine_try_nolock(
+        'sqlite', dbfile, echo=True)
     Base.metadata.create_all(engine)
     session = bob.db.base.utils.session('sqlite', dbfile, echo=True)
     session.add(TestFileSql())
@@ -48,9 +50,11 @@ def create_database():
 class TestDatabaseSql (bob.pad.base.database.PadDatabase, bob.db.base.SQLiteBaseDatabase):
 
     def __init__(self):
-        bob.pad.base.database.PadDatabase.__init__(self, 'pad_test',
-                                                   original_directory="original/directory", original_extension=".orig")
-        bob.db.base.SQLiteBaseDatabase.__init__(self, dbfile, TestFileSql)
+        super(TestDatabaseSql, self).__init__(
+            name='pad_test',
+            original_directory="original/directory",
+            original_extension=".orig", sqlite_file=dbfile,
+            file_class=TestFileSql)
 
     def groups(self, protocol=None):
         return ['group']
@@ -60,5 +64,6 @@ class TestDatabaseSql (bob.pad.base.database.PadDatabase, bob.db.base.SQLiteBase
 
     def annotations(self, file):
         return None
+
 
 database = TestDatabaseSql()
