@@ -9,7 +9,7 @@ import os
 from bob.bio.base import utils
 
 
-class Algorithm:
+class Algorithm(object):
     """This is the base class for all anti-spoofing algorithms.
     It defines the minimum requirements for all derived algorithm classes.
 
