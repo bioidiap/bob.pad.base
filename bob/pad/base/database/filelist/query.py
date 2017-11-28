@@ -104,12 +104,7 @@ class FileListPadDatabase(PadDatabase, FileListBioDatabase):
             keep_read_lists_in_memory=True,
             **kwargs
     ):
-        """We call PadDatabase.__init__() instead of super() because of we do not want
-        bob.bio.base.database.FileListBioDatabase.__init__() to be called by super().
-        bob.bio.base.database.FileListBioDatabase depends on bob.bio.base.database.ZTBioDatabase, which would
-        throw an exception, since we do not implement here methods for ZT-based metric."""
-
-        PadDatabase.__init__(self,
+        super(FileListPadDatabase, self).__init__(
                              name=name,
                              protocol=protocol,
                              original_directory=original_directory,
@@ -118,13 +113,15 @@ class FileListPadDatabase(PadDatabase, FileListBioDatabase):
                              annotation_extension=annotation_extension,
                              annotation_type=annotation_type,
                              filelists_directory=filelists_directory,
-                             # extra args for pretty printing
-                             train_sub_directory=train_subdir,
                              dev_sub_directory=dev_subdir,
                              eval_sub_directory=eval_subdir,
-                             real_filename=real_filename,
-                             attack_filename=attack_filename,
                              **kwargs)
+        # extra args for pretty printing
+        self._kwargs.update(dict(
+            train_sub_directory=train_subdir,
+            real_filename=real_filename,
+            attack_filename=attack_filename,
+        ))
 
         self.pad_file_class = pad_file_class
         self.list_readers = {}
