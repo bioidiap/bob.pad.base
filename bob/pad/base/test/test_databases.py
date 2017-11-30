@@ -43,6 +43,10 @@ class DummyDatabaseSqlTest(unittest.TestCase):
         check_file(db.training_files(), 2)
         check_file(db.files([1]))
         check_file(db.reverse(["test/path"]))
+        # check if flat returns flat files
+        assert len(db.all_files(flat=True)) == 2, db.all_files(flat=True)
+        check_file(db.all_files(flat=True)[0:1])
+        check_file(db.all_files(flat=True)[1:2])
 
         file = db.objects()[0]
         assert db.original_file_name(file) == "original/directory/test/path.orig"
