@@ -130,7 +130,7 @@ class PadDatabase(BioDatabase):
     ######### Methods to provide common functionality ###############
     #################################################################
 
-    def all_files(self, groups=('train', 'dev', 'eval')):
+    def all_files(self, groups=('train', 'dev', 'eval'), flat=False):
         """all_files(groups=('train', 'dev', 'eval')) -> files
 
         Returns all files of the database, respecting the current protocol.
@@ -140,6 +140,7 @@ class PadDatabase(BioDatabase):
 
         groups : some of ``('train', 'dev', 'eval')`` or ``None``
           The groups to get the data for.
+        flat : if True, it will merge the real and attack files into one list.
 
         **Returns:**
 
@@ -148,6 +149,8 @@ class PadDatabase(BioDatabase):
         """
         realset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='real', **self.all_files_options))
         attackset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='attack', **self.all_files_options))
+        if flat:
+            return realset + attackset
         return [realset, attackset]
 
     def training_files(self, step=None, arrange_by_client=False):
