@@ -130,24 +130,29 @@ class PadDatabase(BioDatabase):
     ######### Methods to provide common functionality ###############
     #################################################################
 
-    def all_files(self, groups=('train', 'dev', 'eval')):
-        """all_files(groups=('train', 'dev', 'eval')) -> files
+    def all_files(self, groups=('train', 'dev', 'eval'), flat=False):
+        """Returns all files of the database, respecting the current protocol.
+        The files can be limited using the ``all_files_options`` in the
+        constructor.
 
-        Returns all files of the database, respecting the current protocol.
-        The files can be limited using the ``all_files_options`` in the constructor.
+        Parameters
+        ----------
+        groups : str or tuple or None
+            The groups to get the data for. it should be some of ``('train',
+            'dev', 'eval')`` or ``None``
 
-        **Parameters:**
+        flat : bool
+            if True, it will merge the real and attack files into one list.
 
-        groups : some of ``('train', 'dev', 'eval')`` or ``None``
-          The groups to get the data for.
-
-        **Returns:**
-
+        Returns
+        -------
         files : [:py:class:`bob.pad.base.database.PadFile`]
-          The sorted and unique list of all files of the database.
+            The sorted and unique list of all files of the database.
         """
         realset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='real', **self.all_files_options))
         attackset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='attack', **self.all_files_options))
+        if flat:
+            return realset + attackset
         return [realset, attackset]
 
     def training_files(self, step=None, arrange_by_client=False):
