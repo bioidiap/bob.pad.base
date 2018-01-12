@@ -5,9 +5,9 @@
 
 .. _bob.pad.base:
 
-=================================================
-Running Presentation Attack Detection Experiments
-=================================================
+===================================================
+ Running Presentation Attack Detection Experiments
+===================================================
 
 The ``bob.pad`` packages provide open source tools to run comparable and reproducible presentation attack detection (PAD) experiments.
 To design such experiment, one has to choose:
@@ -28,20 +28,21 @@ But it is also possible to use your own database, preprocessor, feature extracto
     The ``bob.pad.*`` packages are derived from the `bob.bio.* <http://pypi.python.org/pypi/bob.bio.base>`__, packages that are designed for biometric recognition experiments.
 
 This package :py:mod:`bob.pad.base` includes the basic definition of a PAD experiment, as well as a generic script, which can execute the full experiment in a single command line.
-Changing the employed tolls such as the database, protocol, preprocessor, feature extractor or a PAD algorithm is as simple as changing a command line parameter.
+Changing the employed tools such as the database, protocol, preprocessor, feature extractor or a PAD algorithm is as simple as changing a command line parameter.
 
 The implementation of (most of) the tools is separated into other packages in the ``bob.pad`` namespace.
 All these packages can be easily combined.
 Here is a growing list of derived packages:
 
 * `bob.pad.voice <http://pypi.python.org/pypi/bob.pad.voice>`__ Tools to run presentation attack detection experiments for speech, including several Cepstral-based features and LBP-based feature extraction, GMM-based and logistic regression based algorithms, as well as plot and score fusion scripts.
+* `bob.pad.face <http://pypi.python.org/pypi/bob.pad.face>`__ Tools to run presentation attack detection experiments for face, including face-related feature extraction, GMM, SVM, and logistic regression based algorithms, as well as plotting scripts.
 
 If you are interested, please continue reading:
 
 
-===========
-Users Guide
-===========
+=============
+ Users Guide
+=============
 
 .. toctree::
     :maxdepth: 2
@@ -50,10 +51,12 @@ Users Guide
     experiments
     implementation
     high_level_db_interface_guide
+    filedb_guide
 
-================
-Reference Manual
-================
+
+==================
+ Reference Manual
+==================
 
 .. toctree::
     :maxdepth: 2
@@ -62,9 +65,9 @@ Reference Manual
     py_api
 
 
-==================
-Indices and tables
-==================
+====================
+ Indices and tables
+====================
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -6,9 +6,9 @@
 .. _bob.pad.base.experiments:
 
 
-=================================================
-Running Presentation Attack Detection Experiments
-=================================================
+===================================================
+ Running Presentation Attack Detection Experiments
+===================================================
 
 Now, you are almost ready to run presentation attack detection (PAD) experiment.
 

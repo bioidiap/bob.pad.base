@@ -1,8 +1,8 @@
 .. _bob.pad.base.implemented:
 
-=================================
-Tools implemented in bob.pad.base
-=================================
+===================================
+ Tools implemented in bob.pad.base
+===================================
 
 Please not that some parts of the code in this package are dependent on and reused from :ref:`bob.bio.base <bob.bio.base>` package.
 
