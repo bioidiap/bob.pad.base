@@ -1,5 +1,5 @@
 """
-Implementation of high-level interfaces for FileList-based databases that can be 
+Implementation of high-level interfaces for FileList-based databases that can be
 used by both verification and PAD experiments.
 """
 
@@ -111,23 +111,34 @@ class HighBioDatabase(BioDatabase):
 
     def objects(self, protocol=None, purposes=None, model_ids=None, groups=None, **kwargs):
         """
-        Maps objects method of PAD databases into objects method of Verification database
+        Maps objects method of PAD databases into objects method of
+        Verification database
 
-        :param protocol: To distinguish two vulnerability scenarios, protocol name should have either
-        '-licit' or '-spoof' appended to it. For instance, if DB has protocol 'general', the named passed to this method
-        should be 'general-licit', if we want to run verification experiments on bona fide data only, but it should be
-         'general-spoof', if we want to run it for spoof scenario (the probes are attacks).
+        Parameters
+        ----------
+        protocol : str
+            To distinguish two vulnerability scenarios, protocol name should
+            have either '-licit' or '-spoof' appended to it. For instance, if
+            DB has protocol 'general', the named passed to this method should
+            be 'general-licit', if we want to run verification experiments on
+            bona fide data only, but it should be 'general-spoof', if we want
+            to run it for spoof scenario (the probes are attacks).
+        purposes : [str]
+            This parameter is passed by the ``bob.bio.base`` verification
+            experiment
+        model_ids : [object]
+            This parameter is passed by the ``bob.bio.base`` verification
+            experiment
+        groups : [str]
+            We map the groups from ('world', 'dev', 'eval') used in
+            verification experiments to ('train', 'dev', 'eval')
+        **kwargs
+            The rest of the parameters valid for a given database
 
-        :param purposes: This parameter is passed by the ``bob.bio.base`` verification experiment
-
-        :param model_ids: This parameter is passed by the ``bob.bio.base`` verification experiment
-
-        :param groups: We map the groups from ('world', 'dev', 'eval') used in verification experiments to
-        ('train', 'dev', 'eval')
-
-        :param kwargs: The rest of the parameters valid for a given database
-
-        :return: Set of BioFiles that verification experiments expect.
+        Returns
+        -------
+        [object]
+            Set of BioFiles that verification experiments expect.
 
         """
         # convert group names from the conventional names in verification experiments to the internal database names
