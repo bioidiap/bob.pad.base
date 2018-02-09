@@ -131,6 +131,17 @@ setup(
         'bob.pad.grid': [
             'demanding         = bob.pad.base.config.grid.demanding:grid',
         ],
+
+        # main entry for bob pad cli
+        'bob.cli': [
+            'pad               = bob.pad.base.script.pad:pad',
+        ],
+
+        # bob pad scripts
+        'bob.pad.cli': [
+            'metrics          = bob.pad.base.script.metrics:metrics',
+        ],
+
     },
 
     # Classifiers are important if you plan to distribute this package through
