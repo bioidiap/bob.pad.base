@@ -29,6 +29,7 @@ requirements:
     - bob.bio.base
     - bob.bio.video
     - bob.learn.libsvm
+    - bob.learn.linear
   run:
     - python
     - setuptools
