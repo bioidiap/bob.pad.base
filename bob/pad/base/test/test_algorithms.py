@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-# @author: Manuel Guenther <Manuel.Guenther@idiap.ch>
-# @author: Pavel Korshunov <pavel.korshunov@idiap.ch>
-# @date:   Tue May 17 12:09:22 CET 2016
 #
 
+from __future__ import print_function
+
 import numpy as np
+
 from bob.io.base.test_utils import datafile
 from bob.io.base import load
 
 import bob.io.image  # for image loading functionality
-
 import bob.bio.video
+import bob.pad.base
+
 from bob.pad.base.algorithm import SVM
 
 import random

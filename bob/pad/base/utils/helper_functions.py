@@ -2,6 +2,9 @@
 # vim: set fileencoding=utf-8 :
 
 import numpy as np
+import bob.bio.video
+
+import itertools
 
 
 def convert_frame_cont_to_array(frame_container):
@@ -59,8 +62,8 @@ def convert_and_prepare_features(features):
 
     if isinstance(
             features[0],
-            FrameContainer):  # if FrameContainer convert to 2D numpy array
-        return self.convert_list_of_frame_cont_to_array(features)
+            bob.bio.video.FrameContainer):  # if FrameContainer convert to 2D numpy array
+        return convert_list_of_frame_cont_to_array(features)
     else:
         return np.vstack(features)
 
@@ -87,7 +90,7 @@ def convert_list_of_frame_cont_to_array(frame_containers):
     feature_vectors = []
 
     for frame_container in frame_containers:
-        video_features_array = self.convert_frame_cont_to_array(
+        video_features_array = convert_frame_cont_to_array(
             frame_container)
 
         feature_vectors.append(video_features_array)
@@ -117,8 +120,8 @@ def combinations(input_dict):
 
     combinations = [
         dict(zip(varNames, prod))
-        for prod in it.product(*(input_dict[varName]
-                                 for varName in varNames))
+        for prod in itertools.product(*(input_dict[varName]
+                                        for varName in varNames))
         ]
 
     return combinations
@@ -213,7 +216,6 @@ def convert_array_to_list_of_frame_cont(data):
     frame_container_list = []
 
     for idx, vec in enumerate(data):
-
         frame_container = bob.bio.video.FrameContainer(
         )  # initialize the FrameContainer
 
@@ -223,4 +225,3 @@ def convert_array_to_list_of_frame_cont(data):
             frame_container)  # add current frame to FrameContainer
 
     return frame_container_list
-

@@ -32,6 +32,7 @@ requirements:
   run:
     - python
     - setuptools
+    - gridtk
 
 test:
   imports:
@@ -47,6 +48,7 @@ test:
   requires:
     - bob-devel {{ bob_devel }}.*
     - nose
+    - gridtk
     - coverage
     - sphinx
     - sphinx_rtd_theme
