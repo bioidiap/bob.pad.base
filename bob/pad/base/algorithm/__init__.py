@@ -2,6 +2,7 @@ from .Algorithm import Algorithm
 from .SVM import SVM
 from .OneClassGMM import OneClassGMM
 from .LogRegr import LogRegr
+from .SVMCascadePCA import SVMCascadePCA
 
 def __appropriate__(*args):
     """Says object was actually declared here, and not in the import module.
@@ -26,5 +27,6 @@ __appropriate__(
     SVM,
     OneClassGMM,
     LogRegr,
+    SVMCascadePCA,
 )
 __all__ = [_ for _ in dir() if not _.startswith('_')]
