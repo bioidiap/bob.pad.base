@@ -3,3 +3,6 @@ bob.extension
 bob.db.base
 bob.io.base
 bob.bio.base
+bob.bio.video
+bob.learn.libsvm
+bob.learn.linear

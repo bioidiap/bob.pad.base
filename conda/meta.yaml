@@ -27,9 +27,13 @@ requirements:
     - bob.db.base
     - bob.io.base
     - bob.bio.base
+    - bob.bio.video
+    - bob.learn.linear
+    - bob.learn.libsvm
   run:
     - python
     - setuptools
+    - gridtk
 
 test:
   imports:
@@ -44,10 +48,13 @@ test:
     - conda inspect objects -p $PREFIX {{ name }}  # [osx]
   requires:
     - bob-devel {{ bob_devel }}.*
+    - bob.learn.linear
     - nose
+    - gridtk
     - coverage
     - sphinx
     - sphinx_rtd_theme
+    - scikit-learn
 
 about:
   home: https://www.idiap.ch/software/bob/

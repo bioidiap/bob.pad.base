@@ -34,8 +34,8 @@ The implementation of (most of) the tools is separated into other packages in th
 All these packages can be easily combined.
 Here is a growing list of derived packages:
 
-* `bob.pad.voice <http://pypi.python.org/pypi/bob.pad.voice>`__ Tools to run presentation attack detection experiments for speech, including several Cepstral-based features and LBP-based feature extraction, GMM-based and logistic regression based algorithms, as well as plot and score fusion scripts.
-* `bob.pad.face <http://pypi.python.org/pypi/bob.pad.face>`__ Tools to run presentation attack detection experiments for face, including face-related feature extraction, GMM, SVM, and logistic regression based algorithms, as well as plotting scripts.
+* `bob.pad.voice <http://pypi.python.org/pypi/bob.pad.voice>`__ Tools to run presentation attack detection experiments for speech, including several Cepstral-based features and LBP-based feature extraction, OneClassGMM-based and logistic regression based algorithms, as well as plot and score fusion scripts.
+* `bob.pad.face <http://pypi.python.org/pypi/bob.pad.face>`__ Tools to run presentation attack detection experiments for face, including face-related feature extraction, OneClassGMM, SVM, and logistic regression based algorithms, as well as plotting scripts.
 
 If you are interested, please continue reading:
 

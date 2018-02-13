@@ -16,7 +16,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 regenerate_database = False
 
-dbfile = bob.io.base.test_utils.datafile("test_db.sql3", "bob.pad.base.test")
+dbfile = bob.io.base.test_utils.datafile("test_db.sql3", "bob.pad.base.test", path="data")
 
 Base = declarative_base()
 
