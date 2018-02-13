@@ -23,7 +23,8 @@ import bob.io.base
 import os
 
 from bob.pad.base.utils import convert_frame_cont_to_array, convert_and_prepare_features, combinations, \
-    select_uniform_data_subset, select_quasi_uniform_data_subset
+    select_uniform_data_subset, select_quasi_uniform_data_subset, mean_std_normalize, split_data_to_train_cv, \
+    norm_train_cv_data, prepare_data_for_hyper_param_grid_search
 
 # ==============================================================================
 # Main body :
@@ -120,93 +121,6 @@ class SVM(Algorithm):
         self.n_train_samples = n_train_samples
         self.machine = None
 
-    # ==========================================================================
-    def split_data_to_train_cv(self, features):
-        """
-        This function is designed to split the input array of features into two
-        subset namely train and cross-validation. These subsets can be used to tune the
-        hyper-parameters of the SVM. The splitting is 50/50, the first half of the
-        samples in the input are selected to be train set, and the second half of
-        samples is cross-validation.
-
-        **Parameters:**
-
-        ``features`` : 2D :py:class:`numpy.ndarray`
-            Input array with feature vectors. The rows are samples, columns are features.
-
-        **Returns:**
-
-        ``features_train`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of train features.
-
-        ``features_cv`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of cross-validation features.
-        """
-
-        half_samples_num = np.int(features.shape[0] / 2)
-
-        features_train = features[0:half_samples_num, :]
-        features_cv = features[half_samples_num:2 * half_samples_num + 1, :]
-
-        return features_train, features_cv
-
-    # ==========================================================================
-    def prepare_data_for_hyper_param_grid_search(self, training_features,
-                                                 n_samples):
-        """
-        This function converts a list of all training features returned by ``read_features``
-        method of the extractor to the subsampled train and cross-validation arrays for both
-        real and attack classes.
-
-        **Parameters:**
-
-        ``training_features`` : [[FrameContainer], [FrameContainer]]
-            A list containing two elements: [0] - a list of Frame Containers with
-            feature vectors for the real class; [1] - a list of Frame Containers with
-            feature vectors for the attack class.
-
-        ``n_samples`` : :py:class:`int`
-            Number of uniformly selected feature vectors per class.
-
-        **Returns:**
-
-        ``real_train`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of train features for the real class.
-            The number of samples in this set is n_samples/2, which is defined
-            by split_data_to_train_cv method of this class.
-
-        ``real_cv`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of cross-validation features for the real class.
-            The number of samples in this set is n_samples/2, which is defined
-            by split_data_to_train_cv method of this class.
-
-        ``attack_train`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of train features for the attack class.
-            The number of samples in this set is n_samples/2, which is defined
-            by split_data_to_train_cv method of this class.
-
-        ``attack_cv`` : 2D :py:class:`numpy.ndarray`
-            Selected subset of cross-validation features for the attack class.
-            The number of samples in this set is n_samples/2, which is defined
-            by split_data_to_train_cv method of this class.
-        """
-
-        # training_features[0] - training features for the REAL class.
-        real = convert_and_prepare_features(
-            training_features[0])  # output is array
-        # training_features[1] - training features for the ATTACK class.
-        attack = convert_and_prepare_features(
-            training_features[1])  # output is array
-
-        # uniformly select subsets of features:
-        real_subset = select_uniform_data_subset(real, n_samples)
-        attack_subset = select_uniform_data_subset(attack, n_samples)
-
-        # split the data into train and cross-validation:
-        real_train, real_cv = self.split_data_to_train_cv(real_subset)
-        attack_train, attack_cv = self.split_data_to_train_cv(attack_subset)
-
-        return real_train, real_cv, attack_train, attack_cv
 
     # ==========================================================================
     def comp_prediction_precision(self, machine, real, attack):
@@ -241,138 +155,6 @@ class SVM(Algorithm):
                      ).astype(np.float) / samples_num
 
         return precision
-
-    # ==========================================================================
-    def mean_std_normalize(self,
-                           features,
-                           features_mean=None,
-                           features_std=None):
-        """
-        The features in the input 2D array are mean-std normalized.
-        The rows are samples, the columns are features. If ``features_mean``
-        and ``features_std`` are provided, then these vectors will be used for
-        normalization. Otherwise, the mean and std of the features is
-        computed on the fly.
-
-        **Parameters:**
-
-        ``features`` : 2D :py:class:`numpy.ndarray`
-            Array of features to be normalized.
-
-        ``features_mean`` : 1D :py:class:`numpy.ndarray`
-            Mean of the features. Default: None.
-
-        ``features_std`` : 2D :py:class:`numpy.ndarray`
-            Standart deviation of the features. Default: None.
-
-        **Returns:**
-
-        ``features_norm`` : 2D :py:class:`numpy.ndarray`
-            Normalized array of features.
-
-        ``features_mean`` : 1D :py:class:`numpy.ndarray`
-            Mean of the features.
-
-        ``features_std`` : 2D :py:class:`numpy.ndarray`
-            Standart deviation of the features.
-        """
-
-        features = np.copy(features)
-
-        # Compute mean and std if not given:
-        if features_mean is None:
-            features_mean = np.mean(features, axis=0)
-
-            features_std = np.std(features, axis=0)
-
-        row_norm_list = []
-
-        for row in features:  # row is a sample
-
-            row_norm = (row - features_mean) / features_std
-
-            row_norm_list.append(row_norm)
-
-        features_norm = np.vstack(row_norm_list)
-
-        return features_norm, features_mean, features_std
-
-    # ==========================================================================
-    def norm_train_cv_data(self,
-                           real_train,
-                           real_cv,
-                           attack_train,
-                           attack_cv,
-                           one_class_flag=False):
-        """
-        Mean-std normalization of train and cross-validation data arrays.
-
-        **Parameters:**
-
-        ``real_train`` : 2D :py:class:`numpy.ndarray`
-            Subset of train features for the real class.
-
-        ``real_cv`` : 2D :py:class:`numpy.ndarray`
-            Subset of cross-validation features for the real class.
-
-        ``attack_train`` : 2D :py:class:`numpy.ndarray`
-            Subset of train features for the attack class.
-
-        ``attack_cv`` : 2D :py:class:`numpy.ndarray`
-            Subset of cross-validation features for the attack class.
-
-        ``one_class_flag`` : :py:class:`bool`
-            If set to ``True``, only positive/real samples will be used to
-            compute the mean and std normalization vectors. Set to ``True`` if
-            using one-class SVM. Default: False.
-
-        **Returns:**
-
-        ``real_train_norm`` : 2D :py:class:`numpy.ndarray`
-            Normalized subset of train features for the real class.
-
-        ``real_cv_norm`` : 2D :py:class:`numpy.ndarray`
-            Normalized subset of cross-validation features for the real class.
-
-        ``attack_train_norm`` : 2D :py:class:`numpy.ndarray`
-            Normalized subset of train features for the attack class.
-
-        ``attack_cv_norm`` : 2D :py:class:`numpy.ndarray`
-            Normalized subset of cross-validation features for the attack class.
-        """
-        if not (one_class_flag):
-
-            features_train = np.vstack([real_train, attack_train])
-
-            features_train_norm, features_mean, features_std = self.mean_std_normalize(
-                features_train)
-
-            real_train_norm = features_train_norm[0:real_train.shape[0], :]
-
-            attack_train_norm = features_train_norm[real_train.shape[0]:, :]
-
-            real_cv_norm, _, _ = self.mean_std_normalize(
-                real_cv, features_mean, features_std)
-
-            attack_cv_norm, _, _ = self.mean_std_normalize(
-                attack_cv, features_mean, features_std)
-
-        else:  # one-class SVM case
-
-            # only real class used for training in one class SVM:
-            real_train_norm, features_mean, features_std = self.mean_std_normalize(
-                real_train)
-
-            attack_train_norm, _, _ = self.mean_std_normalize(
-                attack_train, features_mean, features_std)
-
-            real_cv_norm, _, _ = self.mean_std_normalize(
-                real_cv, features_mean, features_std)
-
-            attack_cv_norm, _, _ = self.mean_std_normalize(
-                attack_cv, features_mean, features_std)
-
-        return real_train_norm, real_cv_norm, attack_train_norm, attack_cv_norm
 
     # ==========================================================================
     def train_svm(
@@ -453,12 +235,12 @@ class SVM(Algorithm):
             machine_type == 'ONE_CLASS')  # True if one-class SVM is used
 
         # get the data for the hyper-parameter grid-search:
-        real_train, real_cv, attack_train, attack_cv = self.prepare_data_for_hyper_param_grid_search(
-            training_features, n_samples)
+        real_train, real_cv, attack_train, attack_cv = \
+            prepare_data_for_hyper_param_grid_search(training_features, n_samples)
 
         if mean_std_norm_flag:
             # normalize the data:
-            real_train, real_cv, attack_train, attack_cv = self.norm_train_cv_data(
+            real_train, real_cv, attack_train, attack_cv = norm_train_cv_data(
                 real_train, real_cv, attack_train, attack_cv, one_class_flag)
 
         precisions_cv = [
@@ -554,7 +336,7 @@ class SVM(Algorithm):
             if not (one_class_flag):  # two-class SVM case
 
                 features = np.vstack([real, attack])
-                features_norm, features_mean, features_std = self.mean_std_normalize(
+                features_norm, features_mean, features_std = mean_std_normalize(
                     features)
                 real = features_norm[0:real.shape[
                     0], :]  # The array is now normalized
@@ -563,9 +345,9 @@ class SVM(Algorithm):
 
             else:  # one-class SVM case
 
-                real, features_mean, features_std = self.mean_std_normalize(
+                real, features_mean, features_std = mean_std_normalize(
                     real)  # use only real class to compute normalizers
-                attack = self.mean_std_normalize(attack, features_mean,
+                attack = mean_std_normalize(attack, features_mean,
                                                  features_std)
                 # ``real`` and ``attack`` arrays are now normalizaed
 

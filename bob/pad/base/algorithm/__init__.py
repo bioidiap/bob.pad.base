@@ -1,6 +1,7 @@
 from .Algorithm import Algorithm
 from .SVM import SVM
 from OneClassGMM import OneClassGMM
+from LogRegr import LogRegr
 
 def __appropriate__(*args):
     """Says object was actually declared here, and not in the import module.
@@ -24,5 +25,6 @@ __appropriate__(
     Algorithm,
     SVM,
     OneClassGMM,
+    LogRegr,
 )
 __all__ = [_ for _ in dir() if not _.startswith('_')]

@@ -52,6 +52,7 @@ test:
     - coverage
     - sphinx
     - sphinx_rtd_theme
+    - sklearn
 
 about:
   home: https://www.idiap.ch/software/bob/

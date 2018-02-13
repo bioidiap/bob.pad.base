@@ -279,3 +279,203 @@ def mean_std_normalize(features,
     features_norm = np.vstack(row_norm_list)
 
     return features_norm, features_mean, features_std
+
+
+def norm_train_data(real, attack):
+    """
+    Mean-std normalization of input data arrays. The mean and std normalizers
+    are computed using real class only.
+
+    **Parameters:**
+
+    ``real`` : 2D :py:class:`numpy.ndarray`
+        Training features for the real class.
+
+    ``attack`` : 2D :py:class:`numpy.ndarray`
+        Training features for the attack class.
+
+    **Returns:**
+
+    ``real_norm`` : 2D :py:class:`numpy.ndarray`
+        Mean-std normalized training features for the real class.
+
+    ``attack_norm`` : 2D :py:class:`numpy.ndarray`
+        Mean-std normalized training features for the attack class.
+        Or an empty list if ``one_class_flag = True``.
+
+    ``features_mean`` : 1D :py:class:`numpy.ndarray`
+        Mean of the features.
+
+    ``features_std`` : 1D :py:class:`numpy.ndarray`
+        Standart deviation of the features.
+    """
+
+    real_norm, features_mean, features_std = mean_std_normalize(real)
+
+    attack_norm, _, _ = mean_std_normalize(attack, features_mean,
+                                           features_std)
+
+    return real_norm, attack_norm, features_mean, features_std
+
+
+def split_data_to_train_cv(features):
+    """
+    This function is designed to split the input array of features into two
+    subset namely train and cross-validation. These subsets can be used to tune the
+    hyper-parameters of the SVM. The splitting is 50/50, the first half of the
+    samples in the input are selected to be train set, and the second half of
+    samples is cross-validation.
+
+    **Parameters:**
+
+    ``features`` : 2D :py:class:`numpy.ndarray`
+        Input array with feature vectors. The rows are samples, columns are features.
+
+    **Returns:**
+
+    ``features_train`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of train features.
+
+    ``features_cv`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of cross-validation features.
+    """
+
+    half_samples_num = np.int(features.shape[0] / 2)
+
+    features_train = features[0:half_samples_num, :]
+    features_cv = features[half_samples_num:2 * half_samples_num + 1, :]
+
+    return features_train, features_cv
+
+
+def norm_train_cv_data(real_train,
+                       real_cv,
+                       attack_train,
+                       attack_cv,
+                       one_class_flag=False):
+    """
+    Mean-std normalization of train and cross-validation data arrays.
+
+    **Parameters:**
+
+    ``real_train`` : 2D :py:class:`numpy.ndarray`
+        Subset of train features for the real class.
+
+    ``real_cv`` : 2D :py:class:`numpy.ndarray`
+        Subset of cross-validation features for the real class.
+
+    ``attack_train`` : 2D :py:class:`numpy.ndarray`
+        Subset of train features for the attack class.
+
+    ``attack_cv`` : 2D :py:class:`numpy.ndarray`
+        Subset of cross-validation features for the attack class.
+
+    ``one_class_flag`` : :py:class:`bool`
+        If set to ``True``, only positive/real samples will be used to
+        compute the mean and std normalization vectors. Set to ``True`` if
+        using one-class SVM. Default: False.
+
+    **Returns:**
+
+    ``real_train_norm`` : 2D :py:class:`numpy.ndarray`
+        Normalized subset of train features for the real class.
+
+    ``real_cv_norm`` : 2D :py:class:`numpy.ndarray`
+        Normalized subset of cross-validation features for the real class.
+
+    ``attack_train_norm`` : 2D :py:class:`numpy.ndarray`
+        Normalized subset of train features for the attack class.
+
+    ``attack_cv_norm`` : 2D :py:class:`numpy.ndarray`
+        Normalized subset of cross-validation features for the attack class.
+    """
+    if not (one_class_flag):
+
+        features_train = np.vstack([real_train, attack_train])
+
+        features_train_norm, features_mean, features_std = mean_std_normalize(
+            features_train)
+
+        real_train_norm = features_train_norm[0:real_train.shape[0], :]
+
+        attack_train_norm = features_train_norm[real_train.shape[0]:, :]
+
+        real_cv_norm, _, _ = mean_std_normalize(
+            real_cv, features_mean, features_std)
+
+        attack_cv_norm, _, _ = mean_std_normalize(
+            attack_cv, features_mean, features_std)
+
+    else:  # one-class Classifier case
+
+        # only real class used for training in one class Classifier:
+        real_train_norm, features_mean, features_std = mean_std_normalize(
+            real_train)
+
+        attack_train_norm, _, _ = mean_std_normalize(
+            attack_train, features_mean, features_std)
+
+        real_cv_norm, _, _ = mean_std_normalize(
+            real_cv, features_mean, features_std)
+
+        attack_cv_norm, _, _ = mean_std_normalize(
+            attack_cv, features_mean, features_std)
+
+    return real_train_norm, real_cv_norm, attack_train_norm, attack_cv_norm
+
+
+def prepare_data_for_hyper_param_grid_search(training_features, n_samples):
+    """
+    This function converts a list of all training features returned by ``read_features``
+    method of the extractor to the subsampled train and cross-validation arrays for both
+    real and attack classes.
+
+    **Parameters:**
+
+    ``training_features`` : [[FrameContainer], [FrameContainer]]
+        A list containing two elements: [0] - a list of Frame Containers with
+        feature vectors for the real class; [1] - a list of Frame Containers with
+        feature vectors for the attack class.
+
+    ``n_samples`` : :py:class:`int`
+        Number of uniformly selected feature vectors per class.
+
+    **Returns:**
+
+    ``real_train`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of train features for the real class.
+        The number of samples in this set is n_samples/2, which is defined
+        by split_data_to_train_cv method of this class.
+
+    ``real_cv`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of cross-validation features for the real class.
+        The number of samples in this set is n_samples/2, which is defined
+        by split_data_to_train_cv method of this class.
+
+    ``attack_train`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of train features for the attack class.
+        The number of samples in this set is n_samples/2, which is defined
+        by split_data_to_train_cv method of this class.
+
+    ``attack_cv`` : 2D :py:class:`numpy.ndarray`
+        Selected subset of cross-validation features for the attack class.
+        The number of samples in this set is n_samples/2, which is defined
+        by split_data_to_train_cv method of this class.
+    """
+
+    # training_features[0] - training features for the REAL class.
+    real = convert_and_prepare_features(
+        training_features[0])  # output is array
+    # training_features[1] - training features for the ATTACK class.
+    attack = convert_and_prepare_features(
+        training_features[1])  # output is array
+
+    # uniformly select subsets of features:
+    real_subset = select_uniform_data_subset(real, n_samples)
+    attack_subset = select_uniform_data_subset(attack, n_samples)
+
+    # split the data into train and cross-validation:
+    real_train, real_cv = split_data_to_train_cv(real_subset)
+    attack_train, attack_cv = split_data_to_train_cv(attack_subset)
+
+    return real_train, real_cv, attack_train, attack_cv
