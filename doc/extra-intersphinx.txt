@@ -10,3 +10,4 @@ bob.db.voicepa
 bob.bio.spear
 bob.bio.face
 bob.pad.face
+bob.learn.linear

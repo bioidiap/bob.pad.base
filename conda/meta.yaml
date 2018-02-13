@@ -28,8 +28,8 @@ requirements:
     - bob.io.base
     - bob.bio.base
     - bob.bio.video
-    - bob.learn.libsvm
     - bob.learn.linear
+    - bob.learn.libsvm
   run:
     - python
     - setuptools
@@ -48,6 +48,7 @@ test:
     - conda inspect objects -p $PREFIX {{ name }}  # [osx]
   requires:
     - bob-devel {{ bob_devel }}.*
+    - bob.learn.linear
     - nose
     - gridtk
     - coverage
