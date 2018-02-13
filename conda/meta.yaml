@@ -27,6 +27,8 @@ requirements:
     - bob.db.base
     - bob.io.base
     - bob.bio.base
+    - bob.bio.video
+    - bob.learn.libsvm
   run:
     - python
     - setuptools
