@@ -1,6 +1,6 @@
 from .Algorithm import Algorithm
 from .SVM import SVM
-
+from OneClassGMM import OneClassGMM
 
 def __appropriate__(*args):
     """Says object was actually declared here, and not in the import module.
@@ -23,5 +23,6 @@ def __appropriate__(*args):
 __appropriate__(
     Algorithm,
     SVM,
+    OneClassGMM,
 )
 __all__ = [_ for _ in dir() if not _.startswith('_')]

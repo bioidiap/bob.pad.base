@@ -225,3 +225,57 @@ def convert_array_to_list_of_frame_cont(data):
             frame_container)  # add current frame to FrameContainer
 
     return frame_container_list
+
+
+def mean_std_normalize(features,
+                       features_mean=None,
+                       features_std=None):
+    """
+    The features in the input 2D array are mean-std normalized.
+    The rows are samples, the columns are features. If ``features_mean``
+    and ``features_std`` are provided, then these vectors will be used for
+    normalization. Otherwise, the mean and std of the features is
+    computed on the fly.
+
+    **Parameters:**
+
+    ``features`` : 2D :py:class:`numpy.ndarray`
+        Array of features to be normalized.
+
+    ``features_mean`` : 1D :py:class:`numpy.ndarray`
+        Mean of the features. Default: None.
+
+    ``features_std`` : 2D :py:class:`numpy.ndarray`
+        Standart deviation of the features. Default: None.
+
+    **Returns:**
+
+    ``features_norm`` : 2D :py:class:`numpy.ndarray`
+        Normalized array of features.
+
+    ``features_mean`` : 1D :py:class:`numpy.ndarray`
+        Mean of the features.
+
+    ``features_std`` : 1D :py:class:`numpy.ndarray`
+        Standart deviation of the features.
+    """
+
+    features = np.copy(features)
+
+    # Compute mean and std if not given:
+    if features_mean is None:
+        features_mean = np.mean(features, axis=0)
+
+        features_std = np.std(features, axis=0)
+
+    row_norm_list = []
+
+    for row in features:  # row is a sample
+
+        row_norm = (row - features_mean) / features_std
+
+        row_norm_list.append(row_norm)
+
+    features_norm = np.vstack(row_norm_list)
+
+    return features_norm, features_mean, features_std
