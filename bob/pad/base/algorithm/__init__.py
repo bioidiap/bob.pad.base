@@ -1,7 +1,7 @@
 from .Algorithm import Algorithm
 from .SVM import SVM
-from OneClassGMM import OneClassGMM
-from LogRegr import LogRegr
+from .OneClassGMM import OneClassGMM
+from .LogRegr import LogRegr
 
 def __appropriate__(*args):
     """Says object was actually declared here, and not in the import module.
