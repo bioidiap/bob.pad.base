@@ -40,8 +40,7 @@ Here is a growing list of derived packages:
 If you are interested, please continue reading:
 
 
-=============
- Users Guide
+Users Guide
 =============
 
 .. toctree::
@@ -54,8 +53,7 @@ If you are interested, please continue reading:
     filedb_guide
 
 
-==================
- Reference Manual
+Reference Manual
 ==================
 
 .. toctree::
@@ -65,8 +63,7 @@ If you are interested, please continue reading:
     py_api
 
 
-====================
- Indices and tables
+Indices and tables
 ====================
 
 * :ref:`genindex`
