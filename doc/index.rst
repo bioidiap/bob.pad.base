@@ -40,7 +40,6 @@ Here is a growing list of derived packages:
 If you are interested, please continue reading:
 
 
-=============
  Users Guide
 =============
 
@@ -54,7 +53,6 @@ If you are interested, please continue reading:
     filedb_guide
 
 
-==================
  Reference Manual
 ==================
 
@@ -65,7 +63,6 @@ If you are interested, please continue reading:
     py_api
 
 
-====================
  Indices and tables
 ====================
 
