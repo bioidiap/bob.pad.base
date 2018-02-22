@@ -30,9 +30,11 @@ requirements:
     - bob.bio.video
     - bob.learn.linear
     - bob.learn.libsvm
+    - scikit-learn
   run:
     - python
     - setuptools
+    - {{ pin_compatible('scikit-learn', min_pin='x.x') }}
 
 test:
   imports:
@@ -47,13 +49,11 @@ test:
     - conda inspect objects -p $PREFIX {{ name }}  # [osx]
   requires:
     - bob-devel {{ bob_devel }}.*
-    - bob.learn.linear
     - nose
-    - gridtk
     - coverage
     - sphinx
     - sphinx_rtd_theme
-    - scikit-learn
+    - gridtk
 
 about:
   home: https://www.idiap.ch/software/bob/
