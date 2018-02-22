@@ -7,3 +7,4 @@ bob.bio.base
 bob.bio.video
 bob.learn.libsvm
 bob.learn.linear
+scikit-learn
