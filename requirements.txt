@@ -1,7 +1,8 @@
 setuptools
 bob.extension
-bob.db.base
+bob.core
 bob.io.base
+bob.db.base
 bob.bio.base
 bob.bio.video
 bob.learn.libsvm
