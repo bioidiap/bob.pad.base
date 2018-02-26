@@ -121,7 +121,6 @@ class SVM(Algorithm):
         self.n_train_samples = n_train_samples
         self.machine = None
 
-
     # ==========================================================================
     def comp_prediction_precision(self, machine, real, attack):
         """
@@ -468,7 +467,6 @@ class SVM(Algorithm):
             Must be writable with the ``write_feature`` function and
             readable with the ``read_feature`` function.
         """
-
         if isinstance(
                 feature,
                 FrameContainer):  # if FrameContainer convert to 2D numpy array
@@ -516,6 +514,9 @@ class SVM(Algorithm):
             One score per frame.
             Score is a probability of a sample being a real class.
         """
+
+        if toscore.ndim == 1:
+          return [toscore[0]]
 
         if self.frame_level_scores_flag:
 
