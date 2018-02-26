@@ -143,3 +143,16 @@ def test_video_gmm_pad_algorithm():
     assert (np.max(scores_real) + 1.8380480068281055) < 0.000001
     assert (np.min(scores_attack) + 38.831260843070098) < 0.000001
     assert (np.max(scores_attack) + 5.3633030621521272) < 0.000001
+
+def test_convert_list_of_frame_cont_to_array():
+  
+  N = 1000
+  mu = 1
+  sigma = 1
+  real_array = np.transpose(np.vstack([[random.gauss(mu, sigma) for _ in range(N)], [random.gauss(mu, sigma) for _ in range(N)]]))
+
+  features_array = convert_list_of_frame_cont_to_array(real_array)
+  assert isinstance(features_array[0], numpy.array)
+  features_fm = convert_array_to_list_of_frame_cont(real_array)
+  assert isinstance(features_fm[0], bob.bio.video.FrameContainer)
+
