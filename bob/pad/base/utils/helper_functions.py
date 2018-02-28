@@ -87,13 +87,16 @@ def convert_list_of_frame_cont_to_array(frame_containers):
         An array containing features for all frames of all individuals.
     """
 
-    feature_vectors = []
 
-    for frame_container in frame_containers:
-        video_features_array = convert_frame_cont_to_array(
+    if isinstance( frame_containers[0], bob.bio.video.FrameContainer): 
+
+      feature_vectors = []
+      for frame_container in frame_containers:
+          video_features_array = convert_frame_cont_to_array(
             frame_container)
-
-        feature_vectors.append(video_features_array)
+          feature_vectors.append(video_features_array)
+    else: 
+      feature_vectors = frame_containers
 
     features_array = np.vstack(feature_vectors)
 

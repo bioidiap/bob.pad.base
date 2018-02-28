@@ -35,8 +35,8 @@ provided in ``bob.pad``. Hence for speech PAD, you can take
 the :py:class:`bob.bio.spear.preprocessor.Energy_2Gauss` and the
 :py:class:`bob.bio.spear.extractor.Cepstral` feature extractor defined in
 :ref:`bob.bio.spear <bob.bio.spear>`, and the
-:py:class:`bob.pad.voice.algorithm.GmmAlgorithm` algorithm defined in
-:ref:`bob.pad.voice <bob.pad.voice>`, using voicePA database (contains speech presentation attacks)
+:py:class:`bob.pad.base.algorithm.OneClassGMM` algorithm defined in
+:ref:`bob.pad.base <bob.pad.base>`, using voicePA database (contains speech presentation attacks)
 interface defined in :ref:`bob.db.voicepa <bob.db.voicepa>`. Running the
 command line below will install all the required packages:
 
