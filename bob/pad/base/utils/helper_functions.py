@@ -94,8 +94,7 @@ def convert_list_of_frame_cont_to_array(frame_containers):
       for frame_container in frame_containers:
           video_features_array = convert_frame_cont_to_array(
             frame_container)
-
-      feature_vectors.append(video_features_array)
+          feature_vectors.append(video_features_array)
     else: 
       feature_vectors = frame_containers
 
