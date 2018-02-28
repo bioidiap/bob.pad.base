@@ -152,7 +152,7 @@ def test_convert_list_of_frame_cont_to_array():
   real_array = np.transpose(np.vstack([[random.gauss(mu, sigma) for _ in range(N)], [random.gauss(mu, sigma) for _ in range(N)]]))
 
   features_array = convert_list_of_frame_cont_to_array(real_array)
-  assert type(features_array[0]) is np.array
+  assert isinstance(features_array[0], np.ndarray)
   features_fm = convert_array_to_list_of_frame_cont(real_array)
   assert isinstance(features_fm[0], bob.bio.video.FrameContainer)
 
