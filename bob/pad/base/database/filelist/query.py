@@ -213,7 +213,7 @@ class FileListPadDatabase(PadDatabase, FileListBioDatabase):
                                                     self.groups(protocol),
                                                     default_parameters=self.groups(protocol))
 
-        return self.__client_id_list__(groups, 'for_real', protocol)
+        return sorted(self.__client_id_list__(groups, 'for_real', protocol))
 
     def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, **kwargs):
         """Returns a set of :py:class:`PadFile` objects for the specific query by the user.
