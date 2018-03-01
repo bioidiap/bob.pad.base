@@ -25,13 +25,35 @@ import sys
 from bob.db.base.driver import Interface as BaseInterface
 
 
+def clients(args):
+    """Dumps lists of client IDs based on your criteria"""
+
+    from .query import FileListPadDatabase
+    db = FileListPadDatabase(args.list_directory, 'pad_filelist')
+
+    client_ids = db.client_ids(
+        protocol=args.protocol,
+        groups = args.group
+    )
+
+    output = sys.stdout
+    if args.selftest:
+        from bob.db.base.utils import null
+        output = null()
+
+    for client in client_ids:
+        output.write('%s\n' % client)
+
+    return 0
+
+
 def dumplist(args):
     """Dumps lists of files based on your criteria"""
 
     from .query import FileListPadDatabase
     db = FileListPadDatabase(args.list_directory, 'pad_filelist')
 
-    r = db.objects(
+    file_objects = db.objects(
         purposes=args.purpose,
         groups=args.group,
         protocol=args.protocol
@@ -42,8 +64,8 @@ def dumplist(args):
         from bob.db.base.utils import null
         output = null()
 
-    for f in r:
-        output.write('%s\n' % f.make_path(directory=args.directory, extension=args.extension))
+    for file_obj in file_objects:
+        output.write('%s\n' % file_obj.make_path(directory=args.directory, extension=args.extension))
 
     return 0
 
@@ -54,16 +76,16 @@ def checkfiles(args):
     from .query import FileListPadDatabase
     db = FileListPadDatabase(args.list_directory, 'pad_filelist')
 
-    r = db.objects(protocol=args.protocol)
+    file_objects = db.objects(protocol=args.protocol)
 
     # go through all files, check if they are available on the filesystem
     good = []
     bad = []
-    for f in r:
-        if os.path.exists(f.make_path(args.directory, args.extension)):
-            good.append(f)
+    for file_obj in file_objects:
+        if os.path.exists(file_obj.make_path(args.directory, args.extension)):
+            good.append(file_obj)
         else:
-            bad.append(f)
+            bad.append(file_obj)
 
     # report
     output = sys.stdout
@@ -72,9 +94,9 @@ def checkfiles(args):
         output = null()
 
     if bad:
-        for f in bad:
-            output.write('Cannot find file "%s"\n' % f.make_path(args.directory, args.extension))
-        output.write('%d files (out of %d) were not found at "%s"\n' % (len(bad), len(r), args.directory))
+        for file_obj in bad:
+            output.write('Cannot find file "%s"\n' % file_obj.make_path(args.directory, args.extension))
+        output.write('%d files (out of %d) were not found at "%s"\n' % (len(bad), len(file_objects), args.directory))
 
     return 0
 
@@ -101,6 +123,19 @@ class Interface(BaseInterface):
 
         import argparse
 
+        # the "clients" action
+        parser = subparsers.add_parser('clients', help=dumplist.__doc__)
+        parser.add_argument('-l', '--list-directory', required=True,
+                            help="The directory which contains the file lists.")
+        parser.add_argument('-g', '--group',
+                            help="if given, this value will limit the output files to those belonging to a "
+                                 "particular group.",
+                            choices=('dev', 'eval', 'train', ''))
+        parser.add_argument('-p', '--protocol', default=None,
+                            help="If set, the protocol is appended to the directory that contains the file lists.")
+        parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
+        parser.set_defaults(func=clients)  # action
+
         # the "dumplist" action
         parser = subparsers.add_parser('dumplist', help=dumplist.__doc__)
         parser.add_argument('-l', '--list-directory', required=True,
@@ -115,7 +150,7 @@ class Interface(BaseInterface):
                             choices=('real', 'attack', ''))
         parser.add_argument('-g', '--group',
                             help="if given, this value will limit the output files to those belonging to a "
-                                 "particular protocolar group.",
+                                 "particular  group.",
                             choices=('dev', 'eval', 'train', ''))
         parser.add_argument('-p', '--protocol', default=None,
                             help="If set, the protocol is appended to the directory that contains the file lists.")

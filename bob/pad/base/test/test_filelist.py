@@ -66,6 +66,7 @@ def test_query_protocol():
 
 def test_driver_api():
     from bob.db.base.script.dbmanage import main
+    assert main(('pad_filelist clients --list-directory=%s --self-test' % example_dir).split()) == 0
     assert main(('pad_filelist dumplist --list-directory=%s --self-test' % example_dir).split()) == 0
     assert main(('pad_filelist dumplist --list-directory=%s --purpose=real --group=dev --self-test' % 
                  example_dir).split()) == 0
