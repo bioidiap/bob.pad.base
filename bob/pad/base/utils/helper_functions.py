@@ -270,7 +270,9 @@ def mean_std_normalize(features,
         features_mean = np.mean(features, axis=0)
 
         features_std = np.std(features, axis=0)
-
+        
+    features_std[features_std==0.0]=1.0
+    
     row_norm_list = []
 
     for row in features:  # row is a sample
