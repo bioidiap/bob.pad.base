@@ -32,9 +32,12 @@ def convert_frame_cont_to_array(frame_container):
     for frame in frame_container:
         frame_dictionary[frame[0]] = frame[1]
 
+    sorted_keys = np.sort([int(key) for key in frame_dictionary.keys()])
+
     for idx, _ in enumerate(frame_container):
-        # Frames are stored in a mixed order, therefore we get them using incrementing frame index:
-        feature_vectors.append(frame_dictionary[str(idx)])
+        # Frames are stored in a mixed order, therefore we get them using incrementing frame index.
+        # Also, some frames might be missing, this is also addressed.
+        feature_vectors.append(frame_dictionary[str(sorted_keys[idx])])
 
     features_array = np.vstack(feature_vectors)
 
@@ -88,14 +91,14 @@ def convert_list_of_frame_cont_to_array(frame_containers):
     """
 
 
-    if isinstance( frame_containers[0], bob.bio.video.FrameContainer): 
+    if isinstance( frame_containers[0], bob.bio.video.FrameContainer):
 
       feature_vectors = []
       for frame_container in frame_containers:
           video_features_array = convert_frame_cont_to_array(
             frame_container)
           feature_vectors.append(video_features_array)
-    else: 
+    else:
       feature_vectors = frame_containers
 
     features_array = np.vstack(feature_vectors)
