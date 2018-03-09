@@ -17,6 +17,7 @@ Only one base class that is presentation attack detection specific, ``Algorithm`
 
 .. autosummary::
    bob.pad.base.algorithm.Algorithm
+   bob.pad.base.algorithm.Predictions
 
 Implementations
 ~~~~~~~~~~~~~~~

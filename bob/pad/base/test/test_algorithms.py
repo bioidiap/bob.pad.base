@@ -6,9 +6,6 @@ from __future__ import print_function
 
 import numpy as np
 
-from bob.io.base.test_utils import datafile
-from bob.io.base import load
-
 import bob.io.image  # for image loading functionality
 import bob.bio.video
 import bob.pad.base
@@ -18,8 +15,28 @@ from bob.pad.base.algorithm import OneClassGMM
 
 import random
 
-from bob.pad.base.utils import convert_array_to_list_of_frame_cont, convert_list_of_frame_cont_to_array, \
+from bob.pad.base.utils import (
+    convert_array_to_list_of_frame_cont,
+    convert_list_of_frame_cont_to_array,
     convert_frame_cont_to_array
+)
+
+from bob.pad.base.database import PadFile
+from bob.pad.base.algorithm import Predictions
+from bob.pad.base import padfile_to_label
+
+
+def test_prediction():
+    alg = Predictions()
+    sample = [0, 1]
+    assert alg.score(sample)[0] == sample[1]
+
+
+def test_padfile_to_label():
+    f = PadFile(client_id='', path='', attack_type=None, file_id=1)
+    assert padfile_to_label(f) is True, padfile_to_label(f)
+    f = PadFile(client_id='', path='', attack_type='print', file_id=1)
+    assert padfile_to_label(f) is False, padfile_to_label(f)
 
 
 def test_video_svm_pad_algorithm():
@@ -144,8 +161,9 @@ def test_video_gmm_pad_algorithm():
     assert (np.min(scores_attack) + 38.831260843070098) < 0.000001
     assert (np.max(scores_attack) + 5.3633030621521272) < 0.000001
 
+
 def test_convert_list_of_frame_cont_to_array():
-  
+
   N = 1000
   mu = 1
   sigma = 1
@@ -155,4 +173,3 @@ def test_convert_list_of_frame_cont_to_array():
   assert isinstance(features_array[0], np.ndarray)
   features_fm = convert_array_to_list_of_frame_cont(real_array)
   assert isinstance(features_fm[0], bob.bio.video.FrameContainer)
-

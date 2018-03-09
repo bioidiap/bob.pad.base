@@ -3,7 +3,10 @@ from .SVM import SVM
 from .OneClassGMM import OneClassGMM
 from .LogRegr import LogRegr
 from .SVMCascadePCA import SVMCascadePCA
+from .Predictions import Predictions
 
+
+# to fix sphinx warnings of not able to find classes, when path is shortened
 def __appropriate__(*args):
     """Says object was actually declared here, and not in the import module.
     Fixing sphinx warnings of not being able to find classes, when path is
@@ -28,5 +31,8 @@ __appropriate__(
     OneClassGMM,
     LogRegr,
     SVMCascadePCA,
+    Predictions,
 )
+
+# gets sphinx autodoc done right - don't remove it
 __all__ = [_ for _ in dir() if not _.startswith('_')]
