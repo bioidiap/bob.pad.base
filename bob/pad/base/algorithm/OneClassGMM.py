@@ -18,7 +18,7 @@ import bob.io.base
 
 from sklearn import mixture
 
-from bob.pad.base.utils import convert_frame_cont_to_array, mean_std_normalize
+from bob.pad.base.utils import convert_frame_cont_to_array, mean_std_normalize, convert_and_prepare_features
 
 # ==============================================================================
 # Main body :
@@ -184,7 +184,7 @@ class OneClassGMM(Algorithm):
         """
 
         # training_features[0] - training features for the REAL class.
-        real = self.convert_and_prepare_features(
+        real = convert_and_prepare_features(
             training_features[0])  # output is array
 
         # training_features[1] - training features for the ATTACK class.
