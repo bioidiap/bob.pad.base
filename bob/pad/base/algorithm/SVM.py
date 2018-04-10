@@ -432,7 +432,7 @@ class SVM(Algorithm):
             The file to read the projector from.
         """
 
-        f = bob.io.base.HDF5File(projector_file, 'a')
+        f = bob.io.base.HDF5File(projector_file, 'r')
 
         self.machine = bob.learn.libsvm.Machine(f)
 
