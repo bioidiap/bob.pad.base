@@ -10,7 +10,7 @@ import matplotlib.pyplot as mpl
 from bob.extension.scripts.click_helper import verbosity_option
 from  bob.measure.utils import (get_fta, get_thres)
 from bob.measure import (
-    far_threshold, eer_threshold, min_hter_threshold, farfrr
+    far_threshold, eer_threshold, min_hter_threshold, farfrr, epc
 )
 from . import error_utils
 
@@ -269,7 +269,7 @@ class Epc(PadPlot):
         licit_eval_pos = eval_score[0][1]
         spoof_eval_neg = eval_score[1][0]
         mpl.gcf().clear()
-        epc_baseline = error_utils.epc(
+        epc_baseline = epc(
             licit_dev_neg, licit_dev_pos, licit_eval_neg,
             licit_eval_pos, 100
         )
