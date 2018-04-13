@@ -1,5 +1,7 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
+import pkg_resources  # to make sure bob gets imported properly
+import logging
 import click
 import numpy as np
 import  bob.measure.script.figure as measure_figure
@@ -187,7 +189,14 @@ class HistVuln(measure_figure.Hist):
             ax2.grid(False)
             real_data = True if 'real_data' not in self._ctx.meta else \
                     self._ctx.meta['real_data']
+            far, frr = farfrr(neg[0], pos[0], threshold)
             _iapmr_plot(neg[1], threshold, iapmr, real_data=real_data)
+            click.echo(
+                'HTER (t=%.2g) = %.2f%%; IAPMR = %.2f%%' % (
+                    threshold,
+                    50*(far+frr), 100*iapmr
+                )
+            )
 
             ax2.set_ylabel("IAPMR (%)", color='C3')
             ax2.tick_params(axis='y', colors='red')
