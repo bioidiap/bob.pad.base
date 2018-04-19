@@ -4,14 +4,15 @@ import pkg_resources  # to make sure bob gets imported properly
 import logging
 import click
 import numpy as np
+import matplotlib.pyplot as mpl
 import  bob.measure.script.figure as measure_figure
 from tabulate import tabulate
-import matplotlib.pyplot as mpl
 from bob.extension.scripts.click_helper import verbosity_option
 from  bob.measure.utils import (get_fta, get_thres)
 from bob.measure import (
-    far_threshold, eer_threshold, min_hter_threshold, farfrr, epc
+    far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
 )
+from bob.measure.plot import (det, det_axis)
 from . import error_utils
 
 ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
@@ -207,8 +208,7 @@ class PadPlot(measure_figure.PlotBase):
     '''Base class for PAD plots'''
     def __init__(self, ctx, scores, evaluation, func_load):
         super(PadPlot, self).__init__(ctx, scores, evaluation, func_load)
-        if 'figsize' in ctx.meta:
-            mpl.figure(figsize=ctx.meta['figsize'])
+        mpl.rcParams['figure.constrained_layout.use'] = self._clayout
 
     def _process_scores(self, dev_score, eval_score):
         '''Process score files and return neg/pos/fta for eval and dev'''
@@ -244,7 +244,7 @@ class PadPlot(measure_figure.PlotBase):
             li, la = ax.get_legend_handles_labels()
             lines += li
             labels += la
-        mpl.gcf().legend(lines, labels, fancybox=True, framealpha=0.5)
+        mpl.gca().legend(lines, labels, loc=0, fancybox=True, framealpha=0.5)
 
 class Epc(PadPlot):
     ''' Handles the plotting of EPC '''
@@ -313,7 +313,6 @@ class Epc(PadPlot):
         mpl.title(title)
         #legends for all axes
         self._plot_legends()
-        mpl.gcf().set_tight_layout(True)
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig(mpl.gcf())
 
@@ -440,7 +439,7 @@ class Epsc(PadPlot):
         ax1.set_xticklabels(ax1.get_xticks())
         ax1.set_yticklabels(ax1.get_yticks())
         mpl.xticks(rotation=self._x_rotation)
-        self._pdf_page.savefig(bbox_inches='tight')
+        self._pdf_page.savefig()
 
 class Epsc3D(Epsc):
     ''' 3D EPSC plots for PAD'''
@@ -458,6 +457,7 @@ class Epsc3D(Epsc):
         title = self._titles[idx] if self._titles is not None else None
 
         mpl.gcf().clear()
+        mpl.gcf().set_constrained_layout(self._clayout)
 
         from mpl_toolkits.mplot3d import Axes3D
         from matplotlib import cm
@@ -480,7 +480,8 @@ class Epsc3D(Epsc):
         # the following order: frr, far, IAPMR, far_w, wer_wb, hter_wb
         wer_errors = 100 * errors[2 if self._iapmr else 4]
 
-        ax1 = mpl.gcf().add_subplot(111, projection='3d')
+        ax1 = mpl.gcf().add_subplot(111, projection='3d',
+                                    constrained_layout=self._clayout)
 
         W, B = np.meshgrid(omega, beta)
 
@@ -504,4 +505,172 @@ class Epsc3D(Epsc):
         ax1.set_yticklabels(ax1.get_yticks())
         ax1.set_zticklabels(ax1.get_zticks())
 
-        self._pdf_page.savefig(bbox_inches='tight')
+        self._pdf_page.savefig()
+
+class Det(PadPlot):
+    '''DET for PAD'''
+    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data):
+        super(Det, self).__init__(ctx, scores, evaluation, func_load)
+        self._no_spoof = False if 'no_spoof' not in ctx.meta else\
+        ctx.meta['no_spoof']
+        self._criteria = criteria
+        self._real_data = True if real_data is None else real_data
+
+    def compute(self, idx, dev_score, dev_file, eval_score, eval_file=None):
+        ''' Implements plots'''
+        licit_dev_neg = dev_score[0][0]
+        licit_dev_pos = dev_score[0][1]
+        licit_eval_neg = eval_score[0][0]
+        licit_eval_pos = eval_score[0][1]
+        spoof_eval_neg = eval_score[1][0] if len(dev_score) > 1 else None
+        spoof_eval_pos = eval_score[1][1] if len(dev_score) > 1 else None
+
+        det(
+            licit_eval_neg,
+            licit_eval_pos,
+            self._points,
+            color=self._colors[idx],
+            linestyle='-',
+            label=self._label("licit", dev_file[0], idx)
+        )
+        if not self._no_spoof and spoof_eval_neg is not None:
+            det(
+                spoof_eval_neg,
+                spoof_eval_pos,
+                self._points,
+                color=self._colors[idx],
+                linestyle='--',
+                label=self._label("spoof", eval_file[0], idx)
+            )
+
+        if self._criteria is None:
+            return
+
+        thres_baseline = calc_threshold(
+            self._criteria, licit_dev_neg, licit_dev_pos
+        )
+
+        axlim = mpl.axis()
+
+        farfrr_licit = farfrr(
+            licit_eval_neg, licit_eval_pos,
+            thres_baseline)  # calculate test frr @ EER (licit scenario)
+        farfrr_spoof = farfrr(
+            spoof_eval_neg, spoof_eval_pos,
+            thres_baseline)  # calculate test frr @ EER (spoof scenario)
+        farfrr_licit_det = [
+            ppndf(i) for i in farfrr_licit
+        ]
+        # find the FAR and FRR values that need to be plotted on normal deviate
+        # scale
+        farfrr_spoof_det = [
+            ppndf(i) for i in farfrr_spoof
+        ]
+        # find the FAR and FRR values that need to be plotted on normal deviate
+        # scale
+        if not self._real_data:
+            mpl.axhline(
+                y=farfrr_licit_det[1],
+                xmin=axlim[2],
+                xmax=axlim[3],
+                color='k',
+                linestyle='--',
+                label="FRR @ EER")  # vertical FRR threshold
+        else:
+            mpl.axhline(
+                y=farfrr_licit_det[1],
+                xmin=axlim[0],
+                xmax=axlim[1],
+                color='k',
+                linestyle='--',
+                label="FRR = %.2f%%" %
+                (farfrr_licit[1] * 100))  # vertical FRR threshold
+
+        mpl.plot(
+            farfrr_licit_det[0],
+            farfrr_licit_det[1],
+            'o',
+            color=self._colors[idx],
+            markersize=9)  # FAR point, licit scenario
+        mpl.plot(
+            farfrr_spoof_det[0],
+            farfrr_spoof_det[1],
+            'o',
+            color=self._colors[idx],
+            markersize=9)  # FAR point, spoof scenario
+
+        # annotate the FAR points
+        xyannotate_licit = [
+            ppndf(0.7 * farfrr_licit[0]),
+            ppndf(1.8 * farfrr_licit[1])
+        ]
+        xyannotate_spoof = [
+            ppndf(0.95 * farfrr_spoof[0]),
+            ppndf(1.8 * farfrr_licit[1])
+        ]
+
+        if not self._real_data:
+            mpl.annotate(
+                'FMR @\noperating point',
+                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
+                xycoords='data',
+                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
+                color=self._colors[idx])
+            mpl.annotate(
+                'IAPMR @\noperating point',
+                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
+                xycoords='data',
+                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
+                color=self._colors[idx])
+        else:
+            mpl.annotate(
+                'FAR=%.2f%%' % (farfrr_licit[0] * 100),
+                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
+                xycoords='data',
+                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
+                color=self._colors[idx],
+                size='large')
+            mpl.annotate(
+                'IAPMR=\n%.2f%%' % (farfrr_spoof[0] * 100),
+                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
+                xycoords='data',
+                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
+                color=self._colors[idx],
+                size='large')
+
+    def end_process(self):
+        ''' Set title, legend, axis labels, grid colors, save figures and
+        close pdf is needed '''
+        #only for plots
+        add = ''
+        if not self._no_spoof:
+            add = " and overlaid SPOOF scenario"
+        title = self._title if self._title is not None else \
+                ('DET: LICIT' + add)
+        mpl.title(title)
+        mpl.xlabel(self._x_label or "False Acceptance Rate (%)")
+        mpl.ylabel(self._y_label or "False Rejection Rate (%)")
+        mpl.grid(True, color=self._grid_color)
+        mpl.legend(loc='best')
+        self._set_axis()
+        #gives warning when applied with mpl
+        fig = mpl.gcf()
+        mpl.xticks(rotation=self._x_rotation)
+        mpl.tick_params(axis='both', which='major', labelsize=4)
+        for tick in mpl.gca().xaxis.get_major_ticks():
+            tick.label.set_fontsize(6)
+        for tick in mpl.gca().yaxis.get_major_ticks():
+            tick.label.set_fontsize(6)
+
+        self._pdf_page.savefig(fig)
+
+        #do not want to close PDF when running evaluate
+        if 'PdfPages' in self._ctx.meta and \
+            ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
+            self._pdf_page.close()
+
+    def _set_axis(self):
+        if self._axlim is not None and None not in self._axlim:
+            det_axis(self._axlim)
+        else:
+            det_axis([0.01, 99, 0.01, 99])

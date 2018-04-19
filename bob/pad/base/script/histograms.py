@@ -2,7 +2,7 @@
 """
 import click
 from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import verbosity_option
+from bob.extension.scripts.click_helper import (verbosity_option, bool_option)
 from bob.bio.base.score import load
 from . import figure
 
@@ -14,19 +14,20 @@ FUNC_SPLIT = lambda x: load.load_files(x, load.split)
 @common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
-@common_options.axis_fontsize_option()
 @common_options.thresholds_option()
 @common_options.const_layout_option()
 @common_options.show_dev_option()
 @common_options.print_filenames_option(dflt=False)
 @common_options.titles_option()
+@common_options.figsize_option()
+@common_options.style_option()
 @verbosity_option()
 @click.pass_context
 def hist(ctx, scores, evaluation, **kwargs):
     """ Plots histograms of Bona fida and PA along with threshold
     criterion.
 
-    You need provide one or more development score file(s) for each experiment.
+    You need to provide one or more development score file(s) for each experiment.
     You can also provide eval files along with dev files. If only dev scores
     are provided, you must use flag `--no-evaluation`.
 
@@ -48,24 +49,25 @@ def hist(ctx, scores, evaluation, **kwargs):
 
 @click.command()
 @common_options.scores_argument(nargs=-1, eval_mandatory=True, min_len=2)
-@common_options.output_plot_file_option(default_out='hist.pdf')
+@common_options.output_plot_file_option(default_out='vuln.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
-@common_options.axis_fontsize_option()
 @common_options.thresholds_option()
 @common_options.const_layout_option()
 @common_options.show_dev_option()
 @common_options.print_filenames_option(dflt=False)
-@common_options.bool_option(
+@bool_option(
     'iapmr-line', 'I', 'Whether to plot the IAPMR related lines or not.', True
 )
-@common_options.bool_option(
+@bool_option(
     'real-data', 'R',
     'If False, will annotate the plots hypothetically, instead '
     'of with real data values of the calculated error rates.', True
 )
 @common_options.titles_option()
+@common_options.figsize_option()
+@common_options.style_option()
 @verbosity_option()
 @click.pass_context
 def vuln(ctx, scores, evaluation, **kwargs):
@@ -83,7 +85,7 @@ def vuln(ctx, scores, evaluation, **kwargs):
     See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
     vulnerability analysis.
 
-    You need provide one or more development score file(s) for each experiment.
+    You need to provide one or more development score file(s) for each experiment.
     You can also provide eval files along with dev files. If only dev-scores
     are used set the flag `--no-evaluation`
     is required in that case.

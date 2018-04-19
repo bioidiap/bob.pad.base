@@ -142,11 +142,11 @@ setup(
             'metrics          = bob.pad.base.script.metrics:metrics',
             'hist             = bob.pad.base.script.histograms:hist',
             'vuln             = bob.pad.base.script.histograms:vuln',
+            'det              = bob.pad.base.script.det:det',
             'epc              = bob.pad.base.script.epc:epc',
             'epsc             = bob.pad.base.script.epc:epsc',
             'gen              = bob.pad.base.script.gen:gen',
         ],
-
     },
 
     # Classifiers are important if you plan to distribute this package through

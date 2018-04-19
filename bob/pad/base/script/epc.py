@@ -12,12 +12,13 @@ FUNC_SPLIT = lambda x: load.load_files(x, load.split)
 @common_options.scores_argument(eval_mandatory=True, min_len=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='epc.pdf')
 @common_options.titles_option()
-@common_options.axis_fontsize_option()
 @common_options.const_layout_option()
 @common_options.figsize_option()
+@common_options.style_option()
 @common_options.bool_option(
     'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', True
 )
+@common_options.style_option()
 @verbosity_option()
 @click.pass_context
 def epc(ctx, scores, **kwargs):
@@ -49,9 +50,9 @@ def epc(ctx, scores, **kwargs):
 @common_options.scores_argument(eval_mandatory=True, min_len=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='epsc.pdf')
 @common_options.titles_option()
-@common_options.figsize_option()
-@common_options.axis_fontsize_option()
 @common_options.const_layout_option()
+@common_options.figsize_option()
+@common_options.style_option()
 @common_options.bool_option(
     'wer', 'w', 'Whether to plot the WER related lines or not.', True
 )
@@ -63,7 +64,7 @@ def epc(ctx, scores, **kwargs):
 )
 @click.option('-c', '--criteria', default="eer", show_default=True,
               help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'hter', 'wer')))
+              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
 @click.option('-vp', '--var-param', default="omega", show_default=True,
               help='Name of the varying parameter',
               type=click.Choice(('omega', 'beta')))
@@ -73,7 +74,7 @@ def epc(ctx, scores, **kwargs):
 @verbosity_option()
 @click.pass_context
 def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
-    """Plot EPSC (expected performance curve):
+    """Plot EPSC (expected performance spoofing curve):
 
     You need to provide 4 score
     files for each biometric system in this order:

@@ -2,7 +2,8 @@
 """
 import click
 from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import verbosity_option
+from bob.extension.scripts.click_helper import (verbosity_option,
+                                                open_file_mode_option)
 from bob.bio.base.score import load
 from . import figure
 
@@ -12,8 +13,8 @@ FUNC_SPLIT = lambda x: load.load_files(x, load.split)
 @common_options.scores_argument(nargs=-1)
 @common_options.eval_option()
 @common_options.table_option()
-@common_options.open_file_mode_option()
-@common_options.output_plot_metric_option()
+@open_file_mode_option()
+@common_options.output_log_metric_option()
 @common_options.titles_option()
 @verbosity_option()
 @click.pass_context
