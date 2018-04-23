@@ -211,8 +211,6 @@ class Epc(PadPlot):
     ''' Handles the plotting of EPC '''
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Epc, self).__init__(ctx, scores, evaluation, func_load)
-        if 'eval_scores_0' not in self._ctx.meta:
-            raise click.UsageError("EPC requires dev and eval score files")
         self._iapmr = True if 'iapmr' not in self._ctx.meta else \
                 self._ctx.meta['iapmr']
         self._title = 'EPC and IAPMR' if self._iapmr else 'EPC'
@@ -287,8 +285,6 @@ class Epsc(PadPlot):
     def __init__(self, ctx, scores, evaluation, func_load,
                  criteria, var_param, fixed_param):
         super(Epsc, self).__init__(ctx, scores, evaluation, func_load)
-        if 'eval_scores_0' not in self._ctx.meta:
-            raise click.UsageError("EPC requires dev and eval score files")
         self._iapmr = False if 'iapmr' not in self._ctx.meta else \
                 self._ctx.meta['iapmr']
         self._wer = True if 'wer' not in self._ctx.meta else \
@@ -426,6 +422,8 @@ class Epsc3D(Epsc):
 
         title = self._titles[idx] if self._titles is not None else None
 
+        mpl.rcParams.pop('key', None)
+
         mpl.gcf().clear()
         mpl.gcf().set_constrained_layout(self._clayout)
 
@@ -450,8 +448,7 @@ class Epsc3D(Epsc):
         # the following order: frr, far, IAPMR, far_w, wer_wb, hter_wb
         wer_errors = 100 * errors[2 if self._iapmr else 4]
 
-        ax1 = mpl.gcf().add_subplot(111, projection='3d',
-                                    constrained_layout=self._clayout)
+        ax1 = mpl.gcf().add_subplot(111, projection='3d')
 
         W, B = np.meshgrid(omega, beta)
 
