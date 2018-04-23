@@ -6,10 +6,8 @@ from bob.extension.scripts.click_helper import verbosity_option
 from bob.bio.base.score import load
 from . import figure
 
-FUNC_SPLIT = lambda x: load.load_files(x, load.split)
-
 @click.command()
-@common_options.scores_argument(eval_mandatory=True, min_len=2, nargs=-1)
+@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='epc.pdf')
 @common_options.titles_option()
 @common_options.const_layout_option()
@@ -43,11 +41,11 @@ def epc(ctx, scores, **kwargs):
 
         $ bob pad epc {licit,spoof}/scores-{dev,eval}
     """
-    process = figure.Epc(ctx, scores, True, FUNC_SPLIT)
+    process = figure.Epc(ctx, scores, True, load.split)
     process.run()
 
 @click.command()
-@common_options.scores_argument(eval_mandatory=True, min_len=2, nargs=-1)
+@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='epsc.pdf')
 @common_options.titles_option()
 @common_options.const_layout_option()
@@ -102,12 +100,12 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
         if (ctx.meta['wer'] and ctx.meta['iapmr']):
             raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
         process = figure.Epsc3D(
-            ctx, scores, True, FUNC_SPLIT,
+            ctx, scores, True, load.split,
             criteria, var_param, fixed_param
         )
     else:
         process = figure.Epsc(
-            ctx, scores, True, FUNC_SPLIT,
+            ctx, scores, True, load.split,
             criteria, var_param, fixed_param
         )
     process.run()

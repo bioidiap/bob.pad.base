@@ -8,7 +8,7 @@ import matplotlib.pyplot as mpl
 import  bob.measure.script.figure as measure_figure
 from tabulate import tabulate
 from bob.extension.scripts.click_helper import verbosity_option
-from  bob.measure.utils import (get_fta, get_thres)
+from  bob.measure.utils import (get_fta, get_fta_list, get_thres)
 from bob.measure import (
     far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
 )
@@ -57,15 +57,18 @@ class Metrics(measure_figure.Metrics):
         super(Metrics, self).__init__(ctx, scores, evaluation, func_load)
 
     ''' Compute metrics from score files'''
-    def compute(self, idx, dev_score, dev_file=None,
-                eval_score=None, eval_file=None):
+    def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
-        dev_neg, dev_pos, _, eval_neg, eval_pos, _ =\
-                self._process_scores(dev_score, eval_score)
+        neg_list, pos_list, _ = get_fta_list(input_scores)
+        dev_neg, dev_pos = neg_list[0], pos_list[0]
+        dev_file = input_names[0]
+        if self._eval:
+            eval_neg, eval_pos = neg_list[1], pos_list[1]
+            eval_file = input_names[1]
 
         title = self._titles[idx] if self._titles is not None else None
         headers = ['' or title, 'Development %s' % dev_file]
-        if self._eval and eval_score is not None:
+        if self._eval:
             headers.append('Eval. % s' % eval_file)
         for m in ALL_CRITERIA:
             raws = []
@@ -93,11 +96,11 @@ class HistPad(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'PAD'
         self._density_hist(
-            pos, label='Bona Fide', color='C1', **self._kwargs
+            pos[0], label='Bona Fide', color='C1'
         )
         self._density_hist(
-            neg, label='Presentation attack', alpha=0.4, color='C7',
-            hatch='\\\\', **self._kwargs
+            neg[0], label='Presentation attack', alpha=0.4, color='C7',
+            hatch='\\\\'
         )
 
 def _calc_pass_rate(threshold, scores):
@@ -134,48 +137,24 @@ def _iapmr_line_plot(scores, n_points=100, **kwargs):
 
     mpl.plot(thres, mix_prob_y, label='IAPMR', color='C3', **kwargs)
 
-
 def _iapmr_plot(scores, threshold, iapmr, real_data, **kwargs):
     _iapmr_dot(threshold, iapmr, real_data, **kwargs)
     _iapmr_line_plot(scores, n_points=100, **kwargs)
 
-
 class HistVuln(measure_figure.Hist):
     ''' Histograms for vulnerability '''
-    def _get_neg_pos_thres(self, idx, dev_score, eval_score):
-        assert len(dev_score) == self._min_arg
-        dev_neg_list = []
-        eval_neg_list = []
-        dev_pos_list = []
-        eval_pos_list = []
-        for i in range(self._min_arg):
-            dev_neg, dev_pos, _, eval_neg, eval_pos, _ = self._process_scores(
-                dev_score[i], eval_score[i]
-            )
-            dev_neg_list.append(dev_neg)
-            dev_pos_list.append(dev_pos)
-            eval_neg_list.append(eval_neg)
-            eval_pos_list.append(eval_pos)
-
-        threshold = get_thres(
-            self._criter, dev_neg_list[0], dev_pos_list[0]
-        ) if self._thres is None else self._thres[idx]
-        return (dev_neg_list, dev_pos_list,
-                eval_neg_list, eval_pos_list, threshold)
 
     def _setup_hist(self, neg, pos):
         self._title_base = 'Vulnerability'
-        assert len(neg) == len(pos) == self._min_arg
         self._density_hist(
-            pos[0], label='Bona Fide', color='C1', **self._kwargs
+            pos[0], label='Bona Fide', color='C1'
         )
         self._density_hist(
-            neg[0], label='Zero-effort impostors', alpha=0.8, color='C0',
-            **self._kwargs
+            neg[0], label='Zero-effort impostors', alpha=0.8, color='C0'
         )
         self._density_hist(
             neg[1], label='Presentation attack', alpha=0.4, color='C7',
-            hatch='\\\\', **self._kwargs
+            hatch='\\\\'
         )
 
     def _lines(self, threshold, neg, pos, **kwargs):
@@ -210,24 +189,6 @@ class PadPlot(measure_figure.PlotBase):
         super(PadPlot, self).__init__(ctx, scores, evaluation, func_load)
         mpl.rcParams['figure.constrained_layout.use'] = self._clayout
 
-    def _process_scores(self, dev_score, eval_score):
-        '''Process score files and return neg/pos/fta for eval and dev'''
-        assert len(dev_score) == self._min_arg
-        dev_neg_list = []
-        eval_neg_list = []
-        dev_pos_list = []
-        eval_pos_list = []
-        for i in range(self._min_arg):
-            dev_neg, dev_pos, _, eval_neg, eval_pos, _ = \
-                    super(PadPlot, self)._process_scores(
-                        dev_score[i], eval_score[i]
-                    )
-            dev_neg_list.append(dev_neg)
-            dev_pos_list.append(dev_pos)
-            eval_neg_list.append(eval_neg)
-            eval_pos_list.append(eval_pos)
-        return (dev_neg_list, dev_pos_list, None,
-                eval_neg_list, eval_pos_list, None)
 
     def end_process(self):
         '''Close pdf '''
@@ -260,14 +221,19 @@ class Epc(PadPlot):
         self._eval = True #always eval data with EPC
         self._split = False
         self._nb_figs = 1
+        self._title = ''
 
-    def compute(self, idx, dev_score, dev_file, eval_score, eval_file=None):
+        if self._min_arg != 4:
+            raise click.BadParameter("You must provide 4 scores files:{licit,"
+                                     "spoof}/{dev,eval}")
+
+    def compute(self, idx, input_scores, input_names):
         ''' Plot EPC for PAD'''
-        licit_dev_neg = dev_score[0][0]
-        licit_dev_pos = dev_score[0][1]
-        licit_eval_neg = eval_score[0][0]
-        licit_eval_pos = eval_score[0][1]
-        spoof_eval_neg = eval_score[1][0]
+        licit_dev_neg = input_scores[0][0]
+        licit_dev_pos = input_scores[0][1]
+        licit_eval_neg = input_scores[1][0]
+        licit_eval_pos = input_scores[1][1]
+        spoof_eval_neg = input_scores[3][0]
         mpl.gcf().clear()
         epc_baseline = epc(
             licit_dev_neg, licit_dev_pos, licit_eval_neg,
@@ -277,7 +243,7 @@ class Epc(PadPlot):
             epc_baseline[:, 0], [100. * k for k in epc_baseline[:, 1]],
             color='C0',
             label=self._label(
-                'WER', '%s-%s' % (dev_file[0], eval_file[0]), idx
+                'WER', '%s-%s' % (input_names[0], input_names[1]), idx
             ),
             linestyle='-'
         )
@@ -299,7 +265,7 @@ class Epc(PadPlot):
                 color='C3',
                 linestyle='-',
                 label=self._label(
-                    'IAPMR', '%s-%s' % (dev_file[0], eval_file[0]), idx
+                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
                 )
             )
             prob_ax.set_yticklabels(prob_ax.get_yticks())
@@ -330,21 +296,25 @@ class Epsc(PadPlot):
         self._criteria = 'eer' if criteria is None else criteria
         self._var_param = "omega" if var_param is None else var_param
         self._fixed_param = 0.5 if fixed_param is None else fixed_param
-        self._title = ''
         self._eval = True #always eval data with EPC
         self._split = False
         self._nb_figs = 1
+        self._title = ''
 
-    def compute(self, idx, dev_score, dev_file, eval_score, eval_file=None):
+        if self._min_arg != 4:
+            raise click.BadParameter("You must provide 4 scores files:{licit,"
+                                     "spoof}/{dev,eval}")
+
+    def compute(self, idx, input_scores, input_names):
         ''' Plot EPSC for PAD'''
-        licit_dev_neg = dev_score[0][0]
-        licit_dev_pos = dev_score[0][1]
-        licit_eval_neg = eval_score[0][0]
-        licit_eval_pos = eval_score[0][1]
-        spoof_dev_neg = dev_score[1][0]
-        spoof_dev_pos = dev_score[1][1]
-        spoof_eval_neg = eval_score[1][0]
-        spoof_eval_pos = eval_score[1][1]
+        licit_dev_neg = input_scores[0][0]
+        licit_dev_pos = input_scores[0][1]
+        licit_eval_neg = input_scores[1][0]
+        licit_eval_pos = input_scores[1][1]
+        spoof_dev_neg = input_scores[2][0]
+        spoof_dev_pos = input_scores[2][1]
+        spoof_eval_neg = input_scores[3][0]
+        spoof_eval_pos = input_scores[3][1]
         title = self._titles[idx] if self._titles is not None else None
 
         mpl.gcf().clear()
@@ -443,16 +413,16 @@ class Epsc(PadPlot):
 
 class Epsc3D(Epsc):
     ''' 3D EPSC plots for PAD'''
-    def compute(self, idx, dev_score, dev_file, eval_score, eval_file=None):
+    def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
-        licit_dev_neg = dev_score[0][0]
-        licit_dev_pos = dev_score[0][1]
-        licit_eval_neg = eval_score[0][0]
-        licit_eval_pos = eval_score[0][1]
-        spoof_dev_neg = dev_score[1][0]
-        spoof_dev_pos = dev_score[1][1]
-        spoof_eval_neg = eval_score[1][0]
-        spoof_eval_pos = eval_score[1][1]
+        licit_dev_neg = input_scores[0][0]
+        licit_dev_pos = input_scores[0][1]
+        licit_eval_neg = input_scores[1][0]
+        licit_eval_pos = input_scores[1][1]
+        spoof_dev_neg = input_scores[2][0]
+        spoof_dev_pos = input_scores[2][1]
+        spoof_eval_neg = input_scores[3][0]
+        spoof_eval_pos = input_scores[3][1]
 
         title = self._titles[idx] if self._titles is not None else None
 
@@ -516,14 +486,14 @@ class Det(PadPlot):
         self._criteria = criteria
         self._real_data = True if real_data is None else real_data
 
-    def compute(self, idx, dev_score, dev_file, eval_score, eval_file=None):
+    def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
-        licit_dev_neg = dev_score[0][0]
-        licit_dev_pos = dev_score[0][1]
-        licit_eval_neg = eval_score[0][0]
-        licit_eval_pos = eval_score[0][1]
-        spoof_eval_neg = eval_score[1][0] if len(dev_score) > 1 else None
-        spoof_eval_pos = eval_score[1][1] if len(dev_score) > 1 else None
+        licit_dev_neg = input_scores[0][0]
+        licit_dev_pos = input_scores[0][1]
+        licit_eval_neg = input_scores[1][0]
+        licit_eval_pos = input_scores[1][1]
+        spoof_eval_neg = input_scores[3][0] if len(input_scores) > 2 else None
+        spoof_eval_pos = input_scores[3][1] if len(input_scores) > 2 else None
 
         det(
             licit_eval_neg,
@@ -531,7 +501,7 @@ class Det(PadPlot):
             self._points,
             color=self._colors[idx],
             linestyle='-',
-            label=self._label("licit", dev_file[0], idx)
+            label=self._label("licit", input_names[0], idx)
         )
         if not self._no_spoof and spoof_eval_neg is not None:
             det(
@@ -540,7 +510,7 @@ class Det(PadPlot):
                 self._points,
                 color=self._colors[idx],
                 linestyle='--',
-                label=self._label("spoof", eval_file[0], idx)
+                label=self._label("spoof", input_names[3], idx)
             )
 
         if self._criteria is None:

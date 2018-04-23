@@ -6,8 +6,6 @@ from bob.extension.scripts.click_helper import (verbosity_option, bool_option)
 from bob.bio.base.score import load
 from . import figure
 
-FUNC_SPLIT = lambda x: load.load_files(x, load.split)
-
 @click.command()
 @common_options.scores_argument(nargs=-1)
 @common_options.output_plot_file_option(default_out='hist.pdf')
@@ -44,11 +42,11 @@ def hist(ctx, scores, evaluation, **kwargs):
 
         $ bob pad hist --criter hter dev-scores1 eval-scores1
     """
-    process = figure.HistPad(ctx, scores, evaluation, FUNC_SPLIT)
+    process = figure.HistPad(ctx, scores, evaluation, load.split)
     process.run()
 
 @click.command()
-@common_options.scores_argument(nargs=-1, eval_mandatory=True, min_len=2)
+@common_options.scores_argument(nargs=-1, min_arg=2)
 @common_options.output_plot_file_option(default_out='vuln.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
@@ -102,5 +100,5 @@ def vuln(ctx, scores, evaluation, **kwargs):
 
         $ bob pad vuln {licit,spoof}/scores-{dev,eval}
     '''
-    process = figure.HistVuln(ctx, scores, evaluation, FUNC_SPLIT)
+    process = figure.HistVuln(ctx, scores, evaluation, load.split)
     process.run()

@@ -6,10 +6,8 @@ from bob.extension.scripts.click_helper import verbosity_option
 from bob.bio.base.score import load
 from . import figure
 
-FUNC_SPLIT = lambda x: load.load_files(x, load.split)
-
 @click.command()
-@common_options.scores_argument(eval_mandatory=True, min_len=2, nargs=-1)
+@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.titles_option()
 @common_options.const_layout_option()
@@ -48,5 +46,5 @@ def det(ctx, scores, criteria,  real_data, **kwargs):
 
         $ bob pad det {licit,spoof}/scores-{dev,eval}
     """
-    process = figure.Det(ctx, scores, True, FUNC_SPLIT, criteria, real_data)
+    process = figure.Det(ctx, scores, True, load.split, criteria, real_data)
     process.run()

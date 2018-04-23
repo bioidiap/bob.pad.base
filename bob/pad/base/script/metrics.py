@@ -7,8 +7,6 @@ from bob.extension.scripts.click_helper import (verbosity_option,
 from bob.bio.base.score import load
 from . import figure
 
-FUNC_SPLIT = lambda x: load.load_files(x, load.split)
-
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(nargs=-1)
 @common_options.eval_option()
@@ -51,5 +49,5 @@ def metrics(ctx, scores, evaluation, **kwargs):
 
         $ bob pad metrics /path/to/system{1,2,3}/score-{dev,eval}
     """
-    process = figure.Metrics(ctx, scores, evaluation, FUNC_SPLIT)
+    process = figure.Metrics(ctx, scores, evaluation, load.split)
     process.run()
