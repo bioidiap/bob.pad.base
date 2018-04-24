@@ -213,9 +213,10 @@ class Epc(PadPlot):
         super(Epc, self).__init__(ctx, scores, evaluation, func_load)
         self._iapmr = True if 'iapmr' not in self._ctx.meta else \
                 self._ctx.meta['iapmr']
-        self._title = 'EPC and IAPMR' if self._iapmr else 'EPC'
-        self._x_label = r"Weight $\beta$"
-        self._y_label = "WER (%)"
+        self._title = self._title or ('EPC and IAPMR' if self._iapmr else
+                                      'EPC')
+        self._x_label = self._x_label or r"Weight $\beta$"
+        self._y_label = self._y_label or "WER (%)"
         self._eval = True #always eval data with EPC
         self._split = False
         self._nb_figs = 1

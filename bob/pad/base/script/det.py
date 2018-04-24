@@ -10,6 +10,7 @@ from . import figure
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.titles_option()
+@common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
 @common_options.figsize_option()
