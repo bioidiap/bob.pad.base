@@ -219,7 +219,6 @@ class Epc(PadPlot):
         self._eval = True #always eval data with EPC
         self._split = False
         self._nb_figs = 1
-        self._title = ''
 
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
@@ -620,7 +619,6 @@ class Det(PadPlot):
         mpl.grid(True, color=self._grid_color)
         mpl.legend(loc='best')
         self._set_axis()
-        #gives warning when applied with mpl
         fig = mpl.gcf()
         mpl.xticks(rotation=self._x_rotation)
         mpl.tick_params(axis='both', which='major', labelsize=4)
@@ -641,3 +639,58 @@ class Det(PadPlot):
             det_axis(self._axlim)
         else:
             det_axis([0.01, 99, 0.01, 99])
+
+class FmrIapmr(PadPlot):
+    '''FMR vs IAPMR'''
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(FmrIapmr, self).__init__(ctx, scores, evaluation, func_load)
+        self._eval = True #always eval data with EPC
+        self._split = False
+        self._nb_figs = 1
+        self._semilogx = False if 'semilogx' not in ctx.meta else\
+        ctx.meta['semilogx']
+        if self._min_arg != 4:
+            raise click.BadParameter("You must provide 4 scores files:{licit,"
+                                     "spoof}/{dev,eval}")
+
+    def compute(self, idx, input_scores, input_names):
+        ''' Implements plots'''
+        licit_eval_neg = input_scores[1][0]
+        licit_eval_pos = input_scores[1][1]
+        spoof_eval_neg = input_scores[3][0]
+        fmr_list = np.linspace(0, 1, 100)
+        iapmr_list = []
+        for i, fmr in enumerate(fmr_list):
+            thr = far_threshold(licit_eval_neg, licit_eval_pos, fmr, True)
+            iapmr_list.append(farfrr(spoof_eval_neg, licit_eval_pos, thr)[0])
+            # re-calculate fmr since threshold might give a different result
+            # for fmr.
+            fmr_list[i] = farfrr(licit_eval_neg, licit_eval_pos, thr)[0]
+        label = self._titles[idx] if self._titles is not None else \
+                '(%s/%s)' % (input_names[1], input_names[3])
+        if self._semilogx:
+            mpl.semilogx(fmr_list, iapmr_list, label=label)
+        else:
+            mpl.plot(fmr_list, iapmr_list, label=label)
+
+    def end_process(self):
+        ''' Set title, legend, axis labels, grid colors, save figures and
+        close pdf is needed '''
+        #only for plots
+        title = self._title if self._title is not None else "FMR vs IAPMR"
+        mpl.title(title)
+        mpl.xlabel(self._x_label or "False Match Rate (%)")
+        mpl.ylabel(self._y_label or "IAPMR (%)")
+        mpl.grid(True, color=self._grid_color)
+        mpl.legend(loc='best')
+        self._set_axis()
+        fig = mpl.gcf()
+        mpl.xticks(rotation=self._x_rotation)
+        mpl.tick_params(axis='both', which='major', labelsize=4)
+
+        self._pdf_page.savefig(fig)
+
+        #do not want to close PDF when running evaluate
+        if 'PdfPages' in self._ctx.meta and \
+            ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
+            self._pdf_page.close()

@@ -146,6 +146,7 @@ setup(
             'epc              = bob.pad.base.script.epc:epc',
             'epsc             = bob.pad.base.script.epc:epsc',
             'gen              = bob.pad.base.script.gen:gen',
+            'fmr_iapmr        = bob.pad.base.script.fmr_iapmr:fmr_iapmr',
         ],
     },
 

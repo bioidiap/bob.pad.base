@@ -2,7 +2,7 @@ import sys
 import click
 from click.testing import CliRunner
 import pkg_resources
-from ..script import (metrics, histograms, epc, det)
+from ..script import (metrics, histograms, epc, det, fmr_iapmr)
 
 
 def test_det():
@@ -22,6 +22,30 @@ def test_det():
                                                  licit_dev, licit_test,
                                                  spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
+
+def test_fmr_iapmr():
+    licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/licit/scores-dev')
+    licit_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/licit/scores-eval')
+    spoof_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/spoof/scores-dev')
+    spoof_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/spoof/scores-eval')
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(fmr_iapmr.fmr_iapmr, [
+            '--output', 'FMRIAPMR.pdf', licit_dev, licit_test, spoof_dev,
+            spoof_test
+        ])
+        assert result.exit_code == 0, (result.exit_code, result.output)
+
+        result = runner.invoke(fmr_iapmr.fmr_iapmr, [
+            '--output', 'FMRIAPMR.pdf', licit_dev, licit_test, spoof_dev,
+            spoof_test, '-G', '-L', '1e-7,1,0,1'
+        ])
+        assert result.exit_code == 0, (result.exit_code, result.output)
+
 
 def test_hist():
     licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
