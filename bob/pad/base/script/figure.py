@@ -189,7 +189,6 @@ class PadPlot(measure_figure.PlotBase):
         super(PadPlot, self).__init__(ctx, scores, evaluation, func_load)
         mpl.rcParams['figure.constrained_layout.use'] = self._clayout
 
-
     def end_process(self):
         '''Close pdf '''
         #do not want to close PDF when running evaluate

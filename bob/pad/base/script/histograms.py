@@ -40,7 +40,7 @@ def hist(ctx, scores, evaluation, **kwargs):
         $ bob pad hist dev-scores1 eval-scores1 dev-scores2
         eval-scores2
 
-        $ bob pad hist --criter hter dev-scores1 eval-scores1
+        $ bob pad hist --criterion hter dev-scores1 eval-scores1
     """
     process = figure.HistPad(ctx, scores, evaluation, load.split)
     process.run()
