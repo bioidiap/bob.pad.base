@@ -147,7 +147,7 @@ class HistVuln(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'Vulnerability'
         self._density_hist(
-            pos[0], label='Bona Fide', color='C1'
+            pos[0], label='Genuine', color='C1'
         )
         self._density_hist(
             neg[0], label='Zero-effort impostors', alpha=0.8, color='C0'
