@@ -229,13 +229,13 @@ Hence, to run the same experiment as above using four parallel threads on the lo
 
 
 Command Line Options to change Default Behavior
------------------------------------------------
+===============================================
 Additionally to the required command line arguments discussed above, there are several options to modify the behavior of the experiments.
 One set of command line options change the directory structure of the output.
 By default, intermediate (temporary) files are by default written to the ``temp`` directory, which can be overridden by the ``--temp-directory`` command line option, which expects relative or absolute paths:
 
 Re-using Parts of Experiments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=============================
 If you want to re-use parts previous experiments, you can specify the directories (which are relative to the ``--temp-directory``, but you can also specify absolute paths):
 
 * ``--preprocessed-data-directory``
