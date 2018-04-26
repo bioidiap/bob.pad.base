@@ -64,13 +64,13 @@ def test_hist():
     with runner.isolated_filesystem():
         result = runner.invoke(histograms.hist, ['--criterion', 'hter', '--output',
                                                  'HISTO.pdf', '-b',
-                                                 30, '--no-evaluation',
+                                                 '30,auto', '--no-evaluation',
                                                  licit_dev, spoof_dev])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
     with runner.isolated_filesystem():
         result = runner.invoke(histograms.hist, ['--criterion', 'eer', '--output',
-                                                 'HISTO.pdf', '-b', 30,
+                                                 'HISTO.pdf', '-b', '30',
                                                  licit_dev, licit_test,
                                                  spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
@@ -87,7 +87,7 @@ def test_vuln():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(histograms.vuln, ['--criterion', 'eer', '--output',
-                                                 'HISTO.pdf', '-b', 30,
+                                                 'HISTO.pdf', '-b', '30',
                                                  licit_dev, licit_test,
                                                  spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)

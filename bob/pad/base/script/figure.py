@@ -96,10 +96,10 @@ class HistPad(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'PAD'
         self._density_hist(
-            pos[0], label='Bona Fide', color='C1'
+            pos[0], n=0, label='Bona Fide', color='C1'
         )
         self._density_hist(
-            neg[0], label='Presentation attack', alpha=0.4, color='C7',
+            neg[0], n=1, label='Presentation attack', alpha=0.4, color='C7',
             hatch='\\\\'
         )
 
@@ -147,13 +147,13 @@ class HistVuln(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'Vulnerability'
         self._density_hist(
-            pos[0], label='Genuine', color='C1'
+            pos[0], n=0, label='Genuine', color='C1'
         )
         self._density_hist(
-            neg[0], label='Zero-effort impostors', alpha=0.8, color='C0'
+            neg[0], n=1, label='Zero-effort impostors', alpha=0.8, color='C0'
         )
         self._density_hist(
-            neg[1], label='Presentation attack', alpha=0.4, color='C7',
+            neg[1], n=2, label='Presentation attack', alpha=0.4, color='C7',
             hatch='\\\\'
         )
 
