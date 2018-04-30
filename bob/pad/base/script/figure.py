@@ -353,7 +353,7 @@ class Epsc(PadPlot):
                     color='C0',
                     linestyle='-',
                     label=r"WER$_{\omega,\beta}$")
-                mpl.xlabel(r"Weight $\omega$")
+                mpl.xlabel(self._x_label or r"Weight $\omega$")
             else:
                 mpl.plot(
                     beta,
@@ -361,8 +361,8 @@ class Epsc(PadPlot):
                     color='C0',
                     linestyle='-',
                     label=r"WER$_{\omega,\beta}$")
-                mpl.xlabel(r"Weight $\beta$")
-            mpl.ylabel(r"WER$_{\omega,\beta}$ (%)")
+                mpl.xlabel(self._x_label or r"Weight $\beta$")
+            mpl.ylabel(self._y_label or r"WER$_{\omega,\beta}$ (%)")
 
         if self._iapmr:
             axis = mpl.gca()
@@ -376,7 +376,7 @@ class Epsc(PadPlot):
                     color='C3',
                     linestyle='-',
                     label='IAPMR')
-                mpl.xlabel(r"Weight $\omega$")
+                mpl.xlabel(self._x_label or r"Weight $\omega$")
             else:
                 mpl.plot(
                     beta,
@@ -384,8 +384,8 @@ class Epsc(PadPlot):
                     color='C3',
                     linestyle='-',
                     label='IAPMR')
-                mpl.xlabel(r"Weight $\beta$")
-            mpl.ylabel(r"IAPMR  (%)")
+                mpl.xlabel(self._x_label or r"Weight $\beta$")
+            mpl.ylabel(self._y_label or r"IAPMR  (%)")
             if self._wer:
                 axis.set_yticklabels(axis.get_yticks())
                 axis.tick_params(axis='y', colors='red')
@@ -393,11 +393,11 @@ class Epsc(PadPlot):
                 axis.spines['right'].set_color('red')
 
         if self._var_param == 'omega':
-            mpl.title(r"EPSC with $\beta$ = %.2f" % (
-                self._fixed_param,) if title is None else title)
+            mpl.title(title or (r"EPSC with $\beta$ = %.2f" %\
+                                self._fixed_param))
         else:
-            mpl.title(r"EPSC with $\omega$ = %.2f" % (
-                self._fixed_param,) if title is None else title)
+            mpl.title(title or (r"EPSC with $\omega$ = %.2f" %\
+                                self._fixed_param))
 
         mpl.grid()
         self._plot_legends()
@@ -459,13 +459,13 @@ class Epsc3D(Epsc):
             ax1.azim = -30
             ax1.elev = 50
 
-        ax1.set_xlabel(r"Weight $\omega$")
-        ax1.set_ylabel(r"Weight $\beta$")
+        ax1.set_xlabel(self._x_label or r"Weight $\omega$")
+        ax1.set_ylabel(self._y_label or r"Weight $\beta$")
         ax1.set_zlabel(
             r"WER$_{\omega,\beta}$ (%)" if self._wer else "IAPMR (%)"
         )
 
-        mpl.title("3D EPSC" if title is None else title)
+        mpl.title(title or "3D EPSC")
 
         ax1.set_xticklabels(ax1.get_xticks())
         ax1.set_yticklabels(ax1.get_yticks())

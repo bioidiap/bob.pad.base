@@ -52,6 +52,8 @@ def epc(ctx, scores, **kwargs):
 @common_options.output_plot_file_option(default_out='epsc.pdf')
 @common_options.titles_option()
 @common_options.const_layout_option()
+@common_options.x_label_option()
+@common_options.y_label_option()
 @common_options.figsize_option()
 @common_options.style_option()
 @common_options.bool_option(
