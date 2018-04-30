@@ -16,7 +16,7 @@ from . import figure
 @common_options.const_layout_option()
 @common_options.show_dev_option()
 @common_options.print_filenames_option(dflt=False)
-@common_options.titles_option()
+@common_options.legends_option()
 @common_options.figsize_option()
 @common_options.style_option()
 @verbosity_option()
@@ -63,7 +63,7 @@ def hist(ctx, scores, evaluation, **kwargs):
     'If False, will annotate the plots hypothetically, instead '
     'of with real data values of the calculated error rates.', True
 )
-@common_options.titles_option()
+@common_options.legends_option()
 @common_options.figsize_option()
 @common_options.style_option()
 @verbosity_option()

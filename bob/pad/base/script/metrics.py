@@ -13,7 +13,7 @@ from . import figure
 @common_options.table_option()
 @open_file_mode_option()
 @common_options.output_log_metric_option()
-@common_options.titles_option()
+@common_options.legends_option()
 @verbosity_option()
 @click.pass_context
 def metrics(ctx, scores, evaluation, **kwargs):

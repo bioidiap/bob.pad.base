@@ -66,7 +66,7 @@ class Metrics(measure_figure.Metrics):
             eval_neg, eval_pos = neg_list[1], pos_list[1]
             eval_file = input_names[1]
 
-        title = self._titles[idx] if self._titles is not None else None
+        title = self._legends[idx] if self._legends is not None else None
         headers = ['' or title, 'Development %s' % dev_file]
         if self._eval:
             headers.append('Eval. % s' % eval_file)
@@ -272,7 +272,7 @@ class Epc(PadPlot):
             ylabels = prob_ax.get_yticks()
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
             prob_ax.set_axisbelow(True)
-        title = self._titles[idx] if self._titles is not None else self._title
+        title = self._legends[idx] if self._legends is not None else self._title
         mpl.title(title)
         #legends for all axes
         self._plot_legends()
@@ -310,7 +310,7 @@ class Epsc(PadPlot):
         spoof_dev_pos = input_scores[2][1]
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
-        title = self._titles[idx] if self._titles is not None else None
+        title = self._legends[idx] if self._legends is not None else None
 
         mpl.gcf().clear()
         points = 10
@@ -419,7 +419,7 @@ class Epsc3D(Epsc):
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
 
-        title = self._titles[idx] if self._titles is not None else None
+        title = self._legends[idx] if self._legends is not None else None
 
         mpl.rcParams.pop('key', None)
 
@@ -666,7 +666,7 @@ class FmrIapmr(PadPlot):
             # re-calculate fmr since threshold might give a different result
             # for fmr.
             fmr_list[i] = farfrr(licit_eval_neg, licit_eval_pos, thr)[0]
-        label = self._titles[idx] if self._titles is not None else \
+        label = self._legends[idx] if self._legends is not None else \
                 '(%s/%s)' % (input_names[1], input_names[3])
         if self._semilogx:
             mpl.semilogx(fmr_list, iapmr_list, label=label)
