@@ -1,6 +1,5 @@
 """Generate random scores.
 """
-import pkg_resources  # to make sure bob gets imported properly
 import os
 import logging
 import numpy
@@ -15,6 +14,7 @@ logger = logging.getLogger(__name__)
 NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
+
 
 def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
                     sigma_pa=1):
@@ -31,16 +31,16 @@ def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
     return genuine_scores, zei_scores, pa_scores
 
 
-def write_scores_to_file(pos, neg, filename, attack=False):
+def write_scores_to_file(neg, pos, filename, attack=False):
     """Writes score distributions into 4-column score files. For the format of
       the 4-column score files, please refer to Bob's documentation.
 
     Parameters
     ----------
-    pos : array_like
-        Scores for positive samples.
     neg : array_like
         Scores for negative samples.
+    pos : array_like
+        Scores for positive samples.
     filename : str
         The path to write the score to.
     """
