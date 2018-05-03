@@ -28,7 +28,7 @@ def weighted_neg_error_rate_criteria(data,
     """Given the single value for the weight parameter balancing between
     impostors and spoofing attacks and a threshold, calculates the error rates
     and their relationship depending on the criteria (difference in case of
-    'eer', hter in case of 'hter' criteria)
+    'eer', hter in case of 'min-hter' criteria)
     Keyword parameters:
 
       - data - the development data used to determine the threshold. List on 4
@@ -40,8 +40,8 @@ def weighted_neg_error_rate_criteria(data,
       - beta - the weight parameter balancing between real accesses and all the
       negative samples (impostors and spoofing attacks). Note that this
       parameter will be overriden and not considered if the selected criteria
-      is 'hter'.
-      - criteria - 'eer', 'wer' or 'hter' criteria for decision threshold
+      is 'min-hter'.
+      - criteria - 'eer', 'wer' or 'min-hter' criteria for decision threshold
   """
 
     licit_neg = data[0]
@@ -64,7 +64,7 @@ def weighted_neg_error_rate_criteria(data,
             #return abs(far_w - frr)
             return abs((1 - beta) * frr - beta * far_w)
 
-    elif criteria == 'hter':
+    elif criteria == 'min-hter':
         return (far_w + frr) / 2
 
     else:
@@ -94,9 +94,9 @@ def recursive_thr_search(data,
     - beta - the weight parameter balancing between real accesses and all the
     negative samples (impostors and spoofing attacks). Note that methods called
     within this function will override this parameter and not considered if the
-    selected criteria is 'hter'.
+    selected criteria is 'min-hter'.
     - criteria - the decision threshold criteria ('eer' for EER, 'wer' for
-    Minimum WER or 'hter' for Minimum HTER criteria).
+    Minimum WER or 'min-hter' for Minimum HTER criteria).
   """
 
     quit_thr = 1e-10
@@ -144,9 +144,9 @@ def weighted_negatives_threshold(licit_neg,
     - beta - the weight parameter balancing between real accesses and all the
     negative samples (impostors and spoofing attacks). Note that methods called
     within this function will override this parameter and not considered if the
-    selected criteria is 'hter'.
+    selected criteria is 'min-hter'.
     - criteria - the decision threshold criteria ('eer' for EER, 'wer' for
-    Minimum WER or 'hter' for Minimum HTER criteria).
+    Minimum WER or 'min-hter' for Minimum HTER criteria).
   """
     span_min = min(
         numpy.append(licit_neg, spoof_neg)
@@ -192,7 +192,7 @@ def epsc_thresholds(licit_neg,
     - spoof_neg - numpy.array of scores for the negatives (spoof scenario)
     - spoof_pos - numpy.array of scores for the positives (spoof scenario)
     - points - number of points to calculate EPSC
-    - criteria - the decision threshold criteria ('eer', 'wer' or 'hter')
+    - criteria - the decision threshold criteria ('eer', 'wer' or 'min-hter')
     - omega - the value of the parameter omega, balancing between impostors and
     spoofing attacks. If None, it is going to span the full range [0,1].
     Otherwise, can be set to a fixed value or a list of values.
@@ -414,7 +414,7 @@ def calc_aue(licit_neg,
     - l_bound - lower bound of integration
     - h_bound - higher bound of integration
     - points - number of points to calculate EPSC
-    - criteria - the decision threshold criteria ('eer', 'wer' or 'hter')
+    - criteria - the decision threshold criteria ('eer', 'wer' or 'min-hter')
     - var_param - name of the parameter which is varied on the abscissa 
     ('omega' or 'beta')
   """

@@ -8,16 +8,18 @@ from . import figure
 
 @click.command()
 @common_options.scores_argument(nargs=-1)
+@common_options.title_option()
 @common_options.output_plot_file_option(default_out='hist.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
 @common_options.const_layout_option()
-@common_options.show_dev_option()
 @common_options.print_filenames_option(dflt=False)
 @common_options.legends_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
+@common_options.subplot_option()
+@common_options.legend_ncols_option()
 @common_options.style_option()
 @verbosity_option()
 @click.pass_context
@@ -40,20 +42,20 @@ def hist(ctx, scores, evaluation, **kwargs):
         $ bob pad hist dev-scores1 eval-scores1 dev-scores2
         eval-scores2
 
-        $ bob pad hist --criterion hter dev-scores1 eval-scores1
+        $ bob pad hist --criterion min-hter dev-scores1 eval-scores1
     """
     process = figure.HistPad(ctx, scores, evaluation, load.split)
     process.run()
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
+@common_options.title_option()
 @common_options.output_plot_file_option(default_out='vuln.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
 @common_options.const_layout_option()
-@common_options.show_dev_option()
 @common_options.print_filenames_option(dflt=False)
 @bool_option(
     'iapmr-line', 'I', 'Whether to plot the IAPMR related lines or not.', True
@@ -64,7 +66,9 @@ def hist(ctx, scores, evaluation, **kwargs):
     'of with real data values of the calculated error rates.', True
 )
 @common_options.legends_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
+@common_options.subplot_option()
+@common_options.legend_ncols_option()
 @common_options.style_option()
 @verbosity_option()
 @click.pass_context

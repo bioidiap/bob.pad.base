@@ -157,10 +157,10 @@ class HistVuln(measure_figure.Hist):
             hatch='\\\\'
         )
 
-    def _lines(self, threshold, neg, pos, **kwargs):
+    def _lines(self, threshold, label, neg, pos, idx, **kwargs):
         if 'iapmr_line' not in self._ctx.meta or self._ctx.meta['iapmr_line']:
             #plot vertical line
-            super(HistVuln, self)._lines(threshold, neg, pos)
+            super(HistVuln, self)._lines(threshold, label, neg, pos, idx)
 
             #plot iapmr_line
             iapmr, _ = farfrr(neg[1], pos[0], threshold)
@@ -172,13 +172,17 @@ class HistVuln(measure_figure.Hist):
             far, frr = farfrr(neg[0], pos[0], threshold)
             _iapmr_plot(neg[1], threshold, iapmr, real_data=real_data)
             click.echo(
-                'HTER (t=%.2g) = %.2f%%; IAPMR = %.2f%%' % (
+                '%s (t=%.2g) = %.2f%%; IAPMR = %.2f%%' % (
+                    self._criterion.upper(),
                     threshold,
                     50*(far+frr), 100*iapmr
                 )
             )
-
-            ax2.set_ylabel("IAPMR (%)", color='C3')
+            n = idx % self._step_print
+            col = n % self._ncols
+            rest_print = self.n_systems - int(idx / self._step_print) * self._step_print
+            if col == self._ncols - 1 or n == rest_print - 1:
+                ax2.set_ylabel("IAPMR (%)", color='C3')
             ax2.tick_params(axis='y', colors='red')
             ax2.yaxis.label.set_color('red')
             ax2.spines['right'].set_color('red')
