@@ -75,7 +75,7 @@ def test_hist():
                                                  spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
-def test_vuln():
+def test_vuln_hist():
     licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
                                                 'data/licit/scores-dev')
     licit_test = pkg_resources.resource_filename('bob.pad.base.test',
@@ -86,10 +86,27 @@ def test_vuln():
                                                  'data/spoof/scores-eval')
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(histograms.vuln, ['--criterion', 'eer', '--output',
+        result = runner.invoke(histograms.vuln_hist, ['--criterion', 'eer', '--output',
                                                  'HISTO.pdf', '-b', '30',
                                                  licit_dev, licit_test,
                                                  spoof_dev, spoof_test])
+        assert result.exit_code == 0, (result.exit_code, result.output)
+
+def test_vuln_metrics():
+    licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/licit/scores-dev')
+    licit_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/licit/scores-eval')
+    spoof_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/spoof/scores-dev')
+    spoof_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/spoof/scores-eval')
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            metrics.vuln_metrics,
+            ['--criterion', 'eer', licit_dev, licit_test, spoof_dev, spoof_test]
+        )
         assert result.exit_code == 0, (result.exit_code, result.output)
 
 def test_epc():

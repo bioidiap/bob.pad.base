@@ -426,11 +426,11 @@ class Epsc(PadPlot):
                 axis.spines['right'].set_color('red')
 
         if self._var_param == 'omega':
-            if title.replace(' ', ''):
+            if title is not None and title.replace(' ', ''):
                 mpl.title(title or (r"EPSC with $\beta$ = %.2f" %\
                                     self._fixed_param))
         else:
-            if title.replace(' ', ''):
+            if title is not None and title.replace(' ', ''):
                 mpl.title(title or (r"EPSC with $\omega$ = %.2f" %\
                                     self._fixed_param))
 
@@ -455,7 +455,7 @@ class Epsc3D(Epsc):
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
 
-        title = self._legends[idx] if self._legends is not None else None
+        title = self._legends[idx] if self._legends is not None else "3D EPSC"
 
         mpl.rcParams.pop('key', None)
 
@@ -502,7 +502,7 @@ class Epsc3D(Epsc):
         )
 
         if title.replace(' ', ''):
-            mpl.title(title or "3D EPSC")
+            mpl.title(title)
 
         ax1.set_xticklabels(ax1.get_xticks())
         ax1.set_yticklabels(ax1.get_yticks())
