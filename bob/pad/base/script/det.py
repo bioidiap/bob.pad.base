@@ -10,6 +10,8 @@ from . import figure
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.legends_option()
+@common_options.no_legend_option()
+@common_options.legend_loc_option(dflt='upper-right')
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
@@ -18,7 +20,7 @@ from . import figure
     'no-spoof', 'ns', '', False
 )
 @verbosity_option()
-@common_options.axes_val_option(dflt=[0.01, 95, 0.01, 95])
+@common_options.axes_val_option(dflt='0.01,95,0.01,95')
 @common_options.x_rotation_option(dflt=45)
 @common_options.x_label_option()
 @common_options.y_label_option()

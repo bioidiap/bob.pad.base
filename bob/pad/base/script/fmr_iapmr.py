@@ -10,6 +10,8 @@ from . import figure
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='fmr_iapmr.pdf')
 @common_options.legends_option()
+@common_options.no_legend_option()
+@common_options.legend_loc_option()
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()

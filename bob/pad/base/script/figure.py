@@ -17,6 +17,7 @@ from . import error_utils
 
 ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
 
+
 def calc_threshold(method, neg, pos):
     """Calculates the threshold based on the given method.
     The scores should be sorted!
@@ -51,6 +52,7 @@ def calc_threshold(method, neg, pos):
         raise ValueError("Unknown threshold criteria: {}".format(method))
 
     return threshold
+
 
 class Metrics(measure_figure.Metrics):
     def __init__(self, ctx, scores, evaluation, func_load):
@@ -90,6 +92,7 @@ class Metrics(measure_figure.Metrics):
                 file=self.log_file
             )
 
+
 class HistPad(measure_figure.Hist):
     ''' Histograms for PAD '''
 
@@ -103,8 +106,6 @@ class HistPad(measure_figure.Hist):
             hatch='\\\\'
         )
 
-def _calc_pass_rate(threshold, scores):
-    return (scores >= threshold).mean()
 
 def _iapmr_dot(threshold, iapmr, real_data, **kwargs):
     # plot a dot on threshold versus IAPMR line and show IAPMR as a number
@@ -127,19 +128,22 @@ def _iapmr_dot(threshold, iapmr, real_data, **kwargs):
         mpl.text(threshold + (threshold - axlim[0]) / 12, 100. * iapmr,
                  '%.1f%%' % (100. * iapmr,), color='C3')
 
+
 def _iapmr_line_plot(scores, n_points=100, **kwargs):
     axlim = mpl.axis()
     step = (axlim[1] - axlim[0]) / float(n_points)
     thres = [(k * step) + axlim[0] for k in range(2, n_points - 1)]
     mix_prob_y = []
     for k in thres:
-        mix_prob_y.append(100. * _calc_pass_rate(k, scores))
+        mix_prob_y.append(100. * error_utils.calc_pass_rate(k, scores))
 
     mpl.plot(thres, mix_prob_y, label='IAPMR', color='C3', **kwargs)
+
 
 def _iapmr_plot(scores, threshold, iapmr, real_data, **kwargs):
     _iapmr_dot(threshold, iapmr, real_data, **kwargs)
     _iapmr_line_plot(scores, n_points=100, **kwargs)
+
 
 class HistVuln(measure_figure.Hist):
     ''' Histograms for vulnerability '''
@@ -169,15 +173,7 @@ class HistVuln(measure_figure.Hist):
             ax2.grid(False)
             real_data = True if 'real_data' not in self._ctx.meta else \
                     self._ctx.meta['real_data']
-            far, frr = farfrr(neg[0], pos[0], threshold)
             _iapmr_plot(neg[1], threshold, iapmr, real_data=real_data)
-            click.echo(
-                '%s (t=%.2g) = %.2f%%; IAPMR = %.2f%%' % (
-                    self._criterion.upper(),
-                    threshold,
-                    50*(far+frr), 100*iapmr
-                )
-            )
             n = idx % self._step_print
             col = n % self._ncols
             rest_print = self.n_systems - int(idx / self._step_print) * self._step_print
@@ -186,6 +182,7 @@ class HistVuln(measure_figure.Hist):
             ax2.tick_params(axis='y', colors='red')
             ax2.yaxis.label.set_color('red')
             ax2.spines['right'].set_color('red')
+
 
 class PadPlot(measure_figure.PlotBase):
     '''Base class for PAD plots'''
@@ -208,7 +205,10 @@ class PadPlot(measure_figure.PlotBase):
             li, la = ax.get_legend_handles_labels()
             lines += li
             labels += la
-        mpl.gca().legend(lines, labels, loc=0, fancybox=True, framealpha=0.5)
+        if self._disp_legend:
+            mpl.gca().legend(lines, labels, loc=self._legend_loc,
+                             fancybox=True, framealpha=0.5)
+
 
 class Epc(PadPlot):
     ''' Handles the plotting of EPC '''
@@ -277,11 +277,13 @@ class Epc(PadPlot):
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
             prob_ax.set_axisbelow(True)
         title = self._legends[idx] if self._legends is not None else self._title
-        mpl.title(title)
+        if title.replace(' ', ''):
+            mpl.title(title)
         #legends for all axes
         self._plot_legends()
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig(mpl.gcf())
+
 
 class Epsc(PadPlot):
     ''' Handles the plotting of EPSC '''
@@ -397,11 +399,13 @@ class Epsc(PadPlot):
                 axis.spines['right'].set_color('red')
 
         if self._var_param == 'omega':
-            mpl.title(title or (r"EPSC with $\beta$ = %.2f" %\
-                                self._fixed_param))
+            if title.replace(' ', ''):
+                mpl.title(title or (r"EPSC with $\beta$ = %.2f" %\
+                                    self._fixed_param))
         else:
-            mpl.title(title or (r"EPSC with $\omega$ = %.2f" %\
-                                self._fixed_param))
+            if title.replace(' ', ''):
+                mpl.title(title or (r"EPSC with $\omega$ = %.2f" %\
+                                    self._fixed_param))
 
         mpl.grid()
         self._plot_legends()
@@ -409,6 +413,7 @@ class Epsc(PadPlot):
         ax1.set_yticklabels(ax1.get_yticks())
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig()
+
 
 class Epsc3D(Epsc):
     ''' 3D EPSC plots for PAD'''
@@ -469,13 +474,15 @@ class Epsc3D(Epsc):
             r"WER$_{\omega,\beta}$ (%)" if self._wer else "IAPMR (%)"
         )
 
-        mpl.title(title or "3D EPSC")
+        if title.replace(' ', ''):
+            mpl.title(title or "3D EPSC")
 
         ax1.set_xticklabels(ax1.get_xticks())
         ax1.set_yticklabels(ax1.get_yticks())
         ax1.set_zticklabels(ax1.get_zticks())
 
         self._pdf_page.savefig()
+
 
 class Det(PadPlot):
     '''DET for PAD'''
@@ -617,11 +624,13 @@ class Det(PadPlot):
             add = " and overlaid SPOOF scenario"
         title = self._title if self._title is not None else \
                 ('DET: LICIT' + add)
-        mpl.title(title)
+        if title.replace(' ', ''):
+            mpl.title(title)
         mpl.xlabel(self._x_label or "False Acceptance Rate (%)")
         mpl.ylabel(self._y_label or "False Rejection Rate (%)")
         mpl.grid(True, color=self._grid_color)
-        mpl.legend(loc='best')
+        if self._disp_legend:
+            mpl.legend(loc=self._legend_loc)
         self._set_axis()
         fig = mpl.gcf()
         mpl.xticks(rotation=self._x_rotation)
@@ -643,6 +652,7 @@ class Det(PadPlot):
             det_axis(self._axlim)
         else:
             det_axis([0.01, 99, 0.01, 99])
+
 
 class FmrIapmr(PadPlot):
     '''FMR vs IAPMR'''
@@ -682,11 +692,13 @@ class FmrIapmr(PadPlot):
         close pdf is needed '''
         #only for plots
         title = self._title if self._title is not None else "FMR vs IAPMR"
-        mpl.title(title)
+        if title.replace(' ', ''):
+            mpl.title(title)
         mpl.xlabel(self._x_label or "False Match Rate (%)")
         mpl.ylabel(self._y_label or "IAPMR (%)")
         mpl.grid(True, color=self._grid_color)
-        mpl.legend(loc='best')
+        if self._disp_legend:
+            mpl.legend(loc=self._legend_loc)
         self._set_axis()
         fig = mpl.gcf()
         mpl.xticks(rotation=self._x_rotation)

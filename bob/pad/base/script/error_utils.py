@@ -13,12 +13,20 @@ import argparse
 def calc_pass_rate(threshold, attacks):
     """Calculates the rate of successful spoofing attacks
 
-  Keyword parameters:
+    Parameters
+    ----------
+    threshold :
+      the threshold used for classification
+    scores :
+      numpy with the scores of the spoofing attacks
 
-    - threshold - the threshold used for classification
-    - attack: numpy with the scores of the spoofing attacks
-  """
-    return sum(1 for i in attacks if i >= threshold) / float(attacks.size)
+    Returns
+    -------
+    float
+      rate of successful spoofing attacks
+    """
+    return (attacks >= threshold).mean()
+
 
 def weighted_neg_error_rate_criteria(data,
                                      weight,
@@ -298,30 +306,32 @@ def epsc_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
     (omega and beta) and thresholds (the thresholds need to be computed first 
     using the method: epsc_thresholds() before passing to this method)
 
-  Keyword arguments:
+    Parameters
+    ----------
+    licit_neg : array_like
+        array of scores for the negatives (licit scenario)
+    licit_pos : array_like
+        array of scores for the positives (licit scenario)
+    spoof_neg : array_like
+        array of scores for the negatives (spoof scenario)
+    spoof_pos : array_like
+        array of scores for the positives (spoof scenario)
+    thresholds : array_like
+        ndarray with threshold values
+    omega : array_like
+        array of the omega parameter balancing between impostors
+        and spoofing attacks
+    beta : array_like
+        array of the beta parameter balancing between real accesses
+        and all negatives (impostors and spoofing attacks)
 
-    - licit_neg - numpy.array of scores for the negatives (licit scenario)
-    - licit_pos - numpy.array of scores for the positives (licit scenario)
-    - spoof_neg - numpy.array of scores for the negatives (spoof scenario)
-    - spoof_pos - numpy.array of scores for the positives (spoof scenario)
-    - thresholds - numpy.ndarray with threshold values
-    - omega - numpy.array of the omega parameter balancing between impostors 
-    and spoofing attacks
-    - beta - numpy.array of the beta parameter balancing between real accesses
-    and all negatives (impostors and spoofing attacks)
-  """
-
-    if not isinstance(omega, list) and not isinstance(
-            omega, tuple) and not isinstance(omega, numpy.ndarray):
-        omega = numpy.array([omega])
-    else:
-        omega = numpy.array(omega)
-
-    if not isinstance(beta, list) and not isinstance(
-            beta, tuple) and not isinstance(beta, numpy.ndarray):
-        beta = numpy.array([beta])
-    else:
-        beta = numpy.array(beta)
+    Returns
+    -------
+    far_w_errors: array_like
+        FAR_w
+    wer_wb_errors: array_like
+        WER_wb
+    """
 
     far_w_errors = numpy.ndarray((beta.size, omega.size), 'float64')
     wer_wb_errors = numpy.ndarray((beta.size, omega.size), 'float64')
@@ -340,34 +350,36 @@ def epsc_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
 
 def all_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
                     omega, beta):
-    """Calculates several error rates: FAR_w and HTER_w for the given weights
-    (omega and beta) and thresholds (the thresholds need to be computed first
+    """Calculates several error rates: FAR_w and WER_wb for the given weights 
+    (omega and beta) and thresholds (the thresholds need to be computed first 
     using the method: epsc_thresholds() before passing to this method)
 
-  Keyword arguments:
+    Parameters
+    ----------
+    licit_neg : array_like
+        array of scores for the negatives (licit scenario)
+    licit_pos : array_like
+        array of scores for the positives (licit scenario)
+    spoof_neg : array_like
+        array of scores for the negatives (spoof scenario)
+    spoof_pos : array_like
+        array of scores for the positives (spoof scenario)
+    thresholds : array_like
+        ndarray with threshold values
+    omega : array_like
+        array of the omega parameter balancing between impostors
+        and spoofing attacks
+    beta : array_like
+        array of the beta parameter balancing between real accesses
+        and all negatives (impostors and spoofing attacks)
 
-    - licit_neg - numpy.array of scores for the negatives (licit scenario)
-    - licit_pos - numpy.array of scores for the positives (licit scenario)
-    - spoof_neg - numpy.array of scores for the negatives (spoof scenario)
-    - spoof_pos - numpy.array of scores for the positives (spoof scenario)
-    - thresholds - numpy.array with threshold values
-    - omega - numpy.array of the omega parameter balancing between impostors
-    and spoofing attacks
-    - beta - numpy.array of the beta parameter balancing between real accesses
-    and all negatives (impostors and spoofing attacks)
-  """
-
-    if not isinstance(omega, list) and not isinstance(
-            omega, tuple) and not isinstance(omega, numpy.ndarray):
-        omega = numpy.array([omega])
-    else:
-        omega = numpy.array(omega)
-
-    if not isinstance(beta, list) and not isinstance(
-            beta, tuple) and not isinstance(beta, numpy.ndarray):
-        beta = numpy.array([beta])
-    else:
-        beta = numpy.array(beta)
+    Returns
+    -------
+    far_w_errors: array_like
+        FAR_w
+    wer_wb_errors: array_like
+        WER_wb
+    """
 
     frr_errors = numpy.ndarray((beta.size, omega.size), 'float64')
     far_errors = numpy.ndarray((beta.size, omega.size), 'float64')
