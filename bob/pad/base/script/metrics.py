@@ -51,3 +51,33 @@ def metrics(ctx, scores, evaluation, **kwargs):
     """
     process = figure.Metrics(ctx, scores, evaluation, load.split)
     process.run()
+
+@click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
+@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
+@common_options.eval_option()
+@common_options.table_option()
+@common_options.criterion_option()
+@common_options.thresholds_option()
+@open_file_mode_option()
+@common_options.output_log_metric_option()
+@common_options.legends_option()
+@verbosity_option()
+@click.pass_context
+def vuln_metrics(ctx, scores, **kwargs):
+    """Generate table of metrics for vulnerability PAD
+
+    You need to provide 2 or 4 scores
+    files for each PAD system in this order:
+
+    \b
+    * licit development scores
+    * licit evaluation scores
+    * spoof development scores
+    * spoof evaluation scores
+
+
+    Examples:
+        $ bob pad vuln_metrics {licit,spoof}/scores-{dev,eval}
+    """
+    process = figure.MetricsVuln(ctx, scores, True, load.split)
+    process.run()

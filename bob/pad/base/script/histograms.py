@@ -72,7 +72,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.style_option()
 @verbosity_option()
 @click.pass_context
-def vuln(ctx, scores, evaluation, **kwargs):
+def vuln_hist(ctx, scores, evaluation, **kwargs):
     '''Vulnerability analysis distributions.
 
     Plots the histogram of score distributions. You need to provide 4 score
@@ -99,10 +99,10 @@ def vuln(ctx, scores, evaluation, **kwargs):
 
     Examples:
 
-        $ bob pad vuln licit/scores-dev licit/scores-eval \
+        $ bob pad vuln_hist licit/scores-dev licit/scores-eval \
                             spoof/scores-dev spoof/scores-eval
 
-        $ bob pad vuln {licit,spoof}/scores-{dev,eval}
+        $ bob pad vuln_hist {licit,spoof}/scores-{dev,eval}
     '''
     process = figure.HistVuln(ctx, scores, evaluation, load.split)
     process.run()

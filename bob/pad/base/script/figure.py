@@ -93,6 +93,34 @@ class Metrics(measure_figure.Metrics):
             )
 
 
+class MetricsVuln(measure_figure.Metrics):
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(MetricsVuln, self).__init__(ctx, scores, evaluation, func_load)
+
+    ''' Compute metrics from score files'''
+    def compute(self, idx, input_scores, input_names):
+        ''' Compute metrics for the given criteria'''
+        neg_list, pos_list, _ = get_fta_list(input_scores)
+        dev_neg, dev_pos = neg_list[0], pos_list[0]
+        criter = self._criterion or 'eer'
+        threshold = calc_threshold(criter, dev_neg, dev_pos) \
+                if self._thres is None else self._thres[idx]
+        far, frr = farfrr(neg_list[1], pos_list[1], threshold)
+        iapmr, _ = farfrr(neg_list[3], pos_list[1], threshold)
+        title = self._legends[idx] if self._legends is not None else None
+        headers = ['' or title, '%s (threshold=%.2g)' %
+                   (criter.upper(), threshold)]
+        rows = []
+        rows.append(['FMR (%)', '{:>5.1f}%'.format(100*far)])
+        rows.append(['FMNR (%)', '{:>5.1f}%'.format(frr*100)])
+        rows.append(['HTER (%)', '{:>5.1f}%'.format(50*(far+frr))])
+        rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100*iapmr)])
+        click.echo(
+            tabulate(rows, headers, self._tablefmt),
+            file=self.log_file
+        )
+
+
 class HistPad(measure_figure.Hist):
     ''' Histograms for PAD '''
 
