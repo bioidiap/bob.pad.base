@@ -1,6 +1,5 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
-import pkg_resources  # to make sure bob gets imported properly
 import logging
 import click
 import numpy as np
@@ -179,7 +178,7 @@ class HistVuln(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'Vulnerability'
         self._density_hist(
-            pos[0], n=0, label='Genuine', color='C1'
+            pos[0], n=0, label='Genuine', color='C2'
         )
         self._density_hist(
             neg[0], n=1, label='Zero-effort impostors', alpha=0.8, color='C0'
