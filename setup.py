@@ -140,6 +140,8 @@ setup(
         # bob pad scripts
         'bob.pad.cli': [
             'metrics          = bob.pad.base.script.metrics:metrics',
+            'evaluate         = bob.pad.base.script.evaluate:evaluate',
+            'vuln             = bob.pad.base.script.evaluate:vuln',
             'vuln_metrics     = bob.pad.base.script.metrics:vuln_metrics',
             'hist             = bob.pad.base.script.histograms:hist',
             'vuln_hist        = bob.pad.base.script.histograms:vuln_hist',

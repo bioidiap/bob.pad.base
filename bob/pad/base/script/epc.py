@@ -99,8 +99,6 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
     both WER and IAPMR on the same figure (which is possible in 2D).
 
     Examples:
-        $ bob pad epsc dev-scores eval-scores
-
         $ bob pad epsc -o my_epsc.pdf dev-scores1 eval-scores1
 
         $ bob pad epsc -D {licit,spoof}/scores-{dev,eval}
