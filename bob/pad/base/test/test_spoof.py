@@ -43,7 +43,7 @@ def _detect(parameters, cur_test_dir, sub_dir, score_types=('dev-real',), scores
         for i in range(0, len(score_types)):
             data2check = []
             for sfile in (score_files[i], reference_files[i]):
-                f = bob.measure.load.open_file(sfile)
+                f = bob.bio.score.load.open_file(sfile)
                 d_ = []
                 for line in f:
                     if isinstance(line, bytes): line = line.decode('utf-8')
