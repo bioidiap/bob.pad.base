@@ -6,6 +6,7 @@ from bob.extension.scripts.click_helper import (verbosity_option, bool_option)
 from bob.bio.base.score import load
 from . import figure
 
+
 @click.command()
 @common_options.scores_argument(nargs=-1)
 @common_options.title_option()
@@ -27,13 +28,13 @@ def hist(ctx, scores, evaluation, **kwargs):
     """ Plots histograms of Bona fida and PA along with threshold
     criterion.
 
-    You need to provide one or more development score file(s) for each experiment.
-    You can also provide eval files along with dev files. If only dev scores
-    are provided, you must use flag `--no-evaluation`.
+    You need to provide one or more development score file(s) for each
+    experiment. You can also provide eval files along with dev files. If only
+    dev scores are provided, you must use flag `--no-evaluation`.
 
-    By default, when eval-scores are given, only eval-scores histograms are 
+    By default, when eval-scores are given, only eval-scores histograms are
     displayed with threshold line
-    computed from dev-scores. If you want to display dev-scores distributions 
+    computed from dev-scores. If you want to display dev-scores distributions
     as well, use ``--show-dev`` option.
 
     Examples:
@@ -46,6 +47,7 @@ def hist(ctx, scores, evaluation, **kwargs):
     """
     process = figure.HistPad(ctx, scores, evaluation, load.split)
     process.run()
+
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
@@ -87,10 +89,10 @@ def vuln_hist(ctx, scores, evaluation, **kwargs):
     See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
     vulnerability analysis.
 
-    You need to provide one or more development score file(s) for each experiment.
-    You can also provide eval files along with dev files. If only dev-scores
-    are used set the flag `--no-evaluation`
-    is required in that case.
+    You need to provide one or more development score file(s) for each
+    experiment. You can also provide eval files along with dev files. If only
+    dev-scores are used set the flag `--no-evaluation` is required in that
+    case.
 
     By default, when eval-scores are given, only eval-scores histograms are
     displayed with threshold line

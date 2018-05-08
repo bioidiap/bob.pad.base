@@ -6,6 +6,7 @@ from bob.extension.scripts.click_helper import verbosity_option
 from bob.bio.base.score import load
 from . import figure
 
+
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='fmr_iapmr.pdf')

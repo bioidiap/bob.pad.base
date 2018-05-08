@@ -1,13 +1,11 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
-import logging
 import click
 import numpy as np
 import matplotlib.pyplot as mpl
-import  bob.measure.script.figure as measure_figure
+import bob.measure.script.figure as measure_figure
 from tabulate import tabulate
-from bob.extension.scripts.click_helper import verbosity_option
-from  bob.measure.utils import (get_fta, get_fta_list, get_thres)
+from bob.measure.utils import get_fta_list
 from bob.measure import (
     far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
 )
@@ -58,6 +56,7 @@ class Metrics(measure_figure.Metrics):
         super(Metrics, self).__init__(ctx, scores, evaluation, func_load)
 
     ''' Compute metrics from score files'''
+
     def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
         neg_list, pos_list, _ = get_fta_list(input_scores)
@@ -97,23 +96,24 @@ class MetricsVuln(measure_figure.Metrics):
         super(MetricsVuln, self).__init__(ctx, scores, evaluation, func_load)
 
     ''' Compute metrics from score files'''
+
     def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
         neg_list, pos_list, _ = get_fta_list(input_scores)
         dev_neg, dev_pos = neg_list[0], pos_list[0]
         criter = self._criterion or 'eer'
         threshold = calc_threshold(criter, dev_neg, dev_pos) \
-                if self._thres is None else self._thres[idx]
+            if self._thres is None else self._thres[idx]
         far, frr = farfrr(neg_list[1], pos_list[1], threshold)
         iapmr, _ = farfrr(neg_list[3], pos_list[1], threshold)
         title = self._legends[idx] if self._legends is not None else None
         headers = ['' or title, '%s (threshold=%.2g)' %
                    (criter.upper(), threshold)]
         rows = []
-        rows.append(['FMR (%)', '{:>5.1f}%'.format(100*far)])
-        rows.append(['FMNR (%)', '{:>5.1f}%'.format(frr*100)])
-        rows.append(['HTER (%)', '{:>5.1f}%'.format(50*(far+frr))])
-        rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100*iapmr)])
+        rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
+        rows.append(['FMNR (%)', '{:>5.1f}%'.format(frr * 100)])
+        rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
+        rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
         click.echo(
             tabulate(rows, headers, self._tablefmt),
             file=self.log_file
@@ -190,20 +190,21 @@ class HistVuln(measure_figure.Hist):
 
     def _lines(self, threshold, label, neg, pos, idx, **kwargs):
         if 'iapmr_line' not in self._ctx.meta or self._ctx.meta['iapmr_line']:
-            #plot vertical line
+            # plot vertical line
             super(HistVuln, self)._lines(threshold, label, neg, pos, idx)
 
-            #plot iapmr_line
+            # plot iapmr_line
             iapmr, _ = farfrr(neg[1], pos[0], threshold)
             ax2 = mpl.twinx()
             # we never want grid lines on axis 2
             ax2.grid(False)
             real_data = True if 'real_data' not in self._ctx.meta else \
-                    self._ctx.meta['real_data']
+                self._ctx.meta['real_data']
             _iapmr_plot(neg[1], threshold, iapmr, real_data=real_data)
             n = idx % self._step_print
             col = n % self._ncols
-            rest_print = self.n_systems - int(idx / self._step_print) * self._step_print
+            rest_print = self.n_systems - \
+                int(idx / self._step_print) * self._step_print
             if col == self._ncols - 1 or n == rest_print - 1:
                 ax2.set_ylabel("IAPMR (%)", color='C3')
             ax2.tick_params(axis='y', colors='red')
@@ -213,19 +214,20 @@ class HistVuln(measure_figure.Hist):
 
 class PadPlot(measure_figure.PlotBase):
     '''Base class for PAD plots'''
+
     def __init__(self, ctx, scores, evaluation, func_load):
         super(PadPlot, self).__init__(ctx, scores, evaluation, func_load)
         mpl.rcParams['figure.constrained_layout.use'] = self._clayout
 
     def end_process(self):
         '''Close pdf '''
-        #do not want to close PDF when running evaluate
+        # do not want to close PDF when running evaluate
         if 'PdfPages' in self._ctx.meta and \
            ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
             self._pdf_page.close()
 
     def _plot_legends(self):
-        #legends for all axes
+        # legends for all axes
         lines = []
         labels = []
         for ax in mpl.gcf().get_axes():
@@ -239,15 +241,16 @@ class PadPlot(measure_figure.PlotBase):
 
 class Epc(PadPlot):
     ''' Handles the plotting of EPC '''
+
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Epc, self).__init__(ctx, scores, evaluation, func_load)
         self._iapmr = True if 'iapmr' not in self._ctx.meta else \
-                self._ctx.meta['iapmr']
+            self._ctx.meta['iapmr']
         self._title = self._title or ('EPC and IAPMR' if self._iapmr else
                                       'EPC')
         self._x_label = self._x_label or r"Weight $\beta$"
         self._y_label = self._y_label or "WER (%)"
-        self._eval = True #always eval data with EPC
+        self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
 
@@ -306,7 +309,7 @@ class Epc(PadPlot):
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
             mpl.title(title)
-        #legends for all axes
+        # legends for all axes
         self._plot_legends()
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig(mpl.gcf())
@@ -314,17 +317,18 @@ class Epc(PadPlot):
 
 class Epsc(PadPlot):
     ''' Handles the plotting of EPSC '''
+
     def __init__(self, ctx, scores, evaluation, func_load,
                  criteria, var_param, fixed_param):
         super(Epsc, self).__init__(ctx, scores, evaluation, func_load)
         self._iapmr = False if 'iapmr' not in self._ctx.meta else \
-                self._ctx.meta['iapmr']
+            self._ctx.meta['iapmr']
         self._wer = True if 'wer' not in self._ctx.meta else \
-                self._ctx.meta['wer']
+            self._ctx.meta['wer']
         self._criteria = 'eer' if criteria is None else criteria
         self._var_param = "omega" if var_param is None else var_param
         self._fixed_param = 0.5 if fixed_param is None else fixed_param
-        self._eval = True #always eval data with EPC
+        self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
         self._title = ''
@@ -364,7 +368,7 @@ class Epsc(PadPlot):
                 spoof_dev_neg,
                 spoof_dev_pos,
                 points=points,
-                criteria= self._criteria,
+                criteria=self._criteria,
                 omega=self._fixed_param
             )
 
@@ -372,12 +376,12 @@ class Epsc(PadPlot):
             licit_eval_neg, licit_eval_pos, spoof_eval_neg,
             spoof_eval_pos, thrs, omega, beta
         )  # error rates are returned in a list in the
-           # following order: frr, far, IAPMR, far_w, wer_w
+        # following order: frr, far, IAPMR, far_w, wer_w
 
         ax1 = mpl.subplot(
             111
         )  # EPC like curves for FVAS fused scores for weighted error rates
-           # between the negatives (impostors and Presentation attacks)
+        # between the negatives (impostors and Presentation attacks)
         if self._wer:
             if self._var_param == 'omega':
                 mpl.plot(
@@ -427,11 +431,11 @@ class Epsc(PadPlot):
 
         if self._var_param == 'omega':
             if title is not None and title.replace(' ', ''):
-                mpl.title(title or (r"EPSC with $\beta$ = %.2f" %\
+                mpl.title(title or (r"EPSC with $\beta$ = %.2f" %
                                     self._fixed_param))
         else:
             if title is not None and title.replace(' ', ''):
-                mpl.title(title or (r"EPSC with $\omega$ = %.2f" %\
+                mpl.title(title or (r"EPSC with $\omega$ = %.2f" %
                                     self._fixed_param))
 
         mpl.grid()
@@ -444,6 +448,7 @@ class Epsc(PadPlot):
 
 class Epsc3D(Epsc):
     ''' 3D EPSC plots for PAD'''
+
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
         licit_dev_neg = input_scores[0][0]
@@ -513,10 +518,11 @@ class Epsc3D(Epsc):
 
 class Det(PadPlot):
     '''DET for PAD'''
+
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data):
         super(Det, self).__init__(ctx, scores, evaluation, func_load)
         self._no_spoof = False if 'no_spoof' not in ctx.meta else\
-        ctx.meta['no_spoof']
+            ctx.meta['no_spoof']
         self._criteria = criteria
         self._real_data = True if real_data is None else real_data
 
@@ -645,12 +651,12 @@ class Det(PadPlot):
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
         close pdf is needed '''
-        #only for plots
+        # only for plots
         add = ''
         if not self._no_spoof:
             add = " and overlaid SPOOF scenario"
         title = self._title if self._title is not None else \
-                ('DET: LICIT' + add)
+            ('DET: LICIT' + add)
         if title.replace(' ', ''):
             mpl.title(title)
         mpl.xlabel(self._x_label or "False Acceptance Rate (%)")
@@ -669,9 +675,9 @@ class Det(PadPlot):
 
         self._pdf_page.savefig(fig)
 
-        #do not want to close PDF when running evaluate
+        # do not want to close PDF when running evaluate
         if 'PdfPages' in self._ctx.meta and \
-            ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
+                ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
             self._pdf_page.close()
 
     def _set_axis(self):
@@ -683,13 +689,14 @@ class Det(PadPlot):
 
 class FmrIapmr(PadPlot):
     '''FMR vs IAPMR'''
+
     def __init__(self, ctx, scores, evaluation, func_load):
         super(FmrIapmr, self).__init__(ctx, scores, evaluation, func_load)
-        self._eval = True #always eval data with EPC
+        self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
         self._semilogx = False if 'semilogx' not in ctx.meta else\
-        ctx.meta['semilogx']
+            ctx.meta['semilogx']
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
                                      "spoof}/{dev,eval}")
@@ -708,7 +715,7 @@ class FmrIapmr(PadPlot):
             # for fmr.
             fmr_list[i] = farfrr(licit_eval_neg, licit_eval_pos, thr)[0]
         label = self._legends[idx] if self._legends is not None else \
-                '(%s/%s)' % (input_names[1], input_names[3])
+            '(%s/%s)' % (input_names[1], input_names[3])
         if self._semilogx:
             mpl.semilogx(fmr_list, iapmr_list, label=label)
         else:
@@ -717,7 +724,7 @@ class FmrIapmr(PadPlot):
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
         close pdf is needed '''
-        #only for plots
+        # only for plots
         title = self._title if self._title is not None else "FMR vs IAPMR"
         if title.replace(' ', ''):
             mpl.title(title)
@@ -733,7 +740,7 @@ class FmrIapmr(PadPlot):
 
         self._pdf_page.savefig(fig)
 
-        #do not want to close PDF when running evaluate
+        # do not want to close PDF when running evaluate
         if 'PdfPages' in self._ctx.meta and \
-            ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
+                ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
             self._pdf_page.close()

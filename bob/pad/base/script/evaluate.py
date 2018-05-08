@@ -3,10 +3,10 @@ experiements
 """
 import click
 from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import (verbosity_option, bool_option)
-from bob.bio.base.score import load
+from bob.extension.scripts.click_helper import verbosity_option
 import bob.bio.base.script.commands as bio_commands
-from . import (figure, histograms, metrics, det, fmr_iapmr, epc)
+from . import (histograms, metrics, det, fmr_iapmr, epc)
+
 
 @click.command()
 @common_options.scores_argument(nargs=-1)
@@ -99,8 +99,8 @@ def vuln(ctx, scores, **kwargs):
 
     \b
     1. Computes bob pad vuln_metrics
-    2. Plots EPC, EPSC, vulnerability histograms, fmr vs IAPMR to a multi-page PDF
-       file
+    2. Plots EPC, EPSC, vulnerability histograms, fmr vs IAPMR to a multi-page
+       PDF file
 
 
     You need to provide 4 score files for each biometric system in this order:

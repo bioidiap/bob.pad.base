@@ -7,6 +7,7 @@ from bob.extension.scripts.click_helper import (verbosity_option,
 from bob.bio.base.score import load
 from . import figure
 
+
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(nargs=-1)
 @common_options.eval_option()
@@ -20,7 +21,8 @@ def metrics(ctx, scores, evaluation, **kwargs):
     """PAD ISO compliant metrics.
 
     Reports several metrics based on a selected thresholds on the development
-    set and apply them on evaluation sets (if provided). The used thresholds are:
+    set and apply them on evaluation sets (if provided). The used thresholds
+    are:
 
         bpcer20     When APCER is set to 5%.
 
@@ -51,6 +53,7 @@ def metrics(ctx, scores, evaluation, **kwargs):
     """
     process = figure.Metrics(ctx, scores, evaluation, load.split)
     process.run()
+
 
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)

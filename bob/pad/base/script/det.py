@@ -6,6 +6,7 @@ from bob.extension.scripts.click_helper import verbosity_option
 from bob.bio.base.score import load
 from . import figure
 
+
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='det.pdf')
@@ -31,23 +32,23 @@ from . import figure
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
 @click.pass_context
-def det(ctx, scores, criteria,  real_data, **kwargs):
-    """Plot DET
+def det(ctx, scores, criteria, real_data, **kwargs):
+  """Plot DET
 
-    You need to provide 2 or 4 scores
-    files for each PAD system in this order:
+  You need to provide 2 or 4 scores
+  files for each PAD system in this order:
 
-    \b
-    * licit development scores
-    * licit evaluation scores
-    * spoof development scores (when ``--no-spoof`` is False (default))
-    * spoof evaluation scores (when ``--no-spoof`` is False (default))
+  \b
+  * licit development scores
+  * licit evaluation scores
+  * spoof development scores (when ``--no-spoof`` is False (default))
+  * spoof evaluation scores (when ``--no-spoof`` is False (default))
 
 
-    Examples:
-        $ bob pad det --no-spoof dev-scores eval-scores
+  Examples:
+      $ bob pad det --no-spoof dev-scores eval-scores
 
-        $ bob pad det {licit,spoof}/scores-{dev,eval}
-    """
-    process = figure.Det(ctx, scores, True, load.split, criteria, real_data)
-    process.run()
+      $ bob pad det {licit,spoof}/scores-{dev,eval}
+  """
+  process = figure.Det(ctx, scores, True, load.split, criteria, real_data)
+  process.run()

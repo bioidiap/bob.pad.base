@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-#Ivana Chingovska <ivana.chingovska@idiap.ch>
-#Fri Dec  7 12:33:37 CET 2012
+# Ivana Chingovska <ivana.chingovska@idiap.ch>
+# Fri Dec  7 12:33:37 CET 2012
 """Utility functions for computation of EPSC curve and related measurement"""
 
-import os
-import sys
 import bob.measure
 import numpy
-import argparse
 
 
 def calc_pass_rate(threshold, attacks):
@@ -69,7 +66,7 @@ def weighted_neg_error_rate_criteria(data,
         if beta == 0.5:
             return abs(far_w - frr)
         else:
-            #return abs(far_w - frr)
+            # return abs(far_w - frr)
             return abs((1 - beta) * frr - beta * far_w)
 
     elif criteria == 'min-hter':
@@ -137,7 +134,7 @@ def weighted_negatives_threshold(licit_neg,
                                  beta=0.5,
                                  criteria='eer'):
     """Calculates the threshold for achieving the given criteria between the
-    FAR_w and the FRR, given the single value for the weight parameter 
+    FAR_w and the FRR, given the single value for the weight parameter
     balancing between impostors and spoofing attacks and a single value for the
     parameter beta balancing between the real accesses and the negatives
     (impostors and spoofing attacks)
@@ -205,14 +202,14 @@ def epsc_thresholds(licit_neg,
     spoofing attacks. If None, it is going to span the full range [0,1].
     Otherwise, can be set to a fixed value or a list of values.
     - beta - the value of the parameter beta, balancing between real accesses
-    and all the negatives (zero-effort impostors and spoofing attacks). If 
+    and all the negatives (zero-effort impostors and spoofing attacks). If
     None, it is going to span the full range [0,1]. Otherwise, can be set to a
     fixed value or a list of values.
 
   """
     step_size = 1 / float(points)
 
-    if omega == None:
+    if omega is None:
         omega = numpy.array([(i * step_size) for i in range(points + 1)])
     elif not isinstance(omega, list) and not isinstance(
             omega, tuple) and not isinstance(omega, numpy.ndarray):
@@ -220,7 +217,7 @@ def epsc_thresholds(licit_neg,
     else:
         omega = numpy.array(omega)
 
-    if beta == None:
+    if beta is None:
         beta = numpy.array([(i * step_size) for i in range(points + 1)])
     elif not isinstance(beta, list) and not isinstance(
             beta, tuple) and not isinstance(beta, numpy.ndarray):
@@ -288,8 +285,8 @@ negative samples (impostors and spoofing attacks).
         spoof_neg, spoof_pos,
         threshold)  # calculate test frr @ threshold (spoof scenario)
 
-    frr = farfrr_licit[
-        1]  # we can take this value from farfrr_spoof as well, it doesn't matter
+    # we can take this value from farfrr_spoof as well, it doesn't matter
+    frr = farfrr_licit[1]
     far = farfrr_licit[0]
     sfar = farfrr_spoof[0]
 
@@ -302,8 +299,8 @@ negative samples (impostors and spoofing attacks).
 
 def epsc_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
                      omega, beta):
-    """Calculates several error rates: FAR_w and WER_wb for the given weights 
-    (omega and beta) and thresholds (the thresholds need to be computed first 
+    """Calculates several error rates: FAR_w and WER_wb for the given weights
+    (omega and beta) and thresholds (the thresholds need to be computed first
     using the method: epsc_thresholds() before passing to this method)
 
     Parameters
@@ -350,8 +347,8 @@ def epsc_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
 
 def all_error_rates(licit_neg, licit_pos, spoof_neg, spoof_pos, thresholds,
                     omega, beta):
-    """Calculates several error rates: FAR_w and WER_wb for the given weights 
-    (omega and beta) and thresholds (the thresholds need to be computed first 
+    """Calculates several error rates: FAR_w and WER_wb for the given weights
+    (omega and beta) and thresholds (the thresholds need to be computed first
     using the method: epsc_thresholds() before passing to this method)
 
     Parameters
@@ -427,7 +424,7 @@ def calc_aue(licit_neg,
     - h_bound - higher bound of integration
     - points - number of points to calculate EPSC
     - criteria - the decision threshold criteria ('eer', 'wer' or 'min-hter')
-    - var_param - name of the parameter which is varied on the abscissa 
+    - var_param - name of the parameter which is varied on the abscissa
     ('omega' or 'beta')
   """
 
