@@ -5,7 +5,6 @@ import click
 import logging
 import yaml
 import jinja2
-import numpy as np
 from tabulate import tabulate
 from bob.measure import eer_threshold, farfrr
 from bob.measure.script import common_options
@@ -33,7 +32,7 @@ logger = logging.getLogger(__name__)
 @click.option('-g', '--group', 'groups', multiple=True, show_default=True,
               default=['train', 'dev', 'eval'])
 @common_options.table_option()
-@common_options.output_plot_metric_option()
+@common_options.output_log_metric_option()
 @verbosity_option()
 @click.pass_context
 def cross(ctx, score_jinja_template, databases, protocols, algorithms,
