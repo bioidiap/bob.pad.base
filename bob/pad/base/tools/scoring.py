@@ -7,7 +7,7 @@
 
 
 import bob.io.base
-import bob.bio.base
+import bob.bio.base.score.load as bio_load
 import bob.measure
 import numpy
 import os
@@ -49,12 +49,12 @@ def _compute_scores(algorithm, toscore_objects, allow_missing_files):
 
 def _open_to_read(score_file):
     """Checks for the existence of the normal and the compressed version of the file,
-    and calls :py:func:`bob.bio.base.score.open_file` for the existing one."""
+    and calls :py:func:`bob.bio.base.score.load.open_file` for the existing one."""
     if not os.path.exists(score_file):
         score_file += '.tar.bz2'
         if not os.path.exists(score_file):
             raise IOError("The score file '%s' cannot be found. Aborting!" % score_file)
-    return bob.bio.base.open_file(score_file)
+    return bio_load.open_file(score_file)
 
 
 def _open_to_write(score_file, write_compressed):
