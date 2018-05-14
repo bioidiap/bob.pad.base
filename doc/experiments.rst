@@ -108,23 +108,95 @@ By default, you can find them in a sub-directory the ``result`` directory, but y
 Evaluating Experiments
 ----------------------
 
-After the experiment has finished successfully, one or more text file containing all the scores are written.
+After the experiment has finished successfully, one or more text file containing
+all the scores are written. In this section, commands that helps to quickly
+evaluate a set of scores by generating metrics or plots are presented here.
+The scripts take as input either a 4-column or 5-column data format as specified
+in the documentation of :py:func:`bob.bio.base.score.load.four_column` or 
+:py:func:`bob.bio.base.score.load.five_column`.
 
-To evaluate the experiment, you can use the generic ``./bin/evaluate.py`` script, which has properties for all prevalent evaluation types, such as CMC, ROC and DET plots, as well as computing recognition rates, EER/HTER, Cllr and minDCF.
-Additionally, a combination of different algorithms can be plotted into the same files.
-Just specify all the score files that you want to evaluate using the ``--dev-files`` option, and possible legends for the plots (in the same order) using the ``--legends`` option, and the according plots will be generated.
-For example, to create a ROC curve for the experiment above, use:
+Metrics
+=======
+
+Several metrics based on a selected thresholds (bpcer20: when APCER is set to 5%,
+eer, when BPCER == APCER and min-hter, when HTER is minimum) on the development
+set and apply them on evaluation sets (if provided) are generated used
+``metrics`` command. The reported `standard metrics`_ are:
+
+*   APCER: Attack Presentation Classification Error Rate
+
+*   BPCER: Bona-fide Presentation Classification Error Rate
+
+*   HTER (non-ISO): Half Total Error Rate ((BPCER+APCER)/2)
+
+For example:
 
 .. code-block:: sh
 
-   $ ./bin/evaluate.py --dev-files results/pad_speech/scores-dev --legend AVspoof --roc avspoof_dev.pdf -vv
+    $ bob pad metrics scores-{dev,test} --titles ExpA
+
+    Threshold of 6.624767 selected with the bpcer20 criteria
+    ========  ========================  ===================
+    ExpA      Development scores-dev    Eval. scores-eval
+    ========  ========================  ===================
+    BPCER20   5.0%                      5.0%
+    EER       0.0%                      0.0%
+    min-HTER  2.5%                      2.5%
+    ========  ========================  ===================
+
+    Threshold of 6.534215 selected with the eer criteria
+    ========  ========================  ===================
+    ExpA      Development scores-dev    Eval. scores-eval
+    ========  ========================  ===================
+    BPCER20   6.1%                      6.1%
+    EER       0.0%                      0.0%
+    min-HTER  3.0%                      3.0%
+    ========  ========================  ===================
+
+    Threshold of 6.534215 selected with the min-hter criteria
+    ========  ========================  ===================
+    ExpA      Development scores-dev    Eval. scores-eval
+    ========  ========================  ===================
+    BPCER20   6.1%                      6.1%
+    EER       0.0%                      0.0%
+    min-HTER  3.0%                      3.0%
+    ========  ========================  ===================
 
 .. note::
-   Please note that ``evaluate.py`` script accepts only one score file as input, so you need to use the file with combined results.
-   Please also note that there exists another file called ``Experiment.info`` inside the result directory.
-   This file is a pure text file and contains the complete configuration of the experiment.
-   With this configuration it is possible to inspect all default parameters of the algorithms, and even to re-run the exact same experiment.
+    You can compute analysis on development set(s) only by passing option
+    ``--no-evaluation``. See metrics --help for further options.
 
+Plots
+=====
+
+Customizable plotting commands are available in the :py:mod:`bob.pad.base` module.
+They take a list of development and/or evaluation files and generate a single PDF
+file containing the plots. Available plots are:
+
+*  ``hist`` (Bona fida and PA histograms along with threshold criterion)
+
+*  ``vuln`` (Vulnerability analysis distributions)
+
+*  ``epc`` (expected performance curve)
+
+*  ``epsc`` (expected performance spoofing curve)
+
+Use the ``--help`` option on the above-cited commands to find-out about more
+options.
+
+
+For example, to generate a EPSC curve from development and evaluation datasets:
+
+.. code-block:: sh
+
+    $bob pad epsc -o 'my_epsc.pdf' scores-{dev,test}
+
+where `my_epsc.pdf` will contain EPSC curves for all the experiments.
+
+.. note::
+    IAPMR curve can be plotted along with EPC and EPSC using option
+    ``--iapmr``. 3D EPSC can be generated using the ``--three-d``. See metrics
+    --help for further options.
 
 .. _running_in_parallel:
 
@@ -157,13 +229,13 @@ Hence, to run the same experiment as above using four parallel threads on the lo
 
 
 Command Line Options to change Default Behavior
------------------------------------------------
+===============================================
 Additionally to the required command line arguments discussed above, there are several options to modify the behavior of the experiments.
 One set of command line options change the directory structure of the output.
 By default, intermediate (temporary) files are by default written to the ``temp`` directory, which can be overridden by the ``--temp-directory`` command line option, which expects relative or absolute paths:
 
 Re-using Parts of Experiments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=============================
 If you want to re-use parts previous experiments, you can specify the directories (which are relative to the ``--temp-directory``, but you can also specify absolute paths):
 
 * ``--preprocessed-data-directory``
@@ -199,5 +271,5 @@ The scores of the two groups will be concatenated into several files called **sc
 In this case, by default only the development set is employed.
 To use both groups, just specify ``--groups dev eval`` (of course, you can also only use the ``'eval'`` set by calling ``--groups eval``).
 
-
 .. include:: links.rst
+.. _`standard metrics`: https://www.iso.org/obp/ui/#iso:std:iso-iec:30107:-3:ed-1:v1:en

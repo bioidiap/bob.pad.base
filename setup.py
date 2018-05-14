@@ -135,11 +135,29 @@ setup(
         # main entry for bob pad cli
         'bob.cli': [
             'pad               = bob.pad.base.script.pad:pad',
+            'vuln              = bob.pad.base.script.vuln:vuln',
         ],
 
         # bob pad scripts
         'bob.pad.cli': [
-            'metrics          = bob.pad.base.script.metrics:metrics',
+            'metrics          = bob.pad.base.script.pad_commands:metrics',
+            'hist             = bob.pad.base.script.pad_commands:hist',
+            'det              = bob.pad.base.script.pad_commands:det',
+            'roc              = bob.pad.base.script.pad_commands:roc',
+            'gen              = bob.pad.base.script.pad_commands:gen',
+            'evaluate         = bob.pad.base.script.pad_commands:evaluate',
+        ],
+
+        # bob vuln scripts
+        'bob.vuln.cli': [
+            'metrics          = bob.pad.base.script.vuln_commands:metrics',
+            'hist             = bob.pad.base.script.vuln_commands:hist',
+            'det              = bob.pad.base.script.vuln_commands:det',
+            'epc              = bob.pad.base.script.vuln_commands:epc',
+            'epsc             = bob.pad.base.script.vuln_commands:epsc',
+            'gen              = bob.pad.base.script.vuln_commands:gen',
+            'fmr_iapmr        = bob.pad.base.script.vuln_commands:fmr_iapmr',
+            'evaluate         = bob.pad.base.script.vuln_commands:evaluate',
         ],
 
     },
