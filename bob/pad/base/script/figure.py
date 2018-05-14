@@ -519,11 +519,11 @@ class Epsc3D(Epsc):
 class Det(PadPlot):
     '''DET for PAD'''
 
-    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data):
+    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
+                no_spoof):
         super(Det, self).__init__(ctx, scores, evaluation, func_load)
-        self._no_spoof = False if 'no_spoof' not in ctx.meta else\
-            ctx.meta['no_spoof']
-        self._criteria = criteria
+        self._no_spoof = no_spoof
+        self._criteria = criteria or 'eer'
         self._real_data = True if real_data is None else real_data
 
     def compute(self, idx, input_scores, input_names):
@@ -534,12 +534,11 @@ class Det(PadPlot):
         licit_eval_pos = input_scores[1][1]
         spoof_eval_neg = input_scores[3][0] if len(input_scores) > 2 else None
         spoof_eval_pos = input_scores[3][1] if len(input_scores) > 2 else None
-
         det(
             licit_eval_neg,
             licit_eval_pos,
             self._points,
-            color=self._colors[idx],
+            color='C0',
             linestyle='-',
             label=self._label("licit", input_names[0], idx)
         )
@@ -548,12 +547,12 @@ class Det(PadPlot):
                 spoof_eval_neg,
                 spoof_eval_pos,
                 self._points,
-                color=self._colors[idx],
-                linestyle='--',
+                color='C3',
+                linestyle=':',
                 label=self._label("spoof", input_names[3], idx)
             )
 
-        if self._criteria is None:
+        if self._criteria is None or self._no_spoof:
             return
 
         thres_baseline = calc_threshold(
@@ -564,10 +563,12 @@ class Det(PadPlot):
 
         farfrr_licit = farfrr(
             licit_eval_neg, licit_eval_pos,
-            thres_baseline)  # calculate test frr @ EER (licit scenario)
+            thres_baseline
+        )  # calculate test frr @ EER (licit scenario)
         farfrr_spoof = farfrr(
             spoof_eval_neg, spoof_eval_pos,
-            thres_baseline)  # calculate test frr @ EER (spoof scenario)
+            thres_baseline
+        )  # calculate test frr @ EER (spoof scenario)
         farfrr_licit_det = [
             ppndf(i) for i in farfrr_licit
         ]
@@ -585,7 +586,7 @@ class Det(PadPlot):
                 xmax=axlim[3],
                 color='k',
                 linestyle='--',
-                label="FRR @ EER")  # vertical FRR threshold
+                label="FRR @ EER")
         else:
             mpl.axhline(
                 y=farfrr_licit_det[1],
@@ -594,40 +595,42 @@ class Det(PadPlot):
                 color='k',
                 linestyle='--',
                 label="FRR = %.2f%%" %
-                (farfrr_licit[1] * 100))  # vertical FRR threshold
+                (farfrr_licit[1] * 100))
 
         mpl.plot(
             farfrr_licit_det[0],
             farfrr_licit_det[1],
             'o',
-            color=self._colors[idx],
-            markersize=9)  # FAR point, licit scenario
+            color='C0',
+            markersize=9
+        )  # FAR point, licit scenario
         mpl.plot(
             farfrr_spoof_det[0],
             farfrr_spoof_det[1],
             'o',
-            color=self._colors[idx],
-            markersize=9)  # FAR point, spoof scenario
+            color='C3',
+            markersize=9
+        )  # FAR point, spoof scenario
 
         # annotate the FAR points
         xyannotate_licit = [
-            ppndf(0.7 * farfrr_licit[0]),
-            ppndf(1.8 * farfrr_licit[1])
+            0.6*farfrr_licit_det[0],
+            0.6*farfrr_licit_det[1],
         ]
         xyannotate_spoof = [
-            ppndf(0.95 * farfrr_spoof[0]),
-            ppndf(1.8 * farfrr_licit[1])
+            0.6*farfrr_spoof_det[0],
+            0.6*farfrr_spoof_det[1],
         ]
 
         if not self._real_data:
             mpl.annotate(
-                'FMR @\noperating point',
+                'FMR @ operating point',
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]),
                 color=self._colors[idx])
             mpl.annotate(
-                'IAPMR @\noperating point',
+                'IAPMR @ operating point',
                 xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
@@ -638,14 +641,14 @@ class Det(PadPlot):
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]),
-                color=self._colors[idx],
+                color='C0',
                 size='large')
             mpl.annotate(
-                'IAPMR=\n%.2f%%' % (farfrr_spoof[0] * 100),
+                'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
                 xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
-                color=self._colors[idx],
+                color='C3',
                 size='large')
 
     def end_process(self):

@@ -135,22 +135,31 @@ setup(
         # main entry for bob pad cli
         'bob.cli': [
             'pad               = bob.pad.base.script.pad:pad',
+            'vuln              = bob.pad.base.script.vuln:vuln',
         ],
 
         # bob pad scripts
         'bob.pad.cli': [
-            'metrics          = bob.pad.base.script.metrics:metrics',
-            'evaluate         = bob.pad.base.script.evaluate:evaluate',
-            'vuln             = bob.pad.base.script.evaluate:vuln',
-            'vuln_metrics     = bob.pad.base.script.metrics:vuln_metrics',
-            'hist             = bob.pad.base.script.histograms:hist',
-            'vuln_hist        = bob.pad.base.script.histograms:vuln_hist',
-            'det              = bob.pad.base.script.det:det',
-            'epc              = bob.pad.base.script.epc:epc',
-            'epsc             = bob.pad.base.script.epc:epsc',
-            'gen              = bob.pad.base.script.gen:gen',
-            'fmr_iapmr        = bob.pad.base.script.fmr_iapmr:fmr_iapmr',
+            'metrics          = bob.pad.base.script.pad_commands:metrics',
+            'hist             = bob.pad.base.script.pad_commands:hist',
+            'det              = bob.pad.base.script.pad_commands:det',
+            'roc              = bob.pad.base.script.pad_commands:roc',
+            'gen              = bob.pad.base.script.pad_commands:gen',
+            'evaluate         = bob.pad.base.script.pad_commands:evaluate',
         ],
+
+        # bob vuln scripts
+        'bob.vuln.cli': [
+            'metrics          = bob.pad.base.script.vuln_commands:metrics',
+            'hist             = bob.pad.base.script.vuln_commands:hist',
+            'det              = bob.pad.base.script.vuln_commands:det',
+            'epc              = bob.pad.base.script.vuln_commands:epc',
+            'epsc             = bob.pad.base.script.vuln_commands:epsc',
+            'gen              = bob.pad.base.script.vuln_commands:gen',
+            'fmr_iapmr        = bob.pad.base.script.vuln_commands:fmr_iapmr',
+            'evaluate         = bob.pad.base.script.vuln_commands:evaluate',
+        ],
+
     },
 
     # Classifiers are important if you plan to distribute this package through
