@@ -154,6 +154,7 @@ setup(
             'metrics          = bob.pad.base.script.vuln_commands:metrics',
             'hist             = bob.pad.base.script.vuln_commands:hist',
             'det              = bob.pad.base.script.vuln_commands:det',
+            'roc              = bob.pad.base.script.vuln_commands:roc',
             'epc              = bob.pad.base.script.vuln_commands:epc',
             'epsc             = bob.pad.base.script.vuln_commands:epsc',
             'gen              = bob.pad.base.script.vuln_commands:gen',
