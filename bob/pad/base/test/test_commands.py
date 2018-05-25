@@ -13,8 +13,7 @@ def test_det_pad():
                                                  'data/licit/scores-eval')
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(pad_commands.det, ['-c', 'min-hter',
-                                                  '--output',
+        result = runner.invoke(pad_commands.det, ['--output',
                                                   'DET.pdf',
                                                   licit_dev, licit_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
