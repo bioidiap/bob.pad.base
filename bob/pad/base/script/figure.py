@@ -23,7 +23,7 @@ def calc_threshold(method, neg, pos):
     Parameters
     ----------
     method : str
-        One of ``bpcer201``, ``eer``, ``min-hter``.
+        One of ``bpcer20``, ``eer``, ``min-hter``.
     neg : array_like
         The negative scores. They should be sorted!
     pos : array_like
