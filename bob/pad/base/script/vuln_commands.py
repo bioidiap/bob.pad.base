@@ -108,6 +108,51 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
+@common_options.output_plot_file_option(default_out='vuln_roc.pdf')
+@common_options.legends_option()
+@common_options.no_legend_option()
+@common_options.legend_loc_option(dflt='upper-right')
+@common_options.title_option()
+@common_options.const_layout_option()
+@common_options.style_option()
+@common_options.figsize_option(dflt=None)
+@common_options.min_far_option()
+@common_options.axes_val_option()
+@verbosity_option()
+@common_options.x_rotation_option(dflt=45)
+@common_options.x_label_option()
+@common_options.y_label_option()
+@click.option('-c', '--criteria', default=None, show_default=True,
+              help='Criteria for threshold selection',
+              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
+@click.option('--real-data/--no-real-data', default=True, show_default=True,
+              help='If False, will annotate the plots hypothetically, instead '
+              'of with real data values of the calculated error rates.')
+@click.pass_context
+def roc(ctx, scores, criteria, real_data, **kwargs):
+  """Plot ROC
+
+  You need to provide 4 scores
+  files for each PAD system in this order:
+
+  \b
+  * licit development scores
+  * licit evaluation scores
+  * spoof development scores
+  * spoof evaluation scores
+
+  Examples:
+      $ bob pad roc dev-scores eval-scores
+
+      $ bob pad roc {licit,spoof}/scores-{dev,eval}
+  """
+  process = figure.RocVuln(ctx, scores, True, load.split, criteria, real_data,
+                       False)
+  process.run()
+
+
+@click.command()
+@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_det.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
@@ -141,7 +186,7 @@ def det(ctx, scores, criteria, real_data, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob pad det --no-spoof dev-scores eval-scores
+      $ bob pad det dev-scores eval-scores
 
       $ bob pad det {licit,spoof}/scores-{dev,eval}
   """
