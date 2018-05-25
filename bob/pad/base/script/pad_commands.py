@@ -78,55 +78,51 @@ def roc(ctx, scores, evaluation, **kargs):
 
       $ bob pad roc -v -o my_roc.pdf dev-scores1 eval-scores1
   """
-  process = bio_figure.Roc(ctx, scores, evaluation, load.split)
+  process = figure.Roc(ctx, scores, evaluation, load.split)
   process.run()
-
 
 
 @click.command()
-@common_options.scores_argument(min_arg=1, force_eval=True, nargs=-1)
+@common_options.scores_argument(nargs=-1)
+@common_options.title_option()
 @common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.legends_option()
-@common_options.no_legend_option()
 @common_options.legend_loc_option(dflt='upper-right')
-@common_options.title_option()
-@common_options.const_layout_option()
-@common_options.style_option()
-@common_options.figsize_option()
-@common_options.bool_option(
-    'no-spoof', 'ns', '', False
-)
-@verbosity_option()
-@common_options.axes_val_option(dflt='0.01,95,0.01,95')
-@common_options.x_rotation_option(dflt=45)
+@common_options.no_legend_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@click.option('-c', '--criteria', default=None, show_default=True,
-              help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
-@click.option('--real-data/--no-real-data', default=True, show_default=True,
-              help='If False, will annotate the plots hypothetically, instead '
-              'of with real data values of the calculated error rates.')
+@common_options.sep_dev_eval_option()
+@common_options.eval_option()
+@common_options.axes_val_option(dflt='0.01,95,0.01,95')
+@common_options.x_rotation_option(dflt=45)
+@common_options.points_curve_option()
+@common_options.const_layout_option()
+@common_options.style_option()
+@common_options.linestyles_option()
+@common_options.figsize_option()
+@common_options.lines_at_option()
+@common_options.min_far_option()
+@verbosity_option()
 @click.pass_context
-def det(ctx, scores, criteria, real_data, **kwargs):
-  """Plot DET
+def det(ctx, scores, evaluation, **kargs):
+  """Plot DET (detection error trade-off) curve:
+  modified ROC curve which plots error rates on both axes
+  (false positives on the x-axis and false negatives on the y-axis)
 
-  You need to provide 2 scores
-  files for each PAD system in this order:
-
-  \b
-  * licit development scores
-  * licit evaluation scores
-
+  You need to provide one or more development score file(s) for each
+  experiment. You can also provide eval files along with dev files. If only
+  dev-scores are used, the flag `--no-evaluation` must be used. is required
+  in that case. Files must be 4- or 5- columns format, see
+  :py:func:`bob.bio.base.score.load.four_column` and
+  :py:func:`bob.bio.base.score.load.five_column` for details.
 
   Examples:
-      $ bob pad det --no-spoof dev-scores eval-scores
+    $ bob pad det dev-scores eval-scores
 
-      $ bob pad det {licit,spoof}/scores-{dev,eval}
+    $ bob pad det scores-{dev,eval}
   """
-  process = figure.Det(ctx, scores, True, load.split, criteria, real_data, True)
+  process = figure.DetPad(ctx, scores, evaluation, load.split)
   process.run()
-
 
 
 @click.command()
@@ -254,7 +250,6 @@ def metrics(ctx, scores, evaluation, **kwargs):
   process.run()
 
 
-
 @click.command()
 @common_options.scores_argument(nargs=-1)
 @common_options.legends_option()
@@ -266,7 +261,7 @@ def metrics(ctx, scores, evaluation, **kwargs):
 @common_options.points_curve_option()
 @common_options.lines_at_option()
 @common_options.const_layout_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.linestyles_option()
 @verbosity_option()
