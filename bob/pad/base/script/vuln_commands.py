@@ -332,7 +332,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.eval_option()
 @common_options.table_option()
-@common_options.criterion_option(lcriteria=['bpcer201', 'eer', 'min-hter'])
+@common_options.criterion_option(lcriteria=['bpcer20', 'eer', 'min-hter'])
 @common_options.thresholds_option()
 @open_file_mode_option()
 @common_options.output_log_metric_option()
