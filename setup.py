@@ -144,6 +144,7 @@ setup(
             'hist             = bob.pad.base.script.pad_commands:hist',
             'det              = bob.pad.base.script.pad_commands:det',
             'roc              = bob.pad.base.script.pad_commands:roc',
+            'epc              = bob.pad.base.script.pad_commands:epc',
             'gen              = bob.pad.base.script.pad_commands:gen',
             'evaluate         = bob.pad.base.script.pad_commands:evaluate',
         ],
