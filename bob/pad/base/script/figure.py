@@ -10,7 +10,7 @@ from bob.measure.utils import get_fta_list
 from bob.measure import (
     far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
 )
-from bob.measure.plot import (det, det_axis)
+from bob.measure.plot import (det, det_axis, roc_for_far, log_values)
 from . import error_utils
 
 ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
@@ -533,17 +533,16 @@ class DetPad(bio_figure.Det):
 
 
 
-class Det(PadPlot):
-    '''DET for VULN'''
+class BaseDetRoc(PadPlot):
+    '''Base for DET and ROC'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
                 no_spoof):
-        super(Det, self).__init__(ctx, scores, evaluation, func_load)
+        super(BaseDetRoc, self).__init__(ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
         self._criteria = criteria or 'eer'
         self._real_data = True if real_data is None else real_data
-        self._x_label = self._x_label or "APCER"
-        self._y_label = self._y_label or "BPCER"
+
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
@@ -553,7 +552,7 @@ class Det(PadPlot):
         licit_eval_pos = input_scores[1][1]
         spoof_eval_neg = input_scores[3][0] if len(input_scores) > 2 else None
         spoof_eval_pos = input_scores[3][1] if len(input_scores) > 2 else None
-        det(
+        self._plot(
             licit_eval_neg,
             licit_eval_pos,
             self._points,
@@ -562,7 +561,7 @@ class Det(PadPlot):
             label=self._label("licit", input_names[0], idx)
         )
         if not self._no_spoof and spoof_eval_neg is not None:
-            det(
+            self._plot(
                 spoof_eval_neg,
                 spoof_eval_pos,
                 self._points,
@@ -580,24 +579,15 @@ class Det(PadPlot):
 
         axlim = mpl.axis()
 
-        farfrr_licit = farfrr(
+        farfrr_licit, farfrr_licit_det = self._get_farfrr(
             licit_eval_neg, licit_eval_pos,
             thres_baseline
-        )  # calculate test frr @ EER (licit scenario)
-        farfrr_spoof = farfrr(
-            spoof_eval_neg, spoof_eval_pos,
-            thres_baseline
-        )  # calculate test frr @ EER (spoof scenario)
-        farfrr_licit_det = [
-            ppndf(i) for i in farfrr_licit
-        ]
-        # find the FAR and FRR values that need to be plotted on normal deviate
-        # scale
-        farfrr_spoof_det = [
-            ppndf(i) for i in farfrr_spoof
-        ]
-        # find the FAR and FRR values that need to be plotted on normal deviate
-        # scale
+        )
+        if farfrr_licit is None:
+            return
+        farfrr_spoof, farfrr_spoof_det = self._get_farfrr(
+            spoof_eval_neg, spoof_eval_pos, thres_baseline
+        )
         if not self._real_data:
             mpl.axhline(
                 y=farfrr_licit_det[1],
@@ -605,7 +595,7 @@ class Det(PadPlot):
                 xmax=axlim[3],
                 color='k',
                 linestyle='--',
-                label="BPCER @ EER")
+                label="%s @ EER" % self._y_label)
         else:
             mpl.axhline(
                 y=farfrr_licit_det[1],
@@ -613,22 +603,22 @@ class Det(PadPlot):
                 xmax=axlim[1],
                 color='k',
                 linestyle='--',
-                label="BPCER = %.2f%%" %
-                (farfrr_licit[1] * 100))
+                label="%s = %.2f%%" %
+                (self._y_label, farfrr_licit[1] * 100))
 
         mpl.plot(
             farfrr_licit_det[0],
             farfrr_licit_det[1],
             'o',
             color='C0',
-            markersize=9
+            markersize=7
         )  # FAR point, licit scenario
         mpl.plot(
             farfrr_spoof_det[0],
             farfrr_spoof_det[1],
             'o',
             color='C3',
-            markersize=9
+            markersize=7
         )  # FAR point, spoof scenario
 
         # annotate the FAR points
@@ -643,7 +633,7 @@ class Det(PadPlot):
 
         if not self._real_data:
             mpl.annotate(
-                'FMR @ operating point',
+                '%s @ operating point' % self._y_label,
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]))
@@ -659,28 +649,24 @@ class Det(PadPlot):
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]),
                 color='C0',
-                size='large')
+                size='small')
             mpl.annotate(
                 'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
                 xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
                 color='C3',
-                size='large')
+                size='small')
 
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
         close pdf is needed '''
         # only for plots
-        add = ''
-        if not self._no_spoof:
-            add = " and overlaid SPOOF scenario"
-        title = self._title if self._title is not None else \
-            ('DET: LICIT' + add)
-        if title.replace(' ', ''):
-            mpl.title(title)
-        mpl.xlabel(self._x_label or "False Acceptance Rate (%)")
-        mpl.ylabel(self._y_label or "False Rejection Rate (%)")
+
+        if self._title.replace(' ', ''):
+            mpl.title(self._title)
+        mpl.xlabel(self._x_label)
+        mpl.ylabel(self._y_label)
         mpl.grid(True, color=self._grid_color)
         if self._disp_legend:
             mpl.legend(loc=self._legend_loc)
@@ -700,11 +686,71 @@ class Det(PadPlot):
                 ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
             self._pdf_page.close()
 
+    def _get_farfrr(self, x, y, thres):
+        return None, None
+
+    def _plot(self, x, y, points, **kwargs):
+        pass
+
+class Det(BaseDetRoc):
+    '''Base for DET and ROC'''
+
+    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
+                no_spoof):
+        super(Det, self).__init__(ctx, scores, evaluation, func_load,
+                                  criteria, real_data, no_spoof)
+        self._x_label = self._x_label or "APCER"
+        self._y_label = self._y_label or "BPCER"
+        add = ''
+        if not self._no_spoof:
+            add = " and overlaid SPOOF scenario"
+        self._title = self._title or ('DET: LICIT' + add)
+
+
     def _set_axis(self):
         if self._axlim is not None and None not in self._axlim:
             det_axis(self._axlim)
         else:
             det_axis([0.01, 99, 0.01, 99])
+
+    def _get_farfrr(self, x, y, thres):
+        # calculate test frr @ EER (licit scenario)
+        points = farfrr(x, y, thres)
+        return points, [ppndf(i) for i in points]
+
+
+    def _plot(self, x, y, points, **kwargs):
+        det(
+            x, y, points,
+            color=kwargs.get('color'),
+            linestyle=kwargs.get('linestyle'),
+            label=kwargs.get('label')
+        )
+
+class RocVuln(BaseDetRoc):
+    '''ROC for vuln'''
+
+    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
+                no_spoof):
+        super(RocVuln, self).__init__(ctx, scores, evaluation, func_load,
+                                      criteria, real_data, no_spoof)
+        self._x_label = self._x_label or "APCER"
+        self._y_label = self._y_label or "1 - BPCER"
+        self._semilogx = ctx.meta.get('semilogx', True)
+        add = ''
+        if not self._no_spoof:
+            add = " and overlaid SPOOF scenario"
+        self._title = self._title or ('ROC: LICIT' + add)
+
+
+    def _plot(self, x, y, points, **kwargs):
+        roc_for_far(
+            x, y,
+            far_values=log_values(self._min_dig or -4),
+            CAR=self._semilogx,
+            color=kwargs.get('color'), linestyle=kwargs.get('linestyle'),
+            label=kwargs.get('label')
+        )
 
 
 class FmrIapmr(PadPlot):
