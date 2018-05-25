@@ -4,6 +4,7 @@ import click
 import numpy as np
 import matplotlib.pyplot as mpl
 import bob.measure.script.figure as measure_figure
+import bob.bio.base.script.figure as bio_figure
 from tabulate import tabulate
 from bob.measure.utils import get_fta_list
 from bob.measure import (
@@ -76,9 +77,9 @@ class Metrics(measure_figure.Metrics):
             click.echo("\nThreshold of %f selected with the %s criteria" % (
                 threshold, m))
             apcer, bpcer = farfrr(dev_neg, dev_pos, threshold)
-            raws.append(['BPCER20', '{:>5.1f}%'.format(apcer * 100)])
-            raws.append(['EER', '{:>5.1f}%'.format(bpcer * 100)])
-            raws.append(['min-HTER', '{:>5.1f}%'.format((apcer + bpcer) * 50)])
+            raws.append(['APCER', '{:>5.1f}%'.format(apcer * 100)])
+            raws.append(['BP', '{:>5.1f}%'.format(bpcer * 100)])
+            raws.append(['ACER', '{:>5.1f}%'.format((apcer + bpcer) * 50)])
             if self._eval and eval_neg is not None:
                 apcer, bpcer = farfrr(eval_neg, eval_pos, threshold)
                 raws[0].append('{:>5.1f}%'.format(apcer * 100))
@@ -111,7 +112,7 @@ class MetricsVuln(measure_figure.Metrics):
                    (criter.upper(), threshold)]
         rows = []
         rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
-        rows.append(['FMNR (%)', '{:>5.1f}%'.format(frr * 100)])
+        rows.append(['BPCER (%)', '{:>5.1f}%'.format(frr * 100)])
         rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
         rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
         click.echo(
@@ -300,11 +301,12 @@ class Epc(PadPlot):
                 )
             )
             prob_ax.set_yticklabels(prob_ax.get_yticks())
-            prob_ax.tick_params(axis='y', colors='red')
-            prob_ax.yaxis.label.set_color('red')
-            prob_ax.spines['right'].set_color('red')
+            prob_ax.tick_params(axis='y', colors='C3')
+            prob_ax.yaxis.label.set_color('C3')
+            prob_ax.spines['right'].set_color('C3')
             ylabels = prob_ax.get_yticks()
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
+            prob_ax.set_ylabel('IAPMR', color='C3')
             prob_ax.set_axisbelow(True)
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
@@ -516,8 +518,23 @@ class Epsc3D(Epsc):
         self._pdf_page.savefig()
 
 
+class Roc(bio_figure.Roc):
+    '''ROC for PARD'''
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(Roc, self).__init__(ctx, scores, evaluation, func_load)
+        self._x_label = ctx.meta.get('x_label') or 'APCER'
+        self._y_label = ctx.meta.get('y_label') or '1 - BPCER'
+
+class DetPad(bio_figure.Det):
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(DetPad, self).__init__(ctx, scores, evaluation, func_load)
+        self._x_label = ctx.meta.get('x_label') or 'APCER'
+        self._y_label = ctx.meta.get('y_label') or 'BPCER'
+
+
+
 class Det(PadPlot):
-    '''DET for PAD'''
+    '''DET for VULN'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
                 no_spoof):
@@ -525,6 +542,8 @@ class Det(PadPlot):
         self._no_spoof = no_spoof
         self._criteria = criteria or 'eer'
         self._real_data = True if real_data is None else real_data
+        self._x_label = self._x_label or "APCER"
+        self._y_label = self._y_label or "BPCER"
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
@@ -586,7 +605,7 @@ class Det(PadPlot):
                 xmax=axlim[3],
                 color='k',
                 linestyle='--',
-                label="FRR @ EER")
+                label="BPCER @ EER")
         else:
             mpl.axhline(
                 y=farfrr_licit_det[1],
@@ -594,7 +613,7 @@ class Det(PadPlot):
                 xmax=axlim[1],
                 color='k',
                 linestyle='--',
-                label="FRR = %.2f%%" %
+                label="BPCER = %.2f%%" %
                 (farfrr_licit[1] * 100))
 
         mpl.plot(
@@ -614,12 +633,12 @@ class Det(PadPlot):
 
         # annotate the FAR points
         xyannotate_licit = [
-            0.6*farfrr_licit_det[0],
-            0.6*farfrr_licit_det[1],
+            0.15 + farfrr_licit_det[0],
+            farfrr_licit_det[1] - 0.15,
         ]
         xyannotate_spoof = [
-            0.6*farfrr_spoof_det[0],
-            0.6*farfrr_spoof_det[1],
+            0.15 + farfrr_spoof_det[0],
+            farfrr_spoof_det[1] - 0.15,
         ]
 
         if not self._real_data:
@@ -627,17 +646,15 @@ class Det(PadPlot):
                 'FMR @ operating point',
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
-                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
-                color=self._colors[idx])
+                xytext=(xyannotate_licit[0], xyannotate_licit[1]))
             mpl.annotate(
                 'IAPMR @ operating point',
                 xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
                 xycoords='data',
-                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
-                color=self._colors[idx])
+                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]))
         else:
             mpl.annotate(
-                'FAR=%.2f%%' % (farfrr_licit[0] * 100),
+                'APCER=%.2f%%' % (farfrr_licit[0] * 100),
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]),
