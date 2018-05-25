@@ -205,7 +205,7 @@ def epc(ctx, scores, **kwargs):
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.bool_option(
     'wer', 'w', 'Whether to plot the WER related lines or not.', True
@@ -274,7 +274,6 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
-@common_options.const_layout_option()
 @common_options.print_filenames_option(dflt=False)
 @bool_option(
     'iapmr-line', 'I', 'Whether to plot the IAPMR related lines or not.', True
@@ -285,6 +284,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
     'of with real data values of the calculated error rates.', True
 )
 @common_options.legends_option()
+@common_options.const_layout_option()
 @common_options.figsize_option(dflt=None)
 @common_options.subplot_option()
 @common_options.legend_ncols_option()
@@ -332,7 +332,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.eval_option()
 @common_options.table_option()
-@common_options.criterion_option()
+@common_options.criterion_option(lcriteria=['bpcer201', 'eer', 'min-hter'])
 @common_options.thresholds_option()
 @open_file_mode_option()
 @common_options.output_log_metric_option()
@@ -410,7 +410,7 @@ def fmr_iapmr(ctx, scores, **kwargs):
 @common_options.points_curve_option()
 @common_options.lines_at_option()
 @common_options.const_layout_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.linestyles_option()
 @verbosity_option()
