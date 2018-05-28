@@ -1,17 +1,18 @@
 """Prints Cross-db metrics analysis
 """
-import os
 import click
-import logging
-import yaml
 import jinja2
-from tabulate import tabulate
+import logging
+import math
+import os
+import yaml
+from bob.bio.base.score.load import split
+from bob.extension.scripts.click_helper import verbosity_option, bool_option
 from bob.measure import eer_threshold, farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
-from bob.extension.scripts.click_helper import verbosity_option, bool_option
-from bob.bio.base.score.load import split
 from gridtk.generator import expand
+from tabulate import tabulate
 
 logger = logging.getLogger(__name__)
 
@@ -102,10 +103,8 @@ def cross(ctx, score_jinja_template, databases, protocols, algorithms,
         def sort_key(alg):
             r = []
             for grp in ('eval', 'dev', 'train'):
-                hter = metrics.get(
-                    (train_database, train_protocol, alg, group))
-                hter = hter if hter is None else hter[0]
-                r.append(hter)
+                hter = metrics[(train_database, train_protocol, alg, group)][0]
+                r.append(1 if math.isnan(hter) else hter)
             return tuple(r)
         algorithms = sorted(algorithms, key=sort_key)
 
