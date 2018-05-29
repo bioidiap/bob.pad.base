@@ -137,34 +137,34 @@ For example:
 
 .. code-block:: sh
 
-    $ bob pad metrics scores-{dev,test} --titles ExpA
+    $ bob pad metrics scores-{dev,eval} --legends ExpA
 
-    Threshold of 6.624767 selected with the bpcer20 criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   5.0%                      5.0%
-    EER       0.0%                      0.0%
-    min-HTER  2.5%                      2.5%
-    ========  ========================  ===================
+    Threshold of 11.639561 selected with the bpcer20 criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   5.0%                      5.0%
+    BP      100.0%                    100.0%
+    ACER    52.5%                     52.5%
+    ======  ========================  ===================
 
-    Threshold of 6.534215 selected with the eer criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   6.1%                      6.1%
-    EER       0.0%                      0.0%
-    min-HTER  3.0%                      3.0%
-    ========  ========================  ===================
+    Threshold of 3.969103 selected with the eer criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   100.0%                    100.0%
+    BP      100.0%                    100.0%
+    ACER    100.0%                    100.0%
+    ======  ========================  ===================
 
-    Threshold of 6.534215 selected with the min-hter criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   6.1%                      6.1%
-    EER       0.0%                      0.0%
-    min-HTER  3.0%                      3.0%
-    ========  ========================  ===================
+    Threshold of -0.870550 selected with the min-hter criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   100.0%                    100.0%
+    BP      19.5%                     19.5%
+    ACER    59.7%                     59.7%
+    ======  ========================  ===================
 
 .. note::
     You can compute analysis on development set(s) only by passing option
@@ -234,7 +234,7 @@ For example, to generate a EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
-    $bob pad epc -o 'my_epc.pdf' scores-{dev,test}
+    $bob pad epc -o 'my_epc.pdf' scores-{dev,eval}
 
 where `my_epc.pdf` will contain EPC curves for all the experiments.
 
@@ -243,7 +243,7 @@ datasets. Far example, to generate EPSC curve:
 
 .. code-block:: sh
 
-    $bob vuln epsc .../{licit,spoof}/scores-{dev,test}
+    $bob vuln epsc .../{licit,spoof}/scores-{dev,eval}
 
 
 .. note::
