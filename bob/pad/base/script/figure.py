@@ -78,7 +78,7 @@ class Metrics(measure_figure.Metrics):
                 threshold, m))
             apcer, bpcer = farfrr(dev_neg, dev_pos, threshold)
             raws.append(['APCER', '{:>5.1f}%'.format(apcer * 100)])
-            raws.append(['BP', '{:>5.1f}%'.format(bpcer * 100)])
+            raws.append(['BPCER', '{:>5.1f}%'.format(bpcer * 100)])
             raws.append(['ACER', '{:>5.1f}%'.format((apcer + bpcer) * 50)])
             if self._eval and eval_neg is not None:
                 apcer, bpcer = farfrr(eval_neg, eval_pos, threshold)
