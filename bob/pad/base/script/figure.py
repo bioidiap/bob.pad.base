@@ -113,7 +113,7 @@ class MetricsVuln(measure_figure.Metrics):
         rows = []
         rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
         rows.append(['BPCER (%)', '{:>5.1f}%'.format(frr * 100)])
-        rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
+        rows.append(['ACER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
         rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
         click.echo(
             tabulate(rows, headers, self._tablefmt),

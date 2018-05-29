@@ -181,7 +181,7 @@ Metrics for vulnerability analysis are also avaible trhough:
     =========  ===================
     APCER (%)  100.0%
     BPCER (%)  100.0%
-    HTER (%)   100.0%
+    ACER (%)   100.0%
     IAPMR (%)  100.0%
     =========  ===================
 
