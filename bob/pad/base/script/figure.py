@@ -111,7 +111,7 @@ class MetricsVuln(measure_figure.Metrics):
         headers = ['' or title, '%s (threshold=%.2g)' %
                    (criter.upper(), threshold)]
         rows = []
-        rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
+        rows.append(['APCER (%)', '{:>5.1f}%'.format(100 * far)])
         rows.append(['BPCER (%)', '{:>5.1f}%'.format(frr * 100)])
         rows.append(['ACER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
         rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
@@ -334,6 +334,7 @@ class Epsc(PadPlot):
         self._split = False
         self._nb_figs = 1
         self._title = ''
+        self._sampling = ctx.meta.get('sampling', 5)
 
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
@@ -472,7 +473,7 @@ class Epsc3D(Epsc):
         from mpl_toolkits.mplot3d import Axes3D
         from matplotlib import cm
 
-        points = 10
+        points = self._sampling or 5
 
         omega, beta, thrs = error_utils.epsc_thresholds(
             licit_dev_neg,
