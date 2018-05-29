@@ -133,7 +133,7 @@ def roc(ctx, scores, criteria, real_data, **kwargs):
   """Plot ROC
 
   You need to provide 4 scores
-  files for each PAD system in this order:
+  files for each vulnerability system in this order:
 
   \b
   * licit development scores
@@ -142,9 +142,9 @@ def roc(ctx, scores, criteria, real_data, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob pad roc dev-scores eval-scores
+      $ bob vuln roc -v dev-scores eval-scores
 
-      $ bob pad roc {licit,spoof}/scores-{dev,eval}
+      $ bob vuln roc -v {licit,spoof}/scores-{dev,eval}
   """
   process = figure.RocVuln(ctx, scores, True, load.split, criteria, real_data,
                        False)
@@ -177,7 +177,7 @@ def det(ctx, scores, criteria, real_data, **kwargs):
   """Plot DET
 
   You need to provide 4 scores
-  files for each PAD system in this order:
+  files for each vuln system in this order:
 
   \b
   * licit development scores
@@ -186,9 +186,9 @@ def det(ctx, scores, criteria, real_data, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob pad det dev-scores eval-scores
+      $ bob vuln det -v dev-scores eval-scores
 
-      $ bob pad det {licit,spoof}/scores-{dev,eval}
+      $ bob vuln det -v {licit,spoof}/scores-{dev,eval}
   """
   process = figure.Det(ctx, scores, True, load.split, criteria, real_data,
                        False)
@@ -230,11 +230,11 @@ def epc(ctx, scores, **kwargs):
   vulnerability analysis.
 
   Examples:
-      $ bob pad epc dev-scores eval-scores
+      $ bob vuln epc -v dev-scores eval-scores
 
-      $ bob pad epc -o my_epc.pdf dev-scores1 eval-scores1
+      $ bob vuln epc -v -o my_epc.pdf dev-scores1 eval-scores1
 
-      $ bob pad epc {licit,spoof}/scores-{dev,eval}
+      $ bob vuln epc -v {licit,spoof}/scores-{dev,eval}
   """
   process = figure.Epc(ctx, scores, True, load.split)
   process.run()
@@ -270,9 +270,12 @@ def epc(ctx, scores, **kwargs):
 @click.option('-fp', '--fixed-param', default=0.5, show_default=True,
               help='Value of the fixed parameter',
               type=click.FLOAT)
+@click.option('-s', '--sampling', default=5, show_default=True,
+              help='Sampling of the EPSC 3D surface', type=click.INT)
 @verbosity_option()
 @click.pass_context
-def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
+def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
+         **kwargs):
     """Plot EPSC (expected performance spoofing curve):
 
     You need to provide 4 score
@@ -291,13 +294,14 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
     both WER and IAPMR on the same figure (which is possible in 2D).
 
     Examples:
-        $ bob pad epsc -o my_epsc.pdf dev-scores1 eval-scores1
+        $ bob vuln epsc -v -o my_epsc.pdf dev-scores1 eval-scores1
 
-        $ bob pad epsc -D {licit,spoof}/scores-{dev,eval}
+        $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
     """
     if three_d:
         if (ctx.meta['wer'] and ctx.meta['iapmr']):
             raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
+        ctx.meta['sampling'] = sampling
         process = figure.Epsc3D(
             ctx, scores, True, load.split,
             criteria, var_param, fixed_param
@@ -363,10 +367,10 @@ def hist(ctx, scores, evaluation, **kwargs):
 
   Examples:
 
-      $ bob pad vuln_hist licit/scores-dev licit/scores-eval \
+      $ bob vuln vuln_hist -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval
 
-      $ bob pad vuln_hist {licit,spoof}/scores-{dev,eval}
+      $ bob vuln vuln_hist -v {licit,spoof}/scores-{dev,eval}
   '''
   process = figure.HistVuln(ctx, scores, evaluation, load.split)
   process.run()
@@ -387,8 +391,8 @@ def hist(ctx, scores, evaluation, **kwargs):
 def metrics(ctx, scores, **kwargs):
   """Generate table of metrics for vulnerability PAD
 
-  You need to provide 2 or 4 scores
-  files for each PAD system in this order:
+  You need to provide 4 scores
+  files for each vuln system in this order:
 
   \b
   * licit development scores
@@ -398,7 +402,7 @@ def metrics(ctx, scores, **kwargs):
 
 
   Examples:
-      $ bob pad vuln_metrics {licit,spoof}/scores-{dev,eval}
+      $ bob vuln vuln_metrics -v {licit,spoof}/scores-{dev,eval}
   """
   process = figure.MetricsVuln(ctx, scores, True, load.split)
   process.run()
@@ -425,20 +429,19 @@ def metrics(ctx, scores, **kwargs):
 def fmr_iapmr(ctx, scores, **kwargs):
     """Plot FMR vs IAPMR
 
-    You need to provide 2 or 4 scores
-    files for each PAD system in this order:
+    You need to provide 4 scores
+    files for each vuln system in this order:
 
     \b
     * licit development scores
     * licit evaluation scores
-    * spoof development scores (when ``--no-spoof`` is False (default))
-    * spoof evaluation scores (when ``--no-spoof`` is False (default))
-
+    * spoof development scores
+    * spoof evaluation scores
 
     Examples:
-        $ bob pad fmr_iapmr --no-spoof dev-scores eval-scores
+        $ bob vuln fmr_iapmr -v dev-scores eval-scores
 
-        $ bob pad fmr_iapmr {licit,spoof}/scores-{dev,eval}
+        $ bob vuln fmr_iapmr -v {licit,spoof}/scores-{dev,eval}
     """
     process = figure.FmrIapmr(ctx, scores, True, load.split)
     process.run()
@@ -464,7 +467,7 @@ def evaluate(ctx, scores, **kwargs):
   '''Runs error analysis on score sets for vulnerability studies
 
   \b
-  1. Computes bob pad vuln_metrics
+  1. Computes bob vuln vuln_metrics
   2. Plots EPC, EPSC, vulnerability histograms, fmr vs IAPMR to a multi-page
      PDF file
 
@@ -478,9 +481,9 @@ def evaluate(ctx, scores, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob pad vuln -o my_epsc.pdf dev-scores1 eval-scores1
+      $ bob vuln evaluate -o my_epsc.pdf dev-scores1 eval-scores1
 
-      $ bob pad vuln -D {licit,spoof}/scores-{dev,eval}
+      $ bob vuln evaluate -D {licit,spoof}/scores-{dev,eval}
   '''
   # first time erase if existing file
   click.echo("Computing vuln metrics...")
