@@ -66,10 +66,8 @@ def roc(ctx, scores, evaluation, **kargs):
   You need to provide one or more development score file(s) for each
   experiment. You can also provide eval files along with dev files. If only
   dev-scores are used, the flag `--no-evaluation` must be used. is required
-  in that case. Files must be 4- or 5- columns format, see
-  :py:func:`bob.bio.base.score.load.four_column` and
-  :py:func:`bob.bio.base.score.load.five_column` for details.
-
+  in that case. Files must be 4-col format, see
+  :py:func:`bob.bio.base.score.load.four_column`
   Examples:
       $ bob pad roc -v dev-scores
 
@@ -112,14 +110,13 @@ def det(ctx, scores, evaluation, **kargs):
   You need to provide one or more development score file(s) for each
   experiment. You can also provide eval files along with dev files. If only
   dev-scores are used, the flag `--no-evaluation` must be used. is required
-  in that case. Files must be 4- or 5- columns format, see
-  :py:func:`bob.bio.base.score.load.four_column` and
-  :py:func:`bob.bio.base.score.load.five_column` for details.
+  in that case. Files must be 4-col format, see
+  :py:func:`bob.bio.base.score.load.four_column` for details.
 
   Examples:
-    $ bob pad det dev-scores eval-scores
+    $ bob pad det -v dev-scores eval-scores
 
-    $ bob pad det scores-{dev,eval}
+    $ bob pad det -v scores-{dev,eval}
   """
   process = figure.DetPad(ctx, scores, evaluation, load.split)
   process.run()
@@ -156,12 +153,12 @@ def hist(ctx, scores, evaluation, **kwargs):
   as well, use ``--show-dev`` option.
 
   Examples:
-      $ bob pad hist dev-scores
+      $ bob pad hist -v dev-scores
 
-      $ bob pad hist dev-scores1 eval-scores1 dev-scores2
+      $ bob pad hist -v dev-scores1 eval-scores1 dev-scores2
       eval-scores2
 
-      $ bob pad hist --criterion min-hter dev-scores1 eval-scores1
+      $ bob pad hist -v --criterion min-hter dev-scores1 eval-scores1
   """
   process = figure.HistPad(ctx, scores, evaluation, load.split)
   process.run()
@@ -189,14 +186,13 @@ def epc(ctx, scores, **kargs):
   in [0; 1] of FPR and FNR when calculating the threshold.
 
   You need to provide one or more development score and eval file(s)
-  for each experiment. Files must be 4- or 5- columns format, see
-  :py:func:`bob.bio.base.score.load.four_column` and
-  :py:func:`bob.bio.base.score.load.five_column` for details.
+  for each experiment. Files must be 4-columns format, see
+  :py:func:`bob.bio.base.score.load.four_column` for details.
 
   Examples:
-      $ bob bio epc -v dev-scores eval-scores
+      $ bob pad epc -v dev-scores eval-scores
 
-      $ bob bio epc -v -o my_epc.pdf dev-scores1 eval-scores1
+      $ bob pad epc -v -o my_epc.pdf dev-scores1 eval-scores1
   """
   process = measure_figure.Epc(ctx, scores, True, load.split)
   process.run()
