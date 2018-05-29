@@ -611,14 +611,12 @@ class BaseDetRoc(PadPlot):
             farfrr_licit_det[1],
             'o',
             color='C0',
-            markersize=7
         )  # FAR point, licit scenario
         mpl.plot(
             farfrr_spoof_det[0],
             farfrr_spoof_det[1],
             'o',
             color='C3',
-            markersize=7
         )  # FAR point, spoof scenario
 
         # annotate the FAR points
