@@ -74,8 +74,8 @@ def write_scores_to_file(neg, pos, filename, attack=False):
 
 @click.command()
 @click.argument('outdir')
-@click.option('--mean-gen', default=10, type=FLOAT, show_default=True)
-@click.option('--mean-zei', default=0, type=FLOAT, show_default=True)
+@click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
+@click.option('--mean-zei', default=3, type=FLOAT, show_default=True)
 @click.option('--mean-pa', default=5, type=FLOAT, show_default=True)
 @verbosity_option()
 def gen(outdir, mean_gen, mean_zei, mean_pa):
@@ -93,14 +93,14 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
       mean_gen, mean_zei, mean_pa)
 
   # Write the data into files
-  write_scores_to_file(genuine_dev, zei_dev,
+  write_scores_to_file(zei_dev, genuine_dev,
                        os.path.join(outdir, 'licit', 'scores-dev'))
-  write_scores_to_file(genuine_eval, zei_eval,
+  write_scores_to_file(zei_eval, genuine_eval,
                        os.path.join(outdir, 'licit', 'scores-eval'))
-  write_scores_to_file(genuine_dev, pa_dev,
+  write_scores_to_file(pa_dev, genuine_dev,
                        os.path.join(outdir, 'spoof', 'scores-dev'),
                        attack=True)
-  write_scores_to_file(genuine_eval, pa_eval,
+  write_scores_to_file(pa_eval, genuine_eval,
                        os.path.join(outdir, 'spoof', 'scores-eval'),
                        attack=True)
 
