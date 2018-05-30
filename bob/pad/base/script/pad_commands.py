@@ -5,7 +5,8 @@ import pkg_resources
 from click_plugins import with_plugins
 from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (verbosity_option,
-                                                open_file_mode_option)
+                                                open_file_mode_option,
+                                                AliasedGroup)
 import bob.bio.base.script.gen as bio_gen
 import bob.bio.base.script.figure as bio_figure
 import bob.measure.script.figure as measure_figure
