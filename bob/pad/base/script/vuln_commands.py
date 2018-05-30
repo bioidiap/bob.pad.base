@@ -11,7 +11,8 @@ from click.types import FLOAT
 from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (verbosity_option,
                                                 open_file_mode_option,
-                                               bool_option)
+                                               bool_option,
+                                               AliasedGroup)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
@@ -21,13 +22,6 @@ NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
 
-
-
-@with_plugins(pkg_resources.iter_entry_points('bob.vuln.cli'))
-@click.group()
-def vuln():
-  """Presentation Vulnerability related commands."""
-  pass
 
 
 
@@ -498,6 +492,8 @@ def evaluate(ctx, scores, **kwargs):
   ctx.forward(hist)  # use class defaults plot settings
   click.echo("Computing DET...")
   ctx.forward(det)  # use class defaults plot settings
+  click.echo("Computing ROC...")
+  ctx.forward(roc)  # use class defaults plot settings
   click.echo("Computing EPC...")
   ctx.forward(epc)  # use class defaults plot settings
   click.echo("Computing EPSC...")
