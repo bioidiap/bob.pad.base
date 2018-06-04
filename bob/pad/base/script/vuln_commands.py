@@ -154,7 +154,7 @@ def roc(ctx, scores, criteria, real_data, **kwargs):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @verbosity_option()
 @common_options.axes_val_option(dflt='0.01,95,0.01,95')
 @common_options.x_rotation_option(dflt=45)
@@ -200,7 +200,7 @@ def det(ctx, scores, criteria, real_data, **kwargs):
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.bool_option(
     'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', True
@@ -412,7 +412,7 @@ def metrics(ctx, scores, **kwargs):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @verbosity_option()
 @common_options.axes_val_option()
 @common_options.x_rotation_option()
