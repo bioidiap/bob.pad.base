@@ -111,9 +111,9 @@ class MetricsVuln(measure_figure.Metrics):
         headers = ['' or title, '%s (threshold=%.2g)' %
                    (criter.upper(), threshold)]
         rows = []
-        rows.append(['APCER (%)', '{:>5.1f}%'.format(100 * far)])
-        rows.append(['BPCER (%)', '{:>5.1f}%'.format(frr * 100)])
-        rows.append(['ACER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
+        rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
+        rows.append(['FNMR (%)', '{:>5.1f}%'.format(frr * 100)])
+        rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
         rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
         click.echo(
             tabulate(rows, headers, self._tablefmt),
@@ -643,7 +643,7 @@ class BaseDetRoc(PadPlot):
                 xytext=(xyannotate_spoof[0], xyannotate_spoof[1]))
         else:
             mpl.annotate(
-                'APCER=%.2f%%' % (farfrr_licit[0] * 100),
+                'FMR=%.2f%%' % (farfrr_licit[0] * 100),
                 xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
                 xycoords='data',
                 xytext=(xyannotate_licit[0], xyannotate_licit[1]),
@@ -692,14 +692,14 @@ class BaseDetRoc(PadPlot):
         pass
 
 class Det(BaseDetRoc):
-    '''Base for DET and ROC'''
+    '''DET for vuln'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
                 no_spoof):
         super(Det, self).__init__(ctx, scores, evaluation, func_load,
                                   criteria, real_data, no_spoof)
-        self._x_label = self._x_label or "APCER"
-        self._y_label = self._y_label or "BPCER"
+        self._x_label = self._x_label or "FMR"
+        self._y_label = self._y_label or "FNMR"
         add = ''
         if not self._no_spoof:
             add = " and overlaid SPOOF scenario"
@@ -733,8 +733,8 @@ class RocVuln(BaseDetRoc):
                 no_spoof):
         super(RocVuln, self).__init__(ctx, scores, evaluation, func_load,
                                       criteria, real_data, no_spoof)
-        self._x_label = self._x_label or "APCER"
-        self._y_label = self._y_label or "1 - BPCER"
+        self._x_label = self._x_label or "FMR"
+        self._y_label = self._y_label or "1 - FNMR"
         self._semilogx = ctx.meta.get('semilogx', True)
         add = ''
         if not self._no_spoof:
@@ -793,7 +793,7 @@ class FmrIapmr(PadPlot):
         title = self._title if self._title is not None else "FMR vs IAPMR"
         if title.replace(' ', ''):
             mpl.title(title)
-        mpl.xlabel(self._x_label or "False Match Rate (%)")
+        mpl.xlabel(self._x_label or "FMR (%)")
         mpl.ylabel(self._y_label or "IAPMR (%)")
         mpl.grid(True, color=self._grid_color)
         if self._disp_legend:
