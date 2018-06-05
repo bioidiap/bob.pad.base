@@ -520,7 +520,7 @@ class Epsc3D(Epsc):
 
 
 class Roc(bio_figure.Roc):
-    '''ROC for PARD'''
+    '''ROC for PAD'''
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Roc, self).__init__(ctx, scores, evaluation, func_load)
         self._x_label = ctx.meta.get('x_label') or 'APCER'

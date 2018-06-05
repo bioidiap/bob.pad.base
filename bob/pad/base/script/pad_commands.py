@@ -37,7 +37,7 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys, five_col):
 
 @click.command()
 @common_options.scores_argument(nargs=-1)
-@common_options.title_option()
+@common_options.titles_option()
 @common_options.legends_option()
 @common_options.legend_loc_option(dflt='lower-right')
 @common_options.no_legend_option()
@@ -54,7 +54,7 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys, five_col):
 @common_options.const_layout_option()
 @common_options.style_option()
 @common_options.linestyles_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.min_far_option()
 @verbosity_option()
 @click.pass_context
@@ -83,7 +83,7 @@ def roc(ctx, scores, evaluation, **kargs):
 
 @click.command()
 @common_options.scores_argument(nargs=-1)
-@common_options.title_option()
+@common_options.titles_option()
 @common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.legends_option()
 @common_options.legend_loc_option(dflt='upper-right')
@@ -98,7 +98,7 @@ def roc(ctx, scores, evaluation, **kargs):
 @common_options.const_layout_option()
 @common_options.style_option()
 @common_options.linestyles_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.lines_at_option()
 @common_options.min_far_option()
 @verbosity_option()
@@ -125,7 +125,7 @@ def det(ctx, scores, evaluation, **kargs):
 
 @click.command()
 @common_options.scores_argument(nargs=-1)
-@common_options.title_option()
+@common_options.titles_option()
 @common_options.output_plot_file_option(default_out='hist.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
@@ -168,7 +168,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=1, force_eval=True, nargs=-1)
-@common_options.title_option()
+@common_options.titles_option()
 @common_options.output_plot_file_option(default_out='epc.pdf')
 @common_options.legends_option()
 @common_options.legend_loc_option(dflt='upper-center')
@@ -177,7 +177,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.const_layout_option()
 @common_options.style_option()
 @common_options.linestyles_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @verbosity_option()
 @click.pass_context
 def epc(ctx, scores, **kargs):

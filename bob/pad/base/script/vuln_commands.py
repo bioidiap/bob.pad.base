@@ -311,7 +311,6 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
-@common_options.title_option()
 @common_options.output_plot_file_option(default_out='vuln_hist.pdf')
 @common_options.eval_option()
 @common_options.n_bins_option()
