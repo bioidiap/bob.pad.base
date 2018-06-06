@@ -310,9 +310,8 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 
 
 @click.command()
-@common_options.scores_argument(nargs=-1, min_arg=2)
+@common_options.scores_argument(nargs=-1, min_arg=2, force_eval=True)
 @common_options.output_plot_file_option(default_out='vuln_hist.pdf')
-@common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
@@ -333,7 +332,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 @common_options.style_option()
 @verbosity_option()
 @click.pass_context
-def hist(ctx, scores, evaluation, **kwargs):
+def hist(ctx, scores, **kwargs):
   '''Vulnerability analysis distributions.
 
   Plots the histogram of score distributions. You need to provide 4 score
@@ -348,15 +347,10 @@ def hist(ctx, scores, evaluation, **kwargs):
   See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
   vulnerability analysis.
 
-  You need to provide one or more development score file(s) for each
-  experiment. You can also provide eval files along with dev files. If only
-  dev-scores are used set the flag `--no-evaluation` is required in that
-  case.
 
   By default, when eval-scores are given, only eval-scores histograms are
   displayed with threshold line
-  computed from dev-scores. If you want to display dev-scores distributions
-  as well, use ``--show-dev`` option.
+  computed from dev-scores.
 
   Examples:
 
@@ -365,14 +359,13 @@ def hist(ctx, scores, evaluation, **kwargs):
 
       $ bob vuln vuln_hist -v {licit,spoof}/scores-{dev,eval}
   '''
-  process = figure.HistVuln(ctx, scores, evaluation, load.split)
+  process = figure.HistVuln(ctx, scores, True, load.split)
   process.run()
 
 
 
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.eval_option()
 @common_options.table_option()
 @common_options.criterion_option(lcriteria=['bpcer20', 'eer', 'min-hter'])
 @common_options.thresholds_option()

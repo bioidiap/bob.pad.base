@@ -137,7 +137,7 @@ For example:
 
 .. code-block:: sh
 
-    $ bob pad metrics scores-{dev,eval} --legends ExpA
+    $ bob pad metrics -e scores-{dev,eval} --legends ExpA
 
     Threshold of 11.639561 selected with the bpcer20 criteria
     ======  ========================  ===================
@@ -167,14 +167,14 @@ For example:
     ======  ========================  ===================
 
 .. note::
-    You can compute analysis on development set(s) only by passing option
-    ``--no-evaluation``. See metrics --help for further options.
+    When evaluation scores are provided, the ``--eval`` option must be passed.
+    See metrics --help for further options.
 
 Metrics for vulnerability analysis are also avaible trhough:
 
 .. code-block:: sh
 
-    $ bob vuln metrics .../{licit,spoof}/scores-{dev,test}
+    $ bob vuln metrics -e .../{licit,spoof}/scores-{dev,test}
 
     =========  ===================
     None       EER (threshold=4)
@@ -234,7 +234,7 @@ For example, to generate a EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
-    $bob pad epc -o 'my_epc.pdf' scores-{dev,eval}
+    $bob pad epc -e -o 'my_epc.pdf' scores-{dev,eval}
 
 where `my_epc.pdf` will contain EPC curves for all the experiments.
 
@@ -243,7 +243,7 @@ datasets. Far example, to generate EPSC curve:
 
 .. code-block:: sh
 
-    $bob vuln epsc .../{licit,spoof}/scores-{dev,eval}
+    $bob vuln epsc -e .../{licit,spoof}/scores-{dev,eval}
 
 
 .. note::

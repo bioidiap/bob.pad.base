@@ -65,17 +65,17 @@ def roc(ctx, scores, evaluation, **kargs):
   computed using :py:func:`bob.measure.roc`.
 
   You need to provide one or more development score file(s) for each
-  experiment. You can also provide eval files along with dev files. If only
-  dev-scores are used, the flag `--no-evaluation` must be used. is required
+  experiment. You can also provide eval files along with dev files. If
+  evaluation scores are used, the flag `--eval` must be used. is required
   in that case. Files must be 4-col format, see
   :py:func:`bob.bio.base.score.load.four_column`
   Examples:
       $ bob pad roc -v dev-scores
 
-      $ bob pad roc -v dev-scores1 eval-scores1 dev-scores2
+      $ bob pad roc -e -v dev-scores1 eval-scores1 dev-scores2
       eval-scores2
 
-      $ bob pad roc -v -o my_roc.pdf dev-scores1 eval-scores1
+      $ bob pad roc -e -v -o my_roc.pdf dev-scores1 eval-scores1
   """
   process = figure.Roc(ctx, scores, evaluation, load.split)
   process.run()
@@ -109,15 +109,15 @@ def det(ctx, scores, evaluation, **kargs):
   (false positives on the x-axis and false negatives on the y-axis)
 
   You need to provide one or more development score file(s) for each
-  experiment. You can also provide eval files along with dev files. If only
-  dev-scores are used, the flag `--no-evaluation` must be used. is required
+  experiment. You can also provide eval files along with dev files. If
+  evale-scores are used, the flag `--eval` must be used. is required
   in that case. Files must be 4-col format, see
   :py:func:`bob.bio.base.score.load.four_column` for details.
 
   Examples:
     $ bob pad det -v dev-scores eval-scores
 
-    $ bob pad det -v scores-{dev,eval}
+    $ bob pad det -e -v scores-{dev,eval}
   """
   process = figure.DetPad(ctx, scores, evaluation, load.split)
   process.run()
@@ -130,6 +130,7 @@ def det(ctx, scores, evaluation, **kargs):
 @common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
+@common_options.no_line_option()
 @common_options.far_option()
 @common_options.thresholds_option()
 @common_options.const_layout_option()
@@ -147,7 +148,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 
   You need to provide one or more development score file(s) for each
   experiment. You can also provide eval files along with dev files. If only
-  dev scores are provided, you must use flag `--no-evaluation`.
+  evaluation are provided, you must use flag `--eval`.
 
   By default, when eval-scores are given, only eval-scores histograms are
   displayed with threshold line
@@ -156,10 +157,10 @@ def hist(ctx, scores, evaluation, **kwargs):
   Examples:
       $ bob pad hist -v dev-scores
 
-      $ bob pad hist -v dev-scores1 eval-scores1 dev-scores2
+      $ bob pad hist -e -v dev-scores1 eval-scores1 dev-scores2
       eval-scores2
 
-      $ bob pad hist -v --criterion min-hter dev-scores1 eval-scores1
+      $ bob pad hist -e -v --criterion min-hter dev-scores1 eval-scores1
   """
   process = figure.HistPad(ctx, scores, evaluation, load.split)
   process.run()
@@ -282,15 +283,17 @@ def evaluate(ctx, scores, evaluation, **kwargs):
   * development scores
   * evaluation scores
 
+  When evaluation scores are provided, ``--eval`` must be passed.
+
   Examples:
       $ bob pad evaluate -v dev-scores
 
-      $ bob pad evaluate -v scores-dev1 scores-eval1 scores-dev2
+      $ bob pad evaluate -e -v scores-dev1 scores-eval1 scores-dev2
       scores-eval2
 
-      $ bob pad evaluate -v /path/to/sys-{1,2,3}/scores-{dev,eval}
+      $ bob pad evaluate -e -v /path/to/sys-{1,2,3}/scores-{dev,eval}
 
-      $ bob pad evaluate -v -l metrics.txt -o my_plots.pdf dev-scores eval-scores
+      $ bob pad evaluate -e -v -l metrics.txt -o my_plots.pdf dev-scores eval-scores
   '''
   # first time erase if existing file
   click.echo("Computing metrics...")
