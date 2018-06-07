@@ -7,7 +7,6 @@ package:
 
 build:
   entry_points:
-    - grid_search.py    = bob.pad.base.script.grid_search:main
     - spoof.py         = bob.pad.base.script.spoof:main
   number: {{ environ.get('BOB_BUILD_NUMBER', 0) }}
   run_exports:
@@ -40,7 +39,6 @@ test:
   imports:
     - {{ name }}
   commands:
-    - grid_search.py --help
     - spoof.py --help
     - nosetests --with-coverage --cover-package={{ name }} -sv {{ name }}
     - sphinx-build -aEW {{ project_dir }}/doc {{ project_dir }}/sphinx
