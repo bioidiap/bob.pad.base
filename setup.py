@@ -102,7 +102,6 @@ setup(
 
         # scripts should be declared using this entry:
         'console_scripts': [
-            'grid_search.py    = bob.pad.base.script.grid_search:main',
             'spoof.py         = bob.pad.base.script.spoof:main',
         ],
 
