@@ -6,7 +6,7 @@ used by both verification and PAD experiments.
 from bob.pad.base.database import PadFile
 from bob.pad.base.database import FileListPadDatabase
 
-from bob.bio.base.database import BioDatabase
+from bob.bio.base.database import FileListBioDatabase
 from bob.bio.base.database.file import BioFile
 
 import bob.io.base
@@ -66,7 +66,7 @@ class HighPadDatabase(FileListPadDatabase):
                                               **kwargs)
 
 
-class HighBioDatabase(BioDatabase):
+class HighBioDatabase(FileListBioDatabase):
     """
     Implements verification API for querying High database.
     """
@@ -90,7 +90,7 @@ class HighBioDatabase(BioDatabase):
                                               original_directory=original_directory,
                                               original_extension=original_extension, **kwargs)
 
-        self.__pad_db = HighPadDatabase(filelists_directory=filelists_directory,
+        self._pad_db = HighPadDatabase(filelists_directory=filelists_directory,
                                         db_name=db_name,
                                         file_class=file_class,
                                         original_directory=original_directory,
@@ -100,7 +100,7 @@ class HighBioDatabase(BioDatabase):
         self.low_level_group_names = ('train', 'dev', 'eval')
         self.high_level_group_names = ('world', 'dev', 'eval')
 
-    def __convert_protocol(self, protocol=None):
+    def _convert_protocol(self, protocol=None):
         """
         This conversion of the protocol with appended '-licit' or '-spoof' is a hack for verification experiments.
         To adapt spoofing databases to the verification experiments, we need to be able to split a given protocol
@@ -134,7 +134,7 @@ class HighBioDatabase(BioDatabase):
 
         return protocol, modifier
 
-    def __convert_purposes(self, purposes, modifier):
+    def _convert_purposes(self, purposes, modifier):
         """
         We assume there is no enrollment data, since
         PAD File database has real and attack lists only,
@@ -152,13 +152,12 @@ class HighBioDatabase(BioDatabase):
 
         if isinstance(purposes, str):
             purposes = [purposes]
-        else:
+        elif purposes is not None:
             purposes = list(purposes)
 
         # licit scenario considers genuine data only
         # we return all real data
-        if modifier == 'licit':
-            purposes = ['real']
+        purposes = ['real']
 
         # spoof scenario uses spoofed data for probe
         # but, during scoring, this scenario also needs a real-probe data
@@ -166,11 +165,11 @@ class HighBioDatabase(BioDatabase):
         # Hence, we request both real and attack data
         if modifier == 'spoof':
             # we return real and attack data
-            purposes = ['real', 'attack']
+            purposes.append('attack')
 
         return purposes
 
-    def __filter_by_model_ids(self, objects, model_ids):
+    def _filter_by_model_ids(self, objects, model_ids):
         """
         From all File objects, keep only those, whose client_id is in model_ids
         Args:
@@ -212,7 +211,7 @@ class HighBioDatabase(BioDatabase):
         groups = self.convert_names_to_lowlevel(groups, self.low_level_group_names, self.high_level_group_names)
         # we also need to convert protocol name (it can have either '-licit' or '-spoof' appendix)
         # to the expected protocol name without appendix
-        return self.__pad_db.client_ids(protocol=self.__convert_protocol(protocol)[0], groups=groups, **kwargs)
+        return self._pad_db.client_ids(protocol=self._convert_protocol(protocol)[0], groups=groups, **kwargs)
 
     def arrange_by_client(self, files):
         client_files = {}
@@ -263,18 +262,18 @@ class HighBioDatabase(BioDatabase):
             groups = self.high_level_group_names
         groups = self.convert_names_to_lowlevel(groups, self.low_level_group_names, self.high_level_group_names)
 
-        protocol, modifier = self.__convert_protocol(protocol)
-        purposes = self.__convert_purposes(purposes, modifier)
+        protocol, modifier = self._convert_protocol(protocol)
+        purposes = self._convert_purposes(purposes, modifier)
 
         # Query the underline PAD database
-        objects = self.__pad_db.objects(protocol=protocol, groups=groups, purposes=purposes, **kwargs)
+        objects = self._pad_db.objects(protocol=protocol, groups=groups, purposes=purposes, **kwargs)
 
         # note that PAD database does not know anything about model_ids, so these are ignored
         # Hence, for the spoofing protocol, we need to filter out the files and
         # keep only those that belong to model_ids
         # We also modify the client_id to reflect that it is an attack
         if modifier == 'spoof' and model_ids is not None:
-            objects = self.__filter_by_model_ids(objects, model_ids)
+            objects = self._filter_by_model_ids(objects, model_ids)
 
         # make sure to return BioFile representation of a file, not the database one
         return [HighPadFile(client_id=f.client_id, path=f.path, file_id=f.path, attack_type=f.attack_type)
