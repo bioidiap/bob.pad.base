@@ -118,7 +118,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 @common_options.y_label_option()
 @click.option('-c', '--criteria', default=None, show_default=True,
               help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
+              type=click.Choice(('eer', 'min-hter')))
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
@@ -162,7 +162,7 @@ def roc(ctx, scores, criteria, real_data, **kwargs):
 @common_options.y_label_option()
 @click.option('-c', '--criteria', default=None, show_default=True,
               help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
+              type=click.Choice(('eer', 'min-hter')))
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
@@ -257,7 +257,7 @@ def epc(ctx, scores, **kwargs):
 )
 @click.option('-c', '--criteria', default="eer", show_default=True,
               help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
+              type=click.Choice(('eer', 'min-hter')))
 @click.option('-vp', '--var-param', default="omega", show_default=True,
               help='Name of the varying parameter',
               type=click.Choice(('omega', 'beta')))
@@ -367,7 +367,7 @@ def hist(ctx, scores, **kwargs):
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.table_option()
-@common_options.criterion_option(lcriteria=['bpcer20', 'eer', 'min-hter'])
+@common_options.criterion_option(lcriteria=['eer', 'min-hter'])
 @common_options.thresholds_option()
 @open_file_mode_option()
 @common_options.output_log_metric_option()
