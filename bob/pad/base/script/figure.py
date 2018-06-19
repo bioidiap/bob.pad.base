@@ -53,10 +53,10 @@ def calc_threshold(method, neg, pos):
 
 
 class Metrics(measure_figure.Metrics):
+    '''Compute metrics from score files'''
+
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Metrics, self).__init__(ctx, scores, evaluation, func_load)
-
-    ''' Compute metrics from score files'''
 
     def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
@@ -75,7 +75,7 @@ class Metrics(measure_figure.Metrics):
             raws = []
             threshold = calc_threshold(m, dev_neg, dev_pos)
             click.echo("\nThreshold of %f selected with the %s criteria" % (
-                threshold, m))
+                threshold, m), file=self.log_file)
             apcer, bpcer = farfrr(dev_neg, dev_pos, threshold)
             raws.append(['APCER', '{:>5.1f}%'.format(apcer * 100)])
             raws.append(['BPCER', '{:>5.1f}%'.format(bpcer * 100)])
@@ -521,10 +521,12 @@ class Epsc3D(Epsc):
 
 class Roc(bio_figure.Roc):
     '''ROC for PAD'''
+
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Roc, self).__init__(ctx, scores, evaluation, func_load)
         self._x_label = ctx.meta.get('x_label') or 'APCER'
         self._y_label = ctx.meta.get('y_label') or '1 - BPCER'
+
 
 class DetPad(bio_figure.Det):
     def __init__(self, ctx, scores, evaluation, func_load):
@@ -533,18 +535,16 @@ class DetPad(bio_figure.Det):
         self._y_label = ctx.meta.get('y_label') or 'BPCER'
 
 
-
 class BaseDetRoc(PadPlot):
     '''Base for DET and ROC'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
-                no_spoof):
+                 no_spoof):
         super(BaseDetRoc, self).__init__(ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
         self._criteria = criteria or 'eer'
         self._real_data = True if real_data is None else real_data
         self._legend_loc = None
-
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
@@ -598,7 +598,7 @@ class BaseDetRoc(PadPlot):
         farfrr_spoof, farfrr_spoof_det = self._get_farfrr(
             spoof_eval_neg, spoof_eval_pos,
             frr_threshold(spoof_eval_neg, spoof_eval_pos,
-                                      farfrr_licit[1])
+                          farfrr_licit[1])
         )
 
         if not self._real_data:
@@ -718,11 +718,12 @@ class BaseDetRoc(PadPlot):
     def _plot(self, x, y, points, **kwargs):
         pass
 
+
 class Det(BaseDetRoc):
     '''DET for vuln'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
-                no_spoof):
+                 no_spoof):
         super(Det, self).__init__(ctx, scores, evaluation, func_load,
                                   criteria, real_data, no_spoof)
         self._x_label = self._x_label or "FMR"
@@ -732,7 +733,6 @@ class Det(BaseDetRoc):
             add = " and overlaid SPOOF scenario"
         self._title = self._title or ('DET: LICIT' + add)
         self._legend_loc = self._legend_loc or 'upper right'
-
 
     def _set_axis(self):
         if self._axlim is not None and None not in self._axlim:
@@ -744,7 +744,6 @@ class Det(BaseDetRoc):
         points = farfrr(x, y, thres)
         return points, [ppndf(i) for i in points]
 
-
     def _plot(self, x, y, points, **kwargs):
         det(
             x, y, points,
@@ -753,11 +752,12 @@ class Det(BaseDetRoc):
             label=kwargs.get('label')
         )
 
+
 class RocVuln(BaseDetRoc):
     '''ROC for vuln'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
-                no_spoof):
+                 no_spoof):
         super(RocVuln, self).__init__(ctx, scores, evaluation, func_load,
                                       criteria, real_data, no_spoof)
         self._x_label = self._x_label or "FMR"
@@ -769,7 +769,6 @@ class RocVuln(BaseDetRoc):
         self._title = self._title or ('ROC: LICIT' + add)
         best_legend = 'lower right' if self._semilogx else 'upper right'
         self._legend_loc = self._legend_loc or best_legend
-
 
     def _plot(self, x, y, points, **kwargs):
         roc_for_far(
