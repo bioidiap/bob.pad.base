@@ -1,5 +1,6 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
+import math
 import click
 import numpy as np
 import matplotlib.pyplot as mpl
@@ -434,32 +435,30 @@ class Epsc3D(Epsc):
 class BaseVulnDetRoc(PadPlot):
     '''Base for DET and ROC'''
 
-    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
+    def __init__(self, ctx, scores, evaluation, func_load, real_data,
                  no_spoof):
         super(BaseVulnDetRoc, self).__init__(
             ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
-        self._criteria = criteria or 'eer'
+        self._hlines_at = ctx.meta.get('hlines_at', [])
         self._real_data = True if real_data is None else real_data
         self._legend_loc = None
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
-        licit_dev_neg = input_scores[0][0]
-        licit_dev_pos = input_scores[0][1]
-        licit_eval_neg = input_scores[1][0]
-        licit_eval_pos = input_scores[1][1]
-        spoof_eval_neg = input_scores[3][0] if len(input_scores) > 2 else None
-        spoof_eval_pos = input_scores[3][1] if len(input_scores) > 2 else None
+        licit_neg = input_scores[0][0]
+        licit_pos = input_scores[0][1]
+        spoof_neg = input_scores[1][0]
+        spoof_pos = input_scores[1][1]
         self._plot(
-            licit_eval_neg,
-            licit_eval_pos,
+            licit_neg,
+            licit_pos,
             self._points,
             color='C0',
             linestyle='-',
             label=self._label("licit", input_names[0], idx)
         )
-        if not self._no_spoof and spoof_eval_neg is not None:
+        if not self._no_spoof and spoof_neg is not None:
             ax1 = mpl.gca()
             ax2 = ax1.twiny()
             ax2.set_xlabel('IAPMR', color='C3')
@@ -467,114 +466,117 @@ class BaseVulnDetRoc(PadPlot):
             ax2.tick_params(axis='x', colors='C3')
             ax2.xaxis.label.set_color('C3')
             ax2.spines['top'].set_color('C3')
+            ax2.spines['bottom'].set_color('C0')
+            ax1.xaxis.label.set_color('C0')
+            ax1.tick_params(axis='x', colors='C0')
             self._plot(
-                spoof_eval_neg,
-                spoof_eval_pos,
+                spoof_neg,
+                spoof_pos,
                 self._points,
                 color='C3',
                 linestyle=':',
-                label=self._label("spoof", input_names[3], idx)
+                label=self._label("spoof", input_names[1], idx)
             )
             mpl.sca(ax1)
 
-        if self._criteria is None or self._no_spoof:
+        if self._hlines_at is None:
             return
 
-        thres_baseline = calc_threshold(
-            self._criteria, licit_dev_neg, licit_dev_pos
-        )
+        for line in self._hlines_at:
+            print (line)
+            thres_baseline = frr_threshold(licit_neg, licit_pos, line)
 
-        axlim = mpl.axis()
+            axlim = mpl.axis()
 
-        farfrr_licit, farfrr_licit_det = self._get_farfrr(
-            licit_eval_neg, licit_eval_pos,
-            thres_baseline
-        )
-        if farfrr_licit is None:
-            return
-        farfrr_spoof, farfrr_spoof_det = self._get_farfrr(
-            spoof_eval_neg, spoof_eval_pos,
-            frr_threshold(spoof_eval_neg, spoof_eval_pos,
-                          farfrr_licit[1])
-        )
+            farfrr_licit, farfrr_licit_det = self._get_farfrr(
+                licit_neg, licit_pos,
+                thres_baseline
+            )
+            if farfrr_licit is None:
+                return
 
-        if not self._real_data:
-            mpl.axhline(
-                y=farfrr_licit_det[1],
-                xmin=axlim[2],
-                xmax=axlim[3],
-                color='k',
-                linestyle='--',
-                label="%s @ EER" % self._y_label)
-        else:
-            mpl.axhline(
-                y=farfrr_licit_det[1],
-                xmin=axlim[0],
-                xmax=axlim[1],
-                color='k',
-                linestyle='--',
-                label="%s = %.2f%%" %
-                (self._y_label, farfrr_licit[1] * 100))
+            farfrr_spoof, farfrr_spoof_det = self._get_farfrr(
+                spoof_neg, spoof_pos,
+                frr_threshold(spoof_neg, spoof_pos, farfrr_licit[1])
+            )
 
-        mpl.plot(
-            farfrr_licit_det[0],
-            farfrr_licit_det[1],
-            'o',
-            color='C0',
-        )  # FAR point, licit scenario
-        mpl.plot(
-            farfrr_spoof_det[0],
-            farfrr_spoof_det[1],
-            'o',
-            color='C3',
-        )  # FAR point, spoof scenario
+            if not self._real_data:
+                mpl.axhline(
+                    y=farfrr_licit_det[1],
+                    xmin=axlim[2],
+                    xmax=axlim[3],
+                    color='k',
+                    linestyle='--',
+                    label="%s @ EER" % self._y_label)
+            else:
+                mpl.axhline(
+                    y=farfrr_licit_det[1],
+                    xmin=axlim[0],
+                    xmax=axlim[1],
+                    color='k',
+                    linestyle='--',
+                    label="%s = %.2f%%" %
+                    (self._y_label, farfrr_licit[1] * 100))
 
-        # annotate the FAR points
-        if farfrr_licit_det[0] < farfrr_spoof_det[0]:
-            xyannotate_licit = [
-                farfrr_licit_det[0] - 0.7,
-                farfrr_licit_det[1] - 0.4,
-            ]
-            xyannotate_spoof = [
-                0.1 + farfrr_spoof_det[0],
-                farfrr_spoof_det[1] + 0.3,
-            ]
-        else:
-            xyannotate_spoof = [
-                farfrr_licit_det[0] - 0.7,
-                farfrr_licit_det[1] - 0.4,
-            ]
-            xyannotate_licit = [
-                0.1 + farfrr_spoof_det[0],
-                farfrr_spoof_det[1] + 0.3,
-            ]
-
-        if not self._real_data:
-            mpl.annotate(
-                '%s @ operating point' % self._y_label,
-                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_licit[0], xyannotate_licit[1]))
-            mpl.annotate(
-                'IAPMR @ operating point',
-                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]))
-        else:
-            mpl.annotate(
-                'FMR=%.2f%%' % (farfrr_licit[0] * 100),
-                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
+            mpl.plot(
+                farfrr_licit_det[0],
+                farfrr_licit_det[1],
+                'o',
                 color='C0',
-                size='small')
-            mpl.annotate(
-                'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
-                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
+            )  # FAR point, licit scenario
+            mpl.plot(
+                farfrr_spoof_det[0],
+                farfrr_spoof_det[1],
+                'o',
                 color='C3',
-                size='small')
+            )  # FAR point, spoof scenario
+
+            # annotate the FAR points
+            if farfrr_licit_det[0] < farfrr_spoof_det[0]:
+                xyannotate_licit = [
+                    farfrr_licit_det[0] - 0.7,
+                    farfrr_licit_det[1] - 0.4,
+                ]
+                xyannotate_spoof = [
+                    0.1 + farfrr_spoof_det[0],
+                    farfrr_spoof_det[1] + 0.3,
+                ]
+            else:
+                xyannotate_spoof = [
+                    farfrr_licit_det[0] - 0.7,
+                    farfrr_licit_det[1] - 0.4,
+                ]
+                xyannotate_licit = [
+                    0.1 + farfrr_spoof_det[0],
+                    farfrr_spoof_det[1] + 0.3,
+                ]
+
+            if not self._real_data:
+                mpl.annotate(
+                    '%s @ operating point' % self._y_label,
+                    xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
+                    xycoords='data',
+                    xytext=(xyannotate_licit[0], xyannotate_licit[1]))
+                mpl.annotate(
+                    'IAPMR @ operating point',
+                    xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
+                    xycoords='data',
+                    xytext=(xyannotate_spoof[0], xyannotate_spoof[1]))
+            else:
+                mpl.annotate(
+                    'FMR=%.2f%%' % (farfrr_licit[0] * 100),
+                    xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
+                    xycoords='data',
+                    xytext=(xyannotate_licit[0], xyannotate_licit[1]),
+                    color='C0',
+                    size='small')
+                mpl.annotate(
+                    'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
+                    xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
+                    xycoords='data',
+                    xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
+                    color='C3',
+                    size='small')
 
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
@@ -619,10 +621,10 @@ class BaseVulnDetRoc(PadPlot):
 class DetVuln(BaseVulnDetRoc):
     '''DET for vuln'''
 
-    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
+    def __init__(self, ctx, scores, evaluation, func_load, real_data,
                  no_spoof):
         super(Det, self).__init__(ctx, scores, evaluation, func_load,
-                                  criteria, real_data, no_spoof)
+                                  real_data, no_spoof)
         self._x_label = self._x_label or "FMR"
         self._y_label = self._y_label or "FNMR"
         add = ''
@@ -653,10 +655,9 @@ class DetVuln(BaseVulnDetRoc):
 class RocVuln(BaseVulnDetRoc):
     '''ROC for vuln'''
 
-    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
-                 no_spoof):
+    def __init__(self, ctx, scores, evaluation, func_load, real_data, no_spoof):
         super(RocVuln, self).__init__(ctx, scores, evaluation, func_load,
-                                      criteria, real_data, no_spoof)
+                                      real_data, no_spoof)
         self._x_label = self._x_label or "FMR"
         self._y_label = self._y_label or "1 - FNMR"
         self._semilogx = ctx.meta.get('semilogx', True)
@@ -675,6 +676,7 @@ class RocVuln(BaseVulnDetRoc):
             color=kwargs.get('color'), linestyle=kwargs.get('linestyle'),
             label=kwargs.get('label')
         )
+
 
 
 class FmrIapmr(PadPlot):

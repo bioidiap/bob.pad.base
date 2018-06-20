@@ -12,7 +12,7 @@ from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (verbosity_option,
                                                 open_file_mode_option,
                                                bool_option,
-                                               AliasedGroup)
+                                               AliasedGroup, list_float_option)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
@@ -23,6 +23,15 @@ NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
 
 
+def hlines_at_option(dflt=' ', **kwargs):
+    '''Get option to draw const FNMRlines'''
+    return list_float_option(
+        name='hlines-at', short_name='hla',
+        desc='If given, draw horizontal lines at the given axis positions. '
+        'Your values must be separated with a comma (,) without space. '
+        'This option works in ROC and DET curves.',
+        nitems=None, dflt=dflt, **kwargs
+    )
 
 
 def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
@@ -101,7 +110,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 
 
 @click.command()
-@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
+@common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_roc.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
@@ -116,37 +125,32 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 @common_options.x_rotation_option(dflt=45)
 @common_options.x_label_option()
 @common_options.y_label_option()
-@click.option('-c', '--criteria', default=None, show_default=True,
-              help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter')))
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
+@hlines_at_option()
 @click.pass_context
-def roc(ctx, scores, criteria, real_data, **kwargs):
+def roc(ctx, scores, real_data, **kwargs):
   """Plot ROC
 
-  You need to provide 4 scores
+  You need to provide 2 scores
   files for each vulnerability system in this order:
 
   \b
-  * licit development scores
-  * licit evaluation scores
-  * spoof development scores
-  * spoof evaluation scores
+  * licit scores
+  * spoof scores
 
   Examples:
-      $ bob vuln roc -v dev-scores eval-scores
+      $ bob vuln roc -v licit-scores spoof-scores
 
-      $ bob vuln roc -v {licit,spoof}/scores-{dev,eval}
+      $ bob vuln roc -v scores-{licit,spoof}
   """
-  process = figure.RocVuln(ctx, scores, True, load.split, criteria, real_data,
-                       False)
+  process = figure.RocVuln(ctx, scores, True, load.split, real_data, False)
   process.run()
 
 
 @click.command()
-@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
+@common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_det.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
@@ -160,32 +164,28 @@ def roc(ctx, scores, criteria, real_data, **kwargs):
 @common_options.x_rotation_option(dflt=45)
 @common_options.x_label_option()
 @common_options.y_label_option()
-@click.option('-c', '--criteria', default=None, show_default=True,
-              help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter')))
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
+@hlines_at_option()
 @click.pass_context
-def det(ctx, scores, criteria, real_data, **kwargs):
+def det(ctx, scores, real_data, **kwargs):
   """Plot DET
 
-  You need to provide 4 scores
-  files for each vuln system in this order:
+
+  You need to provide 2 scores
+  files for each vulnerability system in this order:
 
   \b
-  * licit development scores
-  * licit evaluation scores
-  * spoof development scores
-  * spoof evaluation scores
+  * licit scores
+  * spoof scores
 
   Examples:
-      $ bob vuln det -v dev-scores eval-scores
+      $ bob vuln det -v licit-scores spoof-scores
 
-      $ bob vuln det -v {licit,spoof}/scores-{dev,eval}
+      $ bob vuln det -v scores-{licit,spoof}
   """
-  process = figure.Det(ctx, scores, True, load.split, criteria, real_data,
-                       False)
+  process = figure.Det(ctx, scores, True, load.split, real_data, False)
   process.run()
 
 
