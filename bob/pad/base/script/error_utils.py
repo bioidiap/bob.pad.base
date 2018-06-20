@@ -5,6 +5,44 @@
 
 import bob.measure
 import numpy
+from bob.measure import (
+    far_threshold, eer_threshold, min_hter_threshold)
+
+
+def calc_threshold(method, neg, pos):
+    """Calculates the threshold based on the given method.
+    The scores should be sorted!
+
+    Parameters
+    ----------
+    method : str
+        One of ``bpcer20``, ``eer``, ``min-hter``.
+    neg : array_like
+        The negative scores. They should be sorted!
+    pos : array_like
+        The positive scores. They should be sorted!
+
+    Returns
+    -------
+    float
+        The calculated threshold.
+
+    Raises
+    ------
+    ValueError
+        If method is unknown.
+    """
+    method = method.lower()
+    if method == 'bpcer20':
+        threshold = far_threshold(neg, pos, 0.05, True)
+    elif method == 'eer':
+        threshold = eer_threshold(neg, pos, True)
+    elif method == 'min-hter':
+        threshold = min_hter_threshold(neg, pos, True)
+    else:
+        raise ValueError("Unknown threshold criteria: {}".format(method))
+
+    return threshold
 
 
 def calc_pass_rate(threshold, attacks):

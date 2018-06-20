@@ -13,88 +13,10 @@ from bob.measure import (
 from bob.measure.plot import (det, det_axis, roc_for_far, log_values)
 from . import error_utils
 
-ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
-
-
-def calc_threshold(method, neg, pos):
-    """Calculates the threshold based on the given method.
-    The scores should be sorted!
-
-    Parameters
-    ----------
-    method : str
-        One of ``bpcer20``, ``eer``, ``min-hter``.
-    neg : array_like
-        The negative scores. They should be sorted!
-    pos : array_like
-        The positive scores. They should be sorted!
-
-    Returns
-    -------
-    float
-        The calculated threshold.
-
-    Raises
-    ------
-    ValueError
-        If method is unknown.
-    """
-    method = method.lower()
-    if method == 'bpcer20':
-        threshold = far_threshold(neg, pos, 0.05, True)
-    elif method == 'eer':
-        threshold = eer_threshold(neg, pos, True)
-    elif method == 'min-hter':
-        threshold = min_hter_threshold(neg, pos, True)
-    else:
-        raise ValueError("Unknown threshold criteria: {}".format(method))
-
-    return threshold
-
 
 class Metrics(measure_figure.Metrics):
-    '''Compute metrics from score files'''
-
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Metrics, self).__init__(ctx, scores, evaluation, func_load)
-
-    def compute(self, idx, input_scores, input_names):
-        ''' Compute metrics for the given criteria'''
-        neg_list, pos_list, _ = get_fta_list(input_scores)
-        dev_neg, dev_pos = neg_list[0], pos_list[0]
-        dev_file = input_names[0]
-        if self._eval:
-            eval_neg, eval_pos = neg_list[1], pos_list[1]
-            eval_file = input_names[1]
-
-        title = self._legends[idx] if self._legends is not None else None
-        headers = ['' or title, 'Development %s' % dev_file]
-        if self._eval:
-            headers.append('Eval. % s' % eval_file)
-        for m in ALL_CRITERIA:
-            raws = []
-            threshold = calc_threshold(m, dev_neg, dev_pos)
-            click.echo("\nThreshold of %f selected with the %s criteria" % (
-                threshold, m), file=self.log_file)
-            apcer, bpcer = farfrr(dev_neg, dev_pos, threshold)
-            raws.append(['APCER', '{:>5.1f}%'.format(apcer * 100)])
-            raws.append(['BPCER', '{:>5.1f}%'.format(bpcer * 100)])
-            raws.append(['ACER', '{:>5.1f}%'.format((apcer + bpcer) * 50)])
-            if self._eval and eval_neg is not None:
-                apcer, bpcer = farfrr(eval_neg, eval_pos, threshold)
-                raws[0].append('{:>5.1f}%'.format(apcer * 100))
-                raws[1].append('{:>5.1f}%'.format(bpcer * 100))
-                raws[2].append('{:>5.1f}%'.format((apcer + bpcer) * 50))
-
-            click.echo(
-                tabulate(raws, headers, self._tablefmt),
-                file=self.log_file
-            )
-
-
-class MetricsVuln(measure_figure.Metrics):
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(MetricsVuln, self).__init__(ctx, scores, evaluation, func_load)
 
     ''' Compute metrics from score files'''
 
@@ -118,20 +40,6 @@ class MetricsVuln(measure_figure.Metrics):
         click.echo(
             tabulate(rows, headers, self._tablefmt),
             file=self.log_file
-        )
-
-
-class HistPad(measure_figure.Hist):
-    ''' Histograms for PAD '''
-
-    def _setup_hist(self, neg, pos):
-        self._title_base = 'PAD'
-        self._density_hist(
-            pos[0], n=0, label='Bona Fide', color='C1'
-        )
-        self._density_hist(
-            neg[0], n=1, label='Presentation attack', alpha=0.4, color='C7',
-            hatch='\\\\'
         )
 
 
@@ -175,6 +83,10 @@ def _iapmr_plot(scores, threshold, iapmr, real_data, **kwargs):
 
 class HistVuln(measure_figure.Hist):
     ''' Histograms for vulnerability '''
+
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(HistVuln, self).__init__(
+            ctx, scores, evaluation, func_load, nhist_per_system=3)
 
     def _setup_hist(self, neg, pos):
         self._title_base = 'Vulnerability'
@@ -519,28 +431,13 @@ class Epsc3D(Epsc):
         self._pdf_page.savefig()
 
 
-class Roc(bio_figure.Roc):
-    '''ROC for PAD'''
-
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(Roc, self).__init__(ctx, scores, evaluation, func_load)
-        self._x_label = ctx.meta.get('x_label') or 'APCER'
-        self._y_label = ctx.meta.get('y_label') or '1 - BPCER'
-
-
-class DetPad(bio_figure.Det):
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(DetPad, self).__init__(ctx, scores, evaluation, func_load)
-        self._x_label = ctx.meta.get('x_label') or 'APCER'
-        self._y_label = ctx.meta.get('y_label') or 'BPCER'
-
-
-class BaseDetRoc(PadPlot):
+class BaseVulnDetRoc(PadPlot):
     '''Base for DET and ROC'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
                  no_spoof):
-        super(BaseDetRoc, self).__init__(ctx, scores, evaluation, func_load)
+        super(BaseVulnDetRoc, self).__init__(
+            ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
         self._criteria = criteria or 'eer'
         self._real_data = True if real_data is None else real_data
@@ -719,7 +616,7 @@ class BaseDetRoc(PadPlot):
         pass
 
 
-class Det(BaseDetRoc):
+class DetVuln(BaseVulnDetRoc):
     '''DET for vuln'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
@@ -753,7 +650,7 @@ class Det(BaseDetRoc):
         )
 
 
-class RocVuln(BaseDetRoc):
+class RocVuln(BaseVulnDetRoc):
     '''ROC for vuln'''
 
     def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
