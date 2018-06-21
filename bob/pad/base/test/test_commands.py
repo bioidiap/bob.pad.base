@@ -31,8 +31,8 @@ def test_det_vuln():
                                                  'data/spoof/scores-eval')
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(vuln_commands.det, ['-c', 'min-hter',
-                                                   '--output',
+        result = runner.invoke(vuln_commands.det, ['-hla', '0.2',
+                                                   '-o',
                                                    'DET.pdf',
                                                    licit_dev, licit_test,
                                                    spoof_dev, spoof_test])
@@ -83,7 +83,7 @@ def test_hist_pad():
         result = runner.invoke(pad_commands.hist, ['--criterion', 'min-hter',
                                                    '--output',
                                                    'HISTO.pdf', '-b',
-                                                   '30,auto',
+                                                   '30,20,60,10',
                                                    licit_dev, spoof_dev])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
