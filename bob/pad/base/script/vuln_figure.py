@@ -483,7 +483,6 @@ class BaseVulnDetRoc(PadPlot):
             return
 
         for line in self._hlines_at:
-            print (line)
             thres_baseline = frr_threshold(licit_neg, licit_pos, line)
 
             axlim = mpl.axis()
@@ -516,67 +515,30 @@ class BaseVulnDetRoc(PadPlot):
                     color='k',
                     linestyle='--',
                     label="%s = %.2f%%" %
-                    (self._y_label, farfrr_licit[1] * 100))
+                    ('FMNR', farfrr_licit[1] * 100))
+
+            if not self._real_data:
+                label_licit = '%s @ operating point' % self._y_label
+                label_spoof = 'IAPMR @ operating point'
+            else:
+                label_licit = 'FMR=%.2f%%' % (farfrr_licit[0] * 100)
+                label_spoof = 'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100)
 
             mpl.plot(
                 farfrr_licit_det[0],
                 farfrr_licit_det[1],
                 'o',
                 color='C0',
+                label=label_licit
             )  # FAR point, licit scenario
             mpl.plot(
                 farfrr_spoof_det[0],
                 farfrr_spoof_det[1],
                 'o',
                 color='C3',
+                label=label_spoof
             )  # FAR point, spoof scenario
 
-            # annotate the FAR points
-            if farfrr_licit_det[0] < farfrr_spoof_det[0]:
-                xyannotate_licit = [
-                    farfrr_licit_det[0] - 0.7,
-                    farfrr_licit_det[1] - 0.4,
-                ]
-                xyannotate_spoof = [
-                    0.1 + farfrr_spoof_det[0],
-                    farfrr_spoof_det[1] + 0.3,
-                ]
-            else:
-                xyannotate_spoof = [
-                    farfrr_licit_det[0] - 0.7,
-                    farfrr_licit_det[1] - 0.4,
-                ]
-                xyannotate_licit = [
-                    0.1 + farfrr_spoof_det[0],
-                    farfrr_spoof_det[1] + 0.3,
-                ]
-
-            if not self._real_data:
-                mpl.annotate(
-                    '%s @ operating point' % self._y_label,
-                    xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                    xycoords='data',
-                    xytext=(xyannotate_licit[0], xyannotate_licit[1]))
-                mpl.annotate(
-                    'IAPMR @ operating point',
-                    xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                    xycoords='data',
-                    xytext=(xyannotate_spoof[0], xyannotate_spoof[1]))
-            else:
-                mpl.annotate(
-                    'FMR=%.2f%%' % (farfrr_licit[0] * 100),
-                    xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                    xycoords='data',
-                    xytext=(xyannotate_licit[0], xyannotate_licit[1]),
-                    color='C0',
-                    size='small')
-                mpl.annotate(
-                    'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
-                    xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                    xycoords='data',
-                    xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
-                    color='C3',
-                    size='small')
 
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
@@ -677,6 +639,10 @@ class RocVuln(BaseVulnDetRoc):
             label=kwargs.get('label')
         )
 
+    def _get_farfrr(self, x, y, thres):
+        points = farfrr(x, y, thres)
+        points2 = (points[0], 1 - points[1])
+        return points, points2
 
 
 class FmrIapmr(PadPlot):
