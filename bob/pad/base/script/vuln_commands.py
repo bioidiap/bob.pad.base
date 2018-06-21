@@ -185,7 +185,7 @@ def det(ctx, scores, real_data, **kwargs):
 
       $ bob vuln det -v scores-{licit,spoof}
   """
-  process = figure.Det(ctx, scores, True, load.split, real_data, False)
+  process = figure.DetVuln(ctx, scores, True, load.split, real_data, False)
   process.run()
 
 

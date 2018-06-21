@@ -585,7 +585,7 @@ class DetVuln(BaseVulnDetRoc):
 
     def __init__(self, ctx, scores, evaluation, func_load, real_data,
                  no_spoof):
-        super(Det, self).__init__(ctx, scores, evaluation, func_load,
+        super(DetVuln, self).__init__(ctx, scores, evaluation, func_load,
                                   real_data, no_spoof)
         self._x_label = self._x_label or "FMR"
         self._y_label = self._y_label or "FNMR"
