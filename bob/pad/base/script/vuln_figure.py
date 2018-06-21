@@ -26,7 +26,7 @@ class Metrics(measure_figure.Metrics):
         neg_list, pos_list, _ = get_fta_list(input_scores)
         dev_neg, dev_pos = neg_list[0], pos_list[0]
         criter = self._criterion or 'eer'
-        threshold = calc_threshold(criter, dev_neg, dev_pos) \
+        threshold = error_utils.calc_threshold(criter, dev_neg, dev_pos) \
             if self._thres is None else self._thres[idx]
         far, frr = farfrr(neg_list[1], pos_list[1], threshold)
         iapmr, _ = farfrr(neg_list[3], pos_list[1], threshold)

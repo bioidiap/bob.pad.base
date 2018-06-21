@@ -390,7 +390,7 @@ def metrics(ctx, scores, **kwargs):
   Examples:
       $ bob vuln vuln_metrics -v {licit,spoof}/scores-{dev,eval}
   """
-  process = figure.MetricsVuln(ctx, scores, True, load.split)
+  process = figure.Metrics(ctx, scores, True, load.split)
   process.run()
 
 
