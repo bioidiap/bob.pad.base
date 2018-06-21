@@ -83,7 +83,7 @@ def test_hist_pad():
         result = runner.invoke(pad_commands.hist, ['--criterion', 'min-hter',
                                                    '--output',
                                                    'HISTO.pdf', '-b',
-                                                   '30,20,60,10',
+                                                   '30,20',
                                                    licit_dev, spoof_dev])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
@@ -114,6 +114,15 @@ def test_hist_vuln():
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(vuln_commands.hist,
+                               ['--criterion', 'eer', '--output',
+                                'HISTO.pdf', '-b', '2,20,30',
+                                licit_dev, licit_test,
+                                spoof_dev, spoof_test])
+        assert result.exit_code == 0, (result.exit_code, result.output)
+
 
 
 
