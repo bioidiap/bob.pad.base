@@ -16,7 +16,7 @@ from bob.extension.scripts.click_helper import (verbosity_option,
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
-from . import figure
+from . import vuln_figure as figure
 
 NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
