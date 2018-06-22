@@ -330,6 +330,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 @common_options.subplot_option()
 @common_options.legend_ncols_option()
 @common_options.style_option()
+@common_options.hide_dev_option()
 @verbosity_option()
 @click.pass_context
 def hist(ctx, scores, **kwargs):
