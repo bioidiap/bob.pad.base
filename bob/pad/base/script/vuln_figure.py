@@ -183,6 +183,7 @@ class Epc(PadPlot):
         spoof_eval_neg = neg_list[3]
 
         mpl.gcf().clear()
+        mpl.grid()
 
         epc(
             licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
@@ -195,7 +196,7 @@ class Epc(PadPlot):
         mpl.xlabel(self._x_label)
         mpl.ylabel(self._y_label)
         if self._iapmr:
-            axlim = mpl.axis()
+            ax1 = mpl.gca()
             mpl.gca().set_axisbelow(True)
             prob_ax = mpl.gca().twinx()
             step = 1.0 / float(self._points)
@@ -223,13 +224,15 @@ class Epc(PadPlot):
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
             prob_ax.set_ylabel('IAPMR', color='C3')
             prob_ax.set_axisbelow(True)
+            ax1.yaxis.label.set_color('C0')
+            ax1.tick_params(axis='y', colors='C0')
+            ax1.spines['left'].set_color('C0')
 
 
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
             mpl.title(title)
         # legends for all axes
-        mpl.grid()
         self._plot_legends()
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig(mpl.gcf())
