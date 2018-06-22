@@ -9,9 +9,10 @@ import bob.bio.base.script.figure as bio_figure
 from tabulate import tabulate
 from bob.measure.utils import get_fta_list
 from bob.measure import (
-    frr_threshold, far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
+    frr_threshold, far_threshold, eer_threshold, min_hter_threshold, farfrr,
+    epc, ppndf, min_weighted_error_rate_threshold
 )
-from bob.measure.plot import (det, det_axis, roc_for_far, log_values)
+from bob.measure.plot import (det, det_axis, roc_for_far, log_values, epc)
 from . import error_utils
 
 
@@ -23,6 +24,7 @@ class Metrics(measure_figure.Metrics):
 
     def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
+        # extract pos and negative and remove NaNs
         neg_list, pos_list, _ = get_fta_list(input_scores)
         dev_neg, dev_pos = neg_list[0], pos_list[0]
         criter = self._criterion or 'eer'
@@ -174,45 +176,44 @@ class Epc(PadPlot):
 
     def compute(self, idx, input_scores, input_names):
         ''' Plot EPC for PAD'''
-        licit_dev_neg = input_scores[0][0]
-        licit_dev_pos = input_scores[0][1]
-        licit_eval_neg = input_scores[1][0]
-        licit_eval_pos = input_scores[1][1]
-        spoof_eval_neg = input_scores[3][0]
+        # extract pos and negative and remove NaNs
+        neg_list, pos_list, _ = get_fta_list(input_scores)
+        licit_dev_neg, licit_dev_pos = neg_list[0], pos_list[0]
+        licit_eval_neg, licit_eval_pos = neg_list[1], pos_list[1]
+        spoof_eval_neg = neg_list[3]
+
         mpl.gcf().clear()
-        epc_baseline = epc(
-            licit_dev_neg, licit_dev_pos, licit_eval_neg,
-            licit_eval_pos, 100
-        )
-        mpl.plot(
-            epc_baseline[:, 0], [100. * k for k in epc_baseline[:, 1]],
-            color='C0',
+
+        epc(
+            licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
+            self._points,
+            color='C0', linestyle=self._linestyles[idx],
             label=self._label(
                 'WER', '%s-%s' % (input_names[0], input_names[1]), idx
             ),
-            linestyle='-'
         )
         mpl.xlabel(self._x_label)
         mpl.ylabel(self._y_label)
         if self._iapmr:
-            mix_prob_y = []
-            for k in epc_baseline[:, 2]:
-                prob_attack = sum(
-                    1 for i in spoof_eval_neg if i >= k
-                ) / float(spoof_eval_neg.size)
-                mix_prob_y.append(100. * prob_attack)
-
+            axlim = mpl.axis()
             mpl.gca().set_axisbelow(True)
             prob_ax = mpl.gca().twinx()
-            mpl.plot(
-                epc_baseline[:, 0],
-                mix_prob_y,
-                color='C3',
-                linestyle='-',
-                label=self._label(
-                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
+            step = 1.0 / float(self._points)
+            thres = [float(k * step) for k in range(self._points)]
+            apply_thres = [min_weighted_error_rate_threshold(
+                licit_dev_neg, licit_dev_pos, t) for t in thres]
+            mix_prob_y = []
+            for k in apply_thres:
+                mix_prob_y.append(
+                    100. * error_utils.calc_pass_rate(k, spoof_eval_neg)
                 )
+
+            mpl.plot(
+                thres, mix_prob_y, label=self._label(
+                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
+                ), color='C3'
             )
+
             prob_ax.set_yticklabels(prob_ax.get_yticks())
             prob_ax.tick_params(axis='y', colors='C3')
             prob_ax.yaxis.label.set_color('C3')
@@ -221,10 +222,13 @@ class Epc(PadPlot):
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
             prob_ax.set_ylabel('IAPMR', color='C3')
             prob_ax.set_axisbelow(True)
+
+
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
             mpl.title(title)
         # legends for all axes
+        mpl.grid()
         self._plot_legends()
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig(mpl.gcf())
