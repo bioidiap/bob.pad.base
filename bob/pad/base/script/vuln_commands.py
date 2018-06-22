@@ -310,7 +310,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 
 
 @click.command()
-@common_options.scores_argument(nargs=-1, min_arg=2, force_eval=True)
+@common_options.scores_argument(nargs=-1, min_arg=2)
 @common_options.output_plot_file_option(default_out='vuln_hist.pdf')
 @common_options.n_bins_option()
 @common_options.criterion_option()
@@ -331,19 +331,21 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 @common_options.legend_ncols_option()
 @common_options.style_option()
 @common_options.hide_dev_option()
+@common_options.eval_option()
 @verbosity_option()
 @click.pass_context
-def hist(ctx, scores, **kwargs):
+def hist(ctx, scores, evaluation, **kwargs):
   '''Vulnerability analysis distributions.
 
-  Plots the histogram of score distributions. You need to provide 4 score
-  files for each biometric system in this order:
+  Plots the histogram of score distributions. You need to provide 2 or 4 score
+  files for each biometric system in this order.
+  When evaluation scores are provided, you must use the ``--eval`` option.
 
   \b
   * licit development scores
-  * licit evaluation scores
+  * (optional) licit evaluation scores
   * spoof development scores
-  * spoof evaluation scores
+  * (optional) spoof evaluation scores
 
   See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
   vulnerability analysis.
@@ -355,12 +357,12 @@ def hist(ctx, scores, **kwargs):
 
   Examples:
 
-      $ bob vuln vuln_hist -v licit/scores-dev licit/scores-eval \
+      $ bob vuln vuln_hist -e -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval
 
-      $ bob vuln vuln_hist -v {licit,spoof}/scores-{dev,eval}
+      $ bob vuln vuln_hist -e -v {licit,spoof}/scores-{dev,eval}
   '''
-  process = figure.HistVuln(ctx, scores, True, load.split)
+  process = figure.HistVuln(ctx, scores, evaluation, load.split)
   process.run()
 
 

@@ -111,14 +111,13 @@ def test_hist_vuln():
         result = runner.invoke(vuln_commands.hist,
                                ['--criterion', 'eer', '--output',
                                 'HISTO.pdf', '-b', '30',
-                                licit_dev, licit_test,
-                                spoof_dev, spoof_test])
+                                licit_dev, licit_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
     with runner.isolated_filesystem():
         result = runner.invoke(vuln_commands.hist,
                                ['--criterion', 'eer', '--output',
-                                'HISTO.pdf', '-b', '2,20,30',
+                                'HISTO.pdf', '-b', '2,20,30', '-e',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
