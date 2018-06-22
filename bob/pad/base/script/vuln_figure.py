@@ -200,6 +200,7 @@ class Epc(PadPlot):
             prob_ax = mpl.gca().twinx()
             step = 1.0 / float(self._points)
             thres = [float(k * step) for k in range(self._points)]
+            thres.append(1.0)
             apply_thres = [min_weighted_error_rate_threshold(
                 licit_dev_neg, licit_dev_pos, t) for t in thres]
             mix_prob_y = []
