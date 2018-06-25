@@ -92,7 +92,7 @@ class HistVuln(measure_figure.Hist):
             ctx, scores, evaluation, func_load, nhist_per_system=3)
 
     def _setup_hist(self, neg, pos):
-        self._title_base = 'Vulnerability'
+        self._title_base = ' '
         self._density_hist(
             pos[0], n=0, label='Genuine', color='C2'
         )
