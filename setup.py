@@ -140,6 +140,7 @@ setup(
         # bob pad scripts
         'bob.pad.cli': [
             'metrics          = bob.pad.base.script.pad_commands:metrics',
+            'multi-metrics    = bob.pad.base.script.pad_commands:multi_metrics',
             'hist             = bob.pad.base.script.pad_commands:hist',
             'det              = bob.pad.base.script.pad_commands:det',
             'roc              = bob.pad.base.script.pad_commands:roc',
