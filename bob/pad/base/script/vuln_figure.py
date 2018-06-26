@@ -1,54 +1,19 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
+import math
 import click
 import numpy as np
 import matplotlib.pyplot as mpl
 import bob.measure.script.figure as measure_figure
+import bob.bio.base.script.figure as bio_figure
 from tabulate import tabulate
 from bob.measure.utils import get_fta_list
 from bob.measure import (
-    far_threshold, eer_threshold, min_hter_threshold, farfrr, epc, ppndf
+    frr_threshold, far_threshold, eer_threshold, min_hter_threshold, farfrr,
+    epc, ppndf, min_weighted_error_rate_threshold
 )
-from bob.measure.plot import (det, det_axis)
+from bob.measure.plot import (det, det_axis, roc_for_far, log_values, epc)
 from . import error_utils
-
-ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
-
-
-def calc_threshold(method, neg, pos):
-    """Calculates the threshold based on the given method.
-    The scores should be sorted!
-
-    Parameters
-    ----------
-    method : str
-        One of ``bpcer201``, ``eer``, ``min-hter``.
-    neg : array_like
-        The negative scores. They should be sorted!
-    pos : array_like
-        The positive scores. They should be sorted!
-
-    Returns
-    -------
-    float
-        The calculated threshold.
-
-    Raises
-    ------
-    ValueError
-        If method is unknown.
-    """
-    method = method.lower()
-    if method == 'bpcer20':
-        threshold = far_threshold(neg, pos, 0.05, True)
-    elif method == 'eer':
-        threshold = eer_threshold(neg, pos, True)
-    elif method == 'min-hter':
-        threshold = min_hter_threshold(neg, pos, True)
-    else:
-        raise ValueError("Unknown threshold criteria: {}".format(method))
-
-    return threshold
 
 
 class Metrics(measure_figure.Metrics):
@@ -59,50 +24,11 @@ class Metrics(measure_figure.Metrics):
 
     def compute(self, idx, input_scores, input_names):
         ''' Compute metrics for the given criteria'''
-        neg_list, pos_list, _ = get_fta_list(input_scores)
-        dev_neg, dev_pos = neg_list[0], pos_list[0]
-        dev_file = input_names[0]
-        if self._eval:
-            eval_neg, eval_pos = neg_list[1], pos_list[1]
-            eval_file = input_names[1]
-
-        title = self._legends[idx] if self._legends is not None else None
-        headers = ['' or title, 'Development %s' % dev_file]
-        if self._eval:
-            headers.append('Eval. % s' % eval_file)
-        for m in ALL_CRITERIA:
-            raws = []
-            threshold = calc_threshold(m, dev_neg, dev_pos)
-            click.echo("\nThreshold of %f selected with the %s criteria" % (
-                threshold, m))
-            apcer, bpcer = farfrr(dev_neg, dev_pos, threshold)
-            raws.append(['BPCER20', '{:>5.1f}%'.format(apcer * 100)])
-            raws.append(['EER', '{:>5.1f}%'.format(bpcer * 100)])
-            raws.append(['min-HTER', '{:>5.1f}%'.format((apcer + bpcer) * 50)])
-            if self._eval and eval_neg is not None:
-                apcer, bpcer = farfrr(eval_neg, eval_pos, threshold)
-                raws[0].append('{:>5.1f}%'.format(apcer * 100))
-                raws[1].append('{:>5.1f}%'.format(bpcer * 100))
-                raws[2].append('{:>5.1f}%'.format((apcer + bpcer) * 50))
-
-            click.echo(
-                tabulate(raws, headers, self._tablefmt),
-                file=self.log_file
-            )
-
-
-class MetricsVuln(measure_figure.Metrics):
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(MetricsVuln, self).__init__(ctx, scores, evaluation, func_load)
-
-    ''' Compute metrics from score files'''
-
-    def compute(self, idx, input_scores, input_names):
-        ''' Compute metrics for the given criteria'''
+        # extract pos and negative and remove NaNs
         neg_list, pos_list, _ = get_fta_list(input_scores)
         dev_neg, dev_pos = neg_list[0], pos_list[0]
         criter = self._criterion or 'eer'
-        threshold = calc_threshold(criter, dev_neg, dev_pos) \
+        threshold = error_utils.calc_threshold(criter, dev_neg, dev_pos) \
             if self._thres is None else self._thres[idx]
         far, frr = farfrr(neg_list[1], pos_list[1], threshold)
         iapmr, _ = farfrr(neg_list[3], pos_list[1], threshold)
@@ -111,26 +37,12 @@ class MetricsVuln(measure_figure.Metrics):
                    (criter.upper(), threshold)]
         rows = []
         rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
-        rows.append(['FMNR (%)', '{:>5.1f}%'.format(frr * 100)])
+        rows.append(['FNMR (%)', '{:>5.1f}%'.format(frr * 100)])
         rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
         rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
         click.echo(
             tabulate(rows, headers, self._tablefmt),
             file=self.log_file
-        )
-
-
-class HistPad(measure_figure.Hist):
-    ''' Histograms for PAD '''
-
-    def _setup_hist(self, neg, pos):
-        self._title_base = 'PAD'
-        self._density_hist(
-            pos[0], n=0, label='Bona Fide', color='C1'
-        )
-        self._density_hist(
-            neg[0], n=1, label='Presentation attack', alpha=0.4, color='C7',
-            hatch='\\\\'
         )
 
 
@@ -175,8 +87,12 @@ def _iapmr_plot(scores, threshold, iapmr, real_data, **kwargs):
 class HistVuln(measure_figure.Hist):
     ''' Histograms for vulnerability '''
 
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(HistVuln, self).__init__(
+            ctx, scores, evaluation, func_load, nhist_per_system=3)
+
     def _setup_hist(self, neg, pos):
-        self._title_base = 'Vulnerability'
+        self._title_base = ' '
         self._density_hist(
             pos[0], n=0, label='Genuine', color='C2'
         )
@@ -260,52 +176,59 @@ class Epc(PadPlot):
 
     def compute(self, idx, input_scores, input_names):
         ''' Plot EPC for PAD'''
-        licit_dev_neg = input_scores[0][0]
-        licit_dev_pos = input_scores[0][1]
-        licit_eval_neg = input_scores[1][0]
-        licit_eval_pos = input_scores[1][1]
-        spoof_eval_neg = input_scores[3][0]
+        # extract pos and negative and remove NaNs
+        neg_list, pos_list, _ = get_fta_list(input_scores)
+        licit_dev_neg, licit_dev_pos = neg_list[0], pos_list[0]
+        licit_eval_neg, licit_eval_pos = neg_list[1], pos_list[1]
+        spoof_eval_neg = neg_list[3]
+
         mpl.gcf().clear()
-        epc_baseline = epc(
-            licit_dev_neg, licit_dev_pos, licit_eval_neg,
-            licit_eval_pos, 100
-        )
-        mpl.plot(
-            epc_baseline[:, 0], [100. * k for k in epc_baseline[:, 1]],
-            color='C0',
+        mpl.grid()
+
+        epc(
+            licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
+            self._points,
+            color='C0', linestyle=self._linestyles[idx],
             label=self._label(
                 'WER', '%s-%s' % (input_names[0], input_names[1]), idx
             ),
-            linestyle='-'
         )
         mpl.xlabel(self._x_label)
         mpl.ylabel(self._y_label)
         if self._iapmr:
-            mix_prob_y = []
-            for k in epc_baseline[:, 2]:
-                prob_attack = sum(
-                    1 for i in spoof_eval_neg if i >= k
-                ) / float(spoof_eval_neg.size)
-                mix_prob_y.append(100. * prob_attack)
-
+            ax1 = mpl.gca()
             mpl.gca().set_axisbelow(True)
             prob_ax = mpl.gca().twinx()
-            mpl.plot(
-                epc_baseline[:, 0],
-                mix_prob_y,
-                color='C3',
-                linestyle='-',
-                label=self._label(
-                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
+            step = 1.0 / float(self._points)
+            thres = [float(k * step) for k in range(self._points)]
+            thres.append(1.0)
+            apply_thres = [min_weighted_error_rate_threshold(
+                licit_dev_neg, licit_dev_pos, t) for t in thres]
+            mix_prob_y = []
+            for k in apply_thres:
+                mix_prob_y.append(
+                    100. * error_utils.calc_pass_rate(k, spoof_eval_neg)
                 )
+
+            mpl.plot(
+                thres, mix_prob_y, label=self._label(
+                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
+                ), color='C3'
             )
+
             prob_ax.set_yticklabels(prob_ax.get_yticks())
-            prob_ax.tick_params(axis='y', colors='red')
-            prob_ax.yaxis.label.set_color('red')
-            prob_ax.spines['right'].set_color('red')
+            prob_ax.tick_params(axis='y', colors='C3')
+            prob_ax.yaxis.label.set_color('C3')
+            prob_ax.spines['right'].set_color('C3')
             ylabels = prob_ax.get_yticks()
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
+            prob_ax.set_ylabel('IAPMR', color='C3')
             prob_ax.set_axisbelow(True)
+            ax1.yaxis.label.set_color('C0')
+            ax1.tick_params(axis='y', colors='C0')
+            ax1.spines['left'].set_color('C0')
+
+
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
             mpl.title(title)
@@ -332,6 +255,7 @@ class Epsc(PadPlot):
         self._split = False
         self._nb_figs = 1
         self._title = ''
+        self._sampling = ctx.meta.get('sampling', 5)
 
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
@@ -470,7 +394,7 @@ class Epsc3D(Epsc):
         from mpl_toolkits.mplot3d import Axes3D
         from matplotlib import cm
 
-        points = 10
+        points = self._sampling or 5
 
         omega, beta, thrs = error_utils.epsc_thresholds(
             licit_dev_neg,
@@ -516,166 +440,140 @@ class Epsc3D(Epsc):
         self._pdf_page.savefig()
 
 
-class Det(PadPlot):
-    '''DET for PAD'''
+class BaseVulnDetRoc(PadPlot):
+    '''Base for DET and ROC'''
 
-    def __init__(self, ctx, scores, evaluation, func_load, criteria, real_data,
-                no_spoof):
-        super(Det, self).__init__(ctx, scores, evaluation, func_load)
+    def __init__(self, ctx, scores, evaluation, func_load, real_data,
+                 no_spoof):
+        super(BaseVulnDetRoc, self).__init__(
+            ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
-        self._criteria = criteria or 'eer'
+        self._hlines_at = ctx.meta.get('hlines_at', [])
         self._real_data = True if real_data is None else real_data
+        self._legend_loc = None
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
-        licit_dev_neg = input_scores[0][0]
-        licit_dev_pos = input_scores[0][1]
-        licit_eval_neg = input_scores[1][0]
-        licit_eval_pos = input_scores[1][1]
-        spoof_eval_neg = input_scores[3][0] if len(input_scores) > 2 else None
-        spoof_eval_pos = input_scores[3][1] if len(input_scores) > 2 else None
-        det(
-            licit_eval_neg,
-            licit_eval_pos,
+        licit_neg = input_scores[0][0]
+        licit_pos = input_scores[0][1]
+        spoof_neg = input_scores[1][0]
+        spoof_pos = input_scores[1][1]
+        self._plot(
+            licit_neg,
+            licit_pos,
             self._points,
             color='C0',
             linestyle='-',
             label=self._label("licit", input_names[0], idx)
         )
-        if not self._no_spoof and spoof_eval_neg is not None:
-            det(
-                spoof_eval_neg,
-                spoof_eval_pos,
+        if not self._no_spoof and spoof_neg is not None:
+            ax1 = mpl.gca()
+            ax2 = ax1.twiny()
+            ax2.set_xlabel('IAPMR', color='C3')
+            ax2.set_xticklabels(ax2.get_xticks())
+            ax2.tick_params(axis='x', colors='C3')
+            ax2.xaxis.label.set_color('C3')
+            ax2.spines['top'].set_color('C3')
+            ax2.spines['bottom'].set_color('C0')
+            ax1.xaxis.label.set_color('C0')
+            ax1.tick_params(axis='x', colors='C0')
+            self._plot(
+                spoof_neg,
+                spoof_pos,
                 self._points,
                 color='C3',
                 linestyle=':',
-                label=self._label("spoof", input_names[3], idx)
+                label=self._label("spoof", input_names[1], idx)
             )
+            mpl.sca(ax1)
 
-        if self._criteria is None or self._no_spoof:
+        if self._hlines_at is None:
             return
 
-        thres_baseline = calc_threshold(
-            self._criteria, licit_dev_neg, licit_dev_pos
-        )
+        for line in self._hlines_at:
+            thres_baseline = frr_threshold(licit_neg, licit_pos, line)
 
-        axlim = mpl.axis()
+            axlim = mpl.axis()
 
-        farfrr_licit = farfrr(
-            licit_eval_neg, licit_eval_pos,
-            thres_baseline
-        )  # calculate test frr @ EER (licit scenario)
-        farfrr_spoof = farfrr(
-            spoof_eval_neg, spoof_eval_pos,
-            thres_baseline
-        )  # calculate test frr @ EER (spoof scenario)
-        farfrr_licit_det = [
-            ppndf(i) for i in farfrr_licit
-        ]
-        # find the FAR and FRR values that need to be plotted on normal deviate
-        # scale
-        farfrr_spoof_det = [
-            ppndf(i) for i in farfrr_spoof
-        ]
-        # find the FAR and FRR values that need to be plotted on normal deviate
-        # scale
-        if not self._real_data:
-            mpl.axhline(
-                y=farfrr_licit_det[1],
-                xmin=axlim[2],
-                xmax=axlim[3],
-                color='k',
-                linestyle='--',
-                label="FRR @ EER")
-        else:
-            mpl.axhline(
-                y=farfrr_licit_det[1],
-                xmin=axlim[0],
-                xmax=axlim[1],
-                color='k',
-                linestyle='--',
-                label="FRR = %.2f%%" %
-                (farfrr_licit[1] * 100))
+            farfrr_licit, farfrr_licit_det = self._get_farfrr(
+                licit_neg, licit_pos,
+                thres_baseline
+            )
+            if farfrr_licit is None:
+                return
 
-        mpl.plot(
-            farfrr_licit_det[0],
-            farfrr_licit_det[1],
-            'o',
-            color='C0',
-            markersize=9
-        )  # FAR point, licit scenario
-        mpl.plot(
-            farfrr_spoof_det[0],
-            farfrr_spoof_det[1],
-            'o',
-            color='C3',
-            markersize=9
-        )  # FAR point, spoof scenario
+            farfrr_spoof, farfrr_spoof_det = self._get_farfrr(
+                spoof_neg, spoof_pos,
+                frr_threshold(spoof_neg, spoof_pos, farfrr_licit[1])
+            )
 
-        # annotate the FAR points
-        xyannotate_licit = [
-            0.6*farfrr_licit_det[0],
-            0.6*farfrr_licit_det[1],
-        ]
-        xyannotate_spoof = [
-            0.6*farfrr_spoof_det[0],
-            0.6*farfrr_spoof_det[1],
-        ]
+            if not self._real_data:
+                mpl.axhline(
+                    y=farfrr_licit_det[1],
+                    xmin=axlim[2],
+                    xmax=axlim[3],
+                    color='k',
+                    linestyle='--',
+                    label="%s @ EER" % self._y_label)
+            else:
+                mpl.axhline(
+                    y=farfrr_licit_det[1],
+                    xmin=axlim[0],
+                    xmax=axlim[1],
+                    color='k',
+                    linestyle='--',
+                    label="%s = %.2f%%" %
+                    ('FMNR', farfrr_licit[1] * 100))
 
-        if not self._real_data:
-            mpl.annotate(
-                'FMR @ operating point',
-                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
-                color=self._colors[idx])
-            mpl.annotate(
-                'IAPMR @ operating point',
-                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
-                color=self._colors[idx])
-        else:
-            mpl.annotate(
-                'FAR=%.2f%%' % (farfrr_licit[0] * 100),
-                xy=(farfrr_licit_det[0], farfrr_licit_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_licit[0], xyannotate_licit[1]),
+            if not self._real_data:
+                label_licit = '%s @ operating point' % self._y_label
+                label_spoof = 'IAPMR @ operating point'
+            else:
+                label_licit = 'FMR=%.2f%%' % (farfrr_licit[0] * 100)
+                label_spoof = 'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100)
+
+            mpl.plot(
+                farfrr_licit_det[0],
+                farfrr_licit_det[1],
+                'o',
                 color='C0',
-                size='large')
-            mpl.annotate(
-                'IAPMR=%.2f%%' % (farfrr_spoof[0] * 100),
-                xy=(farfrr_spoof_det[0], farfrr_spoof_det[1]),
-                xycoords='data',
-                xytext=(xyannotate_spoof[0], xyannotate_spoof[1]),
+                label=label_licit
+            )  # FAR point, licit scenario
+            mpl.plot(
+                farfrr_spoof_det[0],
+                farfrr_spoof_det[1],
+                'o',
                 color='C3',
-                size='large')
+                label=label_spoof
+            )  # FAR point, spoof scenario
+
 
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
         close pdf is needed '''
         # only for plots
-        add = ''
-        if not self._no_spoof:
-            add = " and overlaid SPOOF scenario"
-        title = self._title if self._title is not None else \
-            ('DET: LICIT' + add)
-        if title.replace(' ', ''):
-            mpl.title(title)
-        mpl.xlabel(self._x_label or "False Acceptance Rate (%)")
-        mpl.ylabel(self._y_label or "False Rejection Rate (%)")
-        mpl.grid(True, color=self._grid_color)
-        if self._disp_legend:
-            mpl.legend(loc=self._legend_loc)
-        self._set_axis()
-        fig = mpl.gcf()
-        mpl.xticks(rotation=self._x_rotation)
-        mpl.tick_params(axis='both', which='major', labelsize=4)
-        for tick in mpl.gca().xaxis.get_major_ticks():
-            tick.label.set_fontsize(6)
-        for tick in mpl.gca().yaxis.get_major_ticks():
-            tick.label.set_fontsize(6)
 
+        if self._title.replace(' ', ''):
+            mpl.title(self._title, y=1.15)
+        mpl.xlabel(self._x_label)
+        mpl.ylabel(self._y_label)
+        mpl.grid(True, color=self._grid_color)
+        lines = []
+        labels = []
+        for ax in mpl.gcf().get_axes():
+            li, la = ax.get_legend_handles_labels()
+            lines += li
+            labels += la
+            mpl.sca(ax)
+            self._set_axis()
+            fig = mpl.gcf()
+            mpl.xticks(rotation=self._x_rotation)
+            mpl.tick_params(axis='both', which='major', labelsize=6)
+        if self._disp_legend:
+            mpl.gca().legend(
+                lines, labels, loc=self._legend_loc, fancybox=True,
+                framealpha=0.5
+            )
         self._pdf_page.savefig(fig)
 
         # do not want to close PDF when running evaluate
@@ -683,11 +581,76 @@ class Det(PadPlot):
                 ('closef' not in self._ctx.meta or self._ctx.meta['closef']):
             self._pdf_page.close()
 
+    def _get_farfrr(self, x, y, thres):
+        return None, None
+
+    def _plot(self, x, y, points, **kwargs):
+        pass
+
+
+class DetVuln(BaseVulnDetRoc):
+    '''DET for vuln'''
+
+    def __init__(self, ctx, scores, evaluation, func_load, real_data,
+                 no_spoof):
+        super(DetVuln, self).__init__(ctx, scores, evaluation, func_load,
+                                  real_data, no_spoof)
+        self._x_label = self._x_label or "FMR"
+        self._y_label = self._y_label or "FNMR"
+        add = ''
+        if not self._no_spoof:
+            add = " and overlaid SPOOF scenario"
+        self._title = self._title or ('DET: LICIT' + add)
+        self._legend_loc = self._legend_loc or 'upper right'
+
     def _set_axis(self):
         if self._axlim is not None and None not in self._axlim:
             det_axis(self._axlim)
         else:
             det_axis([0.01, 99, 0.01, 99])
+
+    def _get_farfrr(self, x, y, thres):
+        points = farfrr(x, y, thres)
+        return points, [ppndf(i) for i in points]
+
+    def _plot(self, x, y, points, **kwargs):
+        det(
+            x, y, points,
+            color=kwargs.get('color'),
+            linestyle=kwargs.get('linestyle'),
+            label=kwargs.get('label')
+        )
+
+
+class RocVuln(BaseVulnDetRoc):
+    '''ROC for vuln'''
+
+    def __init__(self, ctx, scores, evaluation, func_load, real_data, no_spoof):
+        super(RocVuln, self).__init__(ctx, scores, evaluation, func_load,
+                                      real_data, no_spoof)
+        self._x_label = self._x_label or "FMR"
+        self._y_label = self._y_label or "1 - FNMR"
+        self._semilogx = ctx.meta.get('semilogx', True)
+        add = ''
+        if not self._no_spoof:
+            add = " and overlaid SPOOF scenario"
+        self._title = self._title or ('ROC: LICIT' + add)
+        best_legend = 'lower right' if self._semilogx else 'upper right'
+        self._legend_loc = self._legend_loc or best_legend
+
+    def _plot(self, x, y, points, **kwargs):
+        roc_for_far(
+            x, y,
+            far_values=log_values(self._min_dig or -4),
+            CAR=self._semilogx,
+            color=kwargs.get('color'), linestyle=kwargs.get('linestyle'),
+            label=kwargs.get('label')
+        )
+
+    def _get_farfrr(self, x, y, thres):
+        points = farfrr(x, y, thres)
+        points2 = (points[0], 1 - points[1])
+        return points, points2
 
 
 class FmrIapmr(PadPlot):
@@ -731,7 +694,7 @@ class FmrIapmr(PadPlot):
         title = self._title if self._title is not None else "FMR vs IAPMR"
         if title.replace(' ', ''):
             mpl.title(title)
-        mpl.xlabel(self._x_label or "False Match Rate (%)")
+        mpl.xlabel(self._x_label or "FMR (%)")
         mpl.ylabel(self._y_label or "IAPMR (%)")
         mpl.grid(True, color=self._grid_color)
         if self._disp_legend:

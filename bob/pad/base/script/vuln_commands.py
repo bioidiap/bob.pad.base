@@ -11,24 +11,27 @@ from click.types import FLOAT
 from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (verbosity_option,
                                                 open_file_mode_option,
-                                               bool_option)
+                                               bool_option,
+                                               AliasedGroup, list_float_option)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
-from . import figure
+from . import vuln_figure as figure
 
 NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
 
 
-
-@with_plugins(pkg_resources.iter_entry_points('bob.vuln.cli'))
-@click.group()
-def vuln():
-  """Presentation Vulnerability related commands."""
-  pass
-
+def hlines_at_option(dflt=' ', **kwargs):
+    '''Get option to draw const FNMRlines'''
+    return list_float_option(
+        name='hlines-at', short_name='hla',
+        desc='If given, draw horizontal lines at the given axis positions. '
+        'Your values must be separated with a comma (,) without space. '
+        'This option works in ROC and DET curves.',
+        nitems=None, dflt=dflt, **kwargs
+    )
 
 
 def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
@@ -74,8 +77,8 @@ def write_scores_to_file(neg, pos, filename, attack=False):
 
 @click.command()
 @click.argument('outdir')
-@click.option('--mean-gen', default=10, type=FLOAT, show_default=True)
-@click.option('--mean-zei', default=0, type=FLOAT, show_default=True)
+@click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
+@click.option('--mean-zei', default=3, type=FLOAT, show_default=True)
 @click.option('--mean-pa', default=5, type=FLOAT, show_default=True)
 @verbosity_option()
 def gen(outdir, mean_gen, mean_zei, mean_pa):
@@ -93,21 +96,61 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
       mean_gen, mean_zei, mean_pa)
 
   # Write the data into files
-  write_scores_to_file(genuine_dev, zei_dev,
+  write_scores_to_file(zei_dev, genuine_dev,
                        os.path.join(outdir, 'licit', 'scores-dev'))
-  write_scores_to_file(genuine_eval, zei_eval,
+  write_scores_to_file(zei_eval, genuine_eval,
                        os.path.join(outdir, 'licit', 'scores-eval'))
-  write_scores_to_file(genuine_dev, pa_dev,
+  write_scores_to_file(pa_dev, genuine_dev,
                        os.path.join(outdir, 'spoof', 'scores-dev'),
                        attack=True)
-  write_scores_to_file(genuine_eval, pa_eval,
+  write_scores_to_file(pa_eval, genuine_eval,
                        os.path.join(outdir, 'spoof', 'scores-eval'),
                        attack=True)
 
 
 
 @click.command()
-@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
+@common_options.scores_argument(min_arg=2, nargs=-1)
+@common_options.output_plot_file_option(default_out='vuln_roc.pdf')
+@common_options.legends_option()
+@common_options.no_legend_option()
+@common_options.legend_loc_option(dflt='upper-right')
+@common_options.title_option()
+@common_options.const_layout_option()
+@common_options.style_option()
+@common_options.figsize_option(dflt=None)
+@common_options.min_far_option()
+@common_options.axes_val_option()
+@verbosity_option()
+@common_options.x_rotation_option(dflt=45)
+@common_options.x_label_option()
+@common_options.y_label_option()
+@click.option('--real-data/--no-real-data', default=True, show_default=True,
+              help='If False, will annotate the plots hypothetically, instead '
+              'of with real data values of the calculated error rates.')
+@hlines_at_option()
+@click.pass_context
+def roc(ctx, scores, real_data, **kwargs):
+  """Plot ROC
+
+  You need to provide 2 scores
+  files for each vulnerability system in this order:
+
+  \b
+  * licit scores
+  * spoof scores
+
+  Examples:
+      $ bob vuln roc -v licit-scores spoof-scores
+
+      $ bob vuln roc -v scores-{licit,spoof}
+  """
+  process = figure.RocVuln(ctx, scores, True, load.split, real_data, False)
+  process.run()
+
+
+@click.command()
+@common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_det.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
@@ -115,38 +158,34 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @verbosity_option()
 @common_options.axes_val_option(dflt='0.01,95,0.01,95')
 @common_options.x_rotation_option(dflt=45)
 @common_options.x_label_option()
 @common_options.y_label_option()
-@click.option('-c', '--criteria', default=None, show_default=True,
-              help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
+@hlines_at_option()
 @click.pass_context
-def det(ctx, scores, criteria, real_data, **kwargs):
+def det(ctx, scores, real_data, **kwargs):
   """Plot DET
 
-  You need to provide 4 scores
-  files for each PAD system in this order:
+
+  You need to provide 2 scores
+  files for each vulnerability system in this order:
 
   \b
-  * licit development scores
-  * licit evaluation scores
-  * spoof development scores
-  * spoof evaluation scores
+  * licit scores
+  * spoof scores
 
   Examples:
-      $ bob pad det --no-spoof dev-scores eval-scores
+      $ bob vuln det -v licit-scores spoof-scores
 
-      $ bob pad det {licit,spoof}/scores-{dev,eval}
+      $ bob vuln det -v scores-{licit,spoof}
   """
-  process = figure.Det(ctx, scores, True, load.split, criteria, real_data,
-                       False)
+  process = figure.DetVuln(ctx, scores, True, load.split, real_data, False)
   process.run()
 
 
@@ -161,7 +200,7 @@ def det(ctx, scores, criteria, real_data, **kwargs):
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.bool_option(
     'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', True
@@ -185,11 +224,11 @@ def epc(ctx, scores, **kwargs):
   vulnerability analysis.
 
   Examples:
-      $ bob pad epc dev-scores eval-scores
+      $ bob vuln epc -v dev-scores eval-scores
 
-      $ bob pad epc -o my_epc.pdf dev-scores1 eval-scores1
+      $ bob vuln epc -v -o my_epc.pdf dev-scores1 eval-scores1
 
-      $ bob pad epc {licit,spoof}/scores-{dev,eval}
+      $ bob vuln epc -v {licit,spoof}/scores-{dev,eval}
   """
   process = figure.Epc(ctx, scores, True, load.split)
   process.run()
@@ -205,7 +244,7 @@ def epc(ctx, scores, **kwargs):
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.bool_option(
     'wer', 'w', 'Whether to plot the WER related lines or not.', True
@@ -218,16 +257,19 @@ def epc(ctx, scores, **kwargs):
 )
 @click.option('-c', '--criteria', default="eer", show_default=True,
               help='Criteria for threshold selection',
-              type=click.Choice(('eer', 'min-hter', 'bpcer20')))
+              type=click.Choice(('eer', 'min-hter')))
 @click.option('-vp', '--var-param', default="omega", show_default=True,
               help='Name of the varying parameter',
               type=click.Choice(('omega', 'beta')))
 @click.option('-fp', '--fixed-param', default=0.5, show_default=True,
               help='Value of the fixed parameter',
               type=click.FLOAT)
+@click.option('-s', '--sampling', default=5, show_default=True,
+              help='Sampling of the EPSC 3D surface', type=click.INT)
 @verbosity_option()
 @click.pass_context
-def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
+def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
+         **kwargs):
     """Plot EPSC (expected performance spoofing curve):
 
     You need to provide 4 score
@@ -246,13 +288,14 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
     both WER and IAPMR on the same figure (which is possible in 2D).
 
     Examples:
-        $ bob pad epsc -o my_epsc.pdf dev-scores1 eval-scores1
+        $ bob vuln epsc -v -o my_epsc.pdf dev-scores1 eval-scores1
 
-        $ bob pad epsc -D {licit,spoof}/scores-{dev,eval}
+        $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
     """
     if three_d:
         if (ctx.meta['wer'] and ctx.meta['iapmr']):
             raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
+        ctx.meta['sampling'] = sampling
         process = figure.Epsc3D(
             ctx, scores, True, load.split,
             criteria, var_param, fixed_param
@@ -268,13 +311,10 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
-@common_options.title_option()
 @common_options.output_plot_file_option(default_out='vuln_hist.pdf')
-@common_options.eval_option()
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
-@common_options.const_layout_option()
 @common_options.print_filenames_option(dflt=False)
 @bool_option(
     'iapmr-line', 'I', 'Whether to plot the IAPMR related lines or not.', True
@@ -284,44 +324,43 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, **kwargs):
     'If False, will annotate the plots hypothetically, instead '
     'of with real data values of the calculated error rates.', True
 )
-@common_options.legends_option()
+@common_options.titles_option()
+@common_options.const_layout_option()
 @common_options.figsize_option(dflt=None)
 @common_options.subplot_option()
 @common_options.legend_ncols_option()
 @common_options.style_option()
+@common_options.hide_dev_option()
+@common_options.eval_option()
 @verbosity_option()
 @click.pass_context
 def hist(ctx, scores, evaluation, **kwargs):
   '''Vulnerability analysis distributions.
 
-  Plots the histogram of score distributions. You need to provide 4 score
-  files for each biometric system in this order:
+  Plots the histogram of score distributions. You need to provide 2 or 4 score
+  files for each biometric system in this order.
+  When evaluation scores are provided, you must use the ``--eval`` option.
 
   \b
   * licit development scores
-  * licit evaluation scores
+  * (optional) licit evaluation scores
   * spoof development scores
-  * spoof evaluation scores
+  * (optional) spoof evaluation scores
 
   See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
   vulnerability analysis.
 
-  You need to provide one or more development score file(s) for each
-  experiment. You can also provide eval files along with dev files. If only
-  dev-scores are used set the flag `--no-evaluation` is required in that
-  case.
 
   By default, when eval-scores are given, only eval-scores histograms are
   displayed with threshold line
-  computed from dev-scores. If you want to display dev-scores distributions
-  as well, use ``--show-dev`` option.
+  computed from dev-scores.
 
   Examples:
 
-      $ bob pad vuln_hist licit/scores-dev licit/scores-eval \
+      $ bob vuln vuln_hist -e -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval
 
-      $ bob pad vuln_hist {licit,spoof}/scores-{dev,eval}
+      $ bob vuln vuln_hist -e -v {licit,spoof}/scores-{dev,eval}
   '''
   process = figure.HistVuln(ctx, scores, evaluation, load.split)
   process.run()
@@ -330,9 +369,8 @@ def hist(ctx, scores, evaluation, **kwargs):
 
 @click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.eval_option()
 @common_options.table_option()
-@common_options.criterion_option()
+@common_options.criterion_option(lcriteria=['eer', 'min-hter'])
 @common_options.thresholds_option()
 @open_file_mode_option()
 @common_options.output_log_metric_option()
@@ -342,8 +380,8 @@ def hist(ctx, scores, evaluation, **kwargs):
 def metrics(ctx, scores, **kwargs):
   """Generate table of metrics for vulnerability PAD
 
-  You need to provide 2 or 4 scores
-  files for each PAD system in this order:
+  You need to provide 4 scores
+  files for each vuln system in this order:
 
   \b
   * licit development scores
@@ -353,9 +391,9 @@ def metrics(ctx, scores, **kwargs):
 
 
   Examples:
-      $ bob pad vuln_metrics {licit,spoof}/scores-{dev,eval}
+      $ bob vuln vuln_metrics -v {licit,spoof}/scores-{dev,eval}
   """
-  process = figure.MetricsVuln(ctx, scores, True, load.split)
+  process = figure.Metrics(ctx, scores, True, load.split)
   process.run()
 
 
@@ -369,7 +407,7 @@ def metrics(ctx, scores, **kwargs):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @verbosity_option()
 @common_options.axes_val_option()
 @common_options.x_rotation_option()
@@ -380,20 +418,19 @@ def metrics(ctx, scores, **kwargs):
 def fmr_iapmr(ctx, scores, **kwargs):
     """Plot FMR vs IAPMR
 
-    You need to provide 2 or 4 scores
-    files for each PAD system in this order:
+    You need to provide 4 scores
+    files for each vuln system in this order:
 
     \b
     * licit development scores
     * licit evaluation scores
-    * spoof development scores (when ``--no-spoof`` is False (default))
-    * spoof evaluation scores (when ``--no-spoof`` is False (default))
-
+    * spoof development scores
+    * spoof evaluation scores
 
     Examples:
-        $ bob pad fmr_iapmr --no-spoof dev-scores eval-scores
+        $ bob vuln fmr_iapmr -v dev-scores eval-scores
 
-        $ bob pad fmr_iapmr {licit,spoof}/scores-{dev,eval}
+        $ bob vuln fmr_iapmr -v {licit,spoof}/scores-{dev,eval}
     """
     process = figure.FmrIapmr(ctx, scores, True, load.split)
     process.run()
@@ -410,7 +447,7 @@ def fmr_iapmr(ctx, scores, **kwargs):
 @common_options.points_curve_option()
 @common_options.lines_at_option()
 @common_options.const_layout_option()
-@common_options.figsize_option()
+@common_options.figsize_option(dflt=None)
 @common_options.style_option()
 @common_options.linestyles_option()
 @verbosity_option()
@@ -419,7 +456,7 @@ def evaluate(ctx, scores, **kwargs):
   '''Runs error analysis on score sets for vulnerability studies
 
   \b
-  1. Computes bob pad vuln_metrics
+  1. Computes bob vuln vuln_metrics
   2. Plots EPC, EPSC, vulnerability histograms, fmr vs IAPMR to a multi-page
      PDF file
 
@@ -433,9 +470,9 @@ def evaluate(ctx, scores, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob pad vuln -o my_epsc.pdf dev-scores1 eval-scores1
+      $ bob vuln evaluate -o my_epsc.pdf dev-scores1 eval-scores1
 
-      $ bob pad vuln -D {licit,spoof}/scores-{dev,eval}
+      $ bob vuln evaluate -D {licit,spoof}/scores-{dev,eval}
   '''
   # first time erase if existing file
   click.echo("Computing vuln metrics...")
@@ -450,6 +487,8 @@ def evaluate(ctx, scores, **kwargs):
   ctx.forward(hist)  # use class defaults plot settings
   click.echo("Computing DET...")
   ctx.forward(det)  # use class defaults plot settings
+  click.echo("Computing ROC...")
+  ctx.forward(roc)  # use class defaults plot settings
   click.echo("Computing EPC...")
   ctx.forward(epc)  # use class defaults plot settings
   click.echo("Computing EPSC...")

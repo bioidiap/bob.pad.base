@@ -115,10 +115,14 @@ The scripts take as input either a 4-column or 5-column data format as specified
 in the documentation of :py:func:`bob.bio.base.score.load.four_column` or 
 :py:func:`bob.bio.base.score.load.five_column`.
 
+Two sets of commands, ``bob pad`` and ``bob vuln`` are available for
+Presentation Attack Detection and
+Vulnerability analysis, respectively.
+
 Metrics
 =======
 
-Several metrics based on a selected thresholds (bpcer20: when APCER is set to 5%,
+Several PAD metrics based on a selected thresholds (bpcer20: when APCER is set to 5%,
 eer, when BPCER == APCER and min-hter, when HTER is minimum) on the development
 set and apply them on evaluation sets (if provided) are generated used
 ``metrics`` command. The reported `standard metrics`_ are:
@@ -133,65 +137,114 @@ For example:
 
 .. code-block:: sh
 
-    $ bob pad metrics scores-{dev,test} --titles ExpA
+    $ bob pad metrics -e scores-{dev,eval} --legends ExpA
 
-    Threshold of 6.624767 selected with the bpcer20 criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   5.0%                      5.0%
-    EER       0.0%                      0.0%
-    min-HTER  2.5%                      2.5%
-    ========  ========================  ===================
+    Threshold of 11.639561 selected with the bpcer20 criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   5.0%                      5.0%
+    BPCER   100.0%                    100.0%
+    ACER    52.5%                     52.5%
+    ======  ========================  ===================
 
-    Threshold of 6.534215 selected with the eer criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   6.1%                      6.1%
-    EER       0.0%                      0.0%
-    min-HTER  3.0%                      3.0%
-    ========  ========================  ===================
+    Threshold of 3.969103 selected with the eer criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   100.0%                    100.0%
+    BPCER   100.0%                    100.0%
+    ACER    100.0%                    100.0%
+    ======  ========================  ===================
 
-    Threshold of 6.534215 selected with the min-hter criteria
-    ========  ========================  ===================
-    ExpA      Development scores-dev    Eval. scores-eval
-    ========  ========================  ===================
-    BPCER20   6.1%                      6.1%
-    EER       0.0%                      0.0%
-    min-HTER  3.0%                      3.0%
-    ========  ========================  ===================
+    Threshold of -0.870550 selected with the min-hter criteria
+    ======  ========================  ===================
+    ExpA    Development scores-dev    Eval. scores-eval
+    ======  ========================  ===================
+    APCER   100.0%                    100.0%
+    BPCER   19.5%                     19.5%
+    ACER    59.7%                     59.7%
+    ======  ========================  ===================
 
 .. note::
-    You can compute analysis on development set(s) only by passing option
-    ``--no-evaluation``. See metrics --help for further options.
+    When evaluation scores are provided, the ``--eval`` option must be passed.
+    See metrics --help for further options.
+
+Metrics for vulnerability analysis are also avaible trhough:
+
+.. code-block:: sh
+
+    $ bob vuln metrics -e .../{licit,spoof}/scores-{dev,test}
+
+    =========  ===================
+    None       EER (threshold=4)
+    =========  ===================
+    APCER (%)  100.0%
+    BPCER (%)  100.0%
+    ACER (%)   100.0%
+    IAPMR (%)  100.0%
+    =========  ===================
+
 
 Plots
 =====
 
 Customizable plotting commands are available in the :py:mod:`bob.pad.base` module.
 They take a list of development and/or evaluation files and generate a single PDF
-file containing the plots. Available plots are:
+file containing the plots.
+
+Available plots for PAD are:
 
 *  ``hist`` (Bona fida and PA histograms along with threshold criterion)
 
-*  ``vuln`` (Vulnerability analysis distributions)
+*  ``epc`` (expected performance curve)
+
+*  ``gen`` (Generate random scores)
+
+*  ``roc`` (receiver operating characteristic)
+
+*  ``det`` (detection error trade-off)
+
+*  ``evaluate`` (Summarize all the above commands in one call)
+
+Available plots for PAD are:
+
+*  ``hist`` (Vulnerability analysis distributions)
 
 *  ``epc`` (expected performance curve)
 
+*  ``gen`` (Generate random scores)
+
+*  ``roc`` (receiver operating characteristic)
+
+*  ``det`` (detection error trade-off)
+
 *  ``epsc`` (expected performance spoofing curve)
+
+*  ``fmr_iapmr``  (Plot FMR vs IAPMR)
+
+*  ``evaluate`` (Summarize all the above commands in one call)
+
 
 Use the ``--help`` option on the above-cited commands to find-out about more
 options.
 
 
-For example, to generate a EPSC curve from development and evaluation datasets:
+For example, to generate a EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
-    $bob pad epsc -o 'my_epsc.pdf' scores-{dev,test}
+    $bob pad epc -e -o 'my_epc.pdf' scores-{dev,eval}
 
-where `my_epsc.pdf` will contain EPSC curves for all the experiments.
+where `my_epc.pdf` will contain EPC curves for all the experiments.
+
+Vulnerability commands require licit and spoof development and evaluation
+datasets. Far example, to generate EPSC curve:
+
+.. code-block:: sh
+
+    $bob vuln epsc -e .../{licit,spoof}/scores-{dev,eval}
+
 
 .. note::
     IAPMR curve can be plotted along with EPC and EPSC using option
