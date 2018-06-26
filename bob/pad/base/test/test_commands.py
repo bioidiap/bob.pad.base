@@ -110,7 +110,7 @@ def test_hist_vuln():
     with runner.isolated_filesystem():
         result = runner.invoke(vuln_commands.hist,
                                ['--criterion', 'eer', '--output',
-                                'HISTO.pdf', '-b', '30',
+                                'HISTO.pdf', '-b', '30', '-ts', 'A,B',
                                 licit_dev, licit_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
 

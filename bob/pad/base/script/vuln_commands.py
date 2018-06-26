@@ -324,7 +324,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
     'If False, will annotate the plots hypothetically, instead '
     'of with real data values of the calculated error rates.', True
 )
-@common_options.legends_option()
+@common_options.titles_option()
 @common_options.const_layout_option()
 @common_options.figsize_option(dflt=None)
 @common_options.subplot_option()
