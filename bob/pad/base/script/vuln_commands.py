@@ -346,10 +346,10 @@ def hist(ctx, scores, evaluation, **kwargs):
 
   Examples:
 
-      $ bob vuln vuln_hist -e -v licit/scores-dev licit/scores-eval \
+      $ bob vuln hist -e -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval
 
-      $ bob vuln vuln_hist -e -v {licit,spoof}/scores-{dev,eval}
+      $ bob vuln hist -e -v {licit,spoof}/scores-{dev,eval}
   '''
   process = figure.HistVuln(ctx, scores, evaluation, load.split)
   process.run()

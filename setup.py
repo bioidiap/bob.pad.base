@@ -134,7 +134,7 @@ setup(
         # main entry for bob pad cli
         'bob.cli': [
             'pad               = bob.pad.base.script.pad:pad',
-            'vuln              = bob.pad.base.script.vuln:vuln',
+            'vulnerability     = bob.pad.base.script.vuln:vulnerability',
         ],
 
         # bob pad scripts

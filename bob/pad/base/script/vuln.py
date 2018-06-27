@@ -8,6 +8,6 @@ from bob.extension.scripts.click_helper import AliasedGroup
 
 @with_plugins(pkg_resources.iter_entry_points('bob.vuln.cli'))
 @click.group(cls=AliasedGroup)
-def vuln():
+def vulnerability():
   """Vulnerability analysis related commands."""
   pass
