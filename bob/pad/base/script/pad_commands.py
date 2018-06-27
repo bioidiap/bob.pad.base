@@ -88,7 +88,7 @@ def evaluate(ctx, scores, evaluation, **kwargs):
     common_options.MULTI_METRICS_HELP.format(
         names='FtA, APCER, BPCER, FAR, FRR, ACER',
         criteria=CRITERIA, score_format=SCORE_FORMAT,
-        command='bob measure multi-metrics'),
+        command='bob pad multi-metrics'),
     criteria=CRITERIA)
 def multi_metrics(ctx, scores, evaluation, protocols_number, **kwargs):
   ctx.meta['min_arg'] = protocols_number * (2 if evaluation else 1)

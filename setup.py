@@ -151,7 +151,6 @@ setup(
 
         # bob vuln scripts
         'bob.vuln.cli': [
-            'metrics          = bob.pad.base.script.vuln_commands:metrics',
             'hist             = bob.pad.base.script.vuln_commands:hist',
             'det              = bob.pad.base.script.vuln_commands:det',
             'roc              = bob.pad.base.script.vuln_commands:roc',
@@ -159,7 +158,6 @@ setup(
             'epsc             = bob.pad.base.script.vuln_commands:epsc',
             'gen              = bob.pad.base.script.vuln_commands:gen',
             'fmr_iapmr        = bob.pad.base.script.vuln_commands:fmr_iapmr',
-            'evaluate         = bob.pad.base.script.vuln_commands:evaluate',
         ],
 
     },
