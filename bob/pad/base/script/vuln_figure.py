@@ -1,49 +1,16 @@
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
-import math
 import click
 import numpy as np
 import matplotlib.pyplot as mpl
 import bob.measure.script.figure as measure_figure
-import bob.bio.base.script.figure as bio_figure
-from tabulate import tabulate
 from bob.measure.utils import get_fta_list
 from bob.measure import (
-    frr_threshold, far_threshold, eer_threshold, min_hter_threshold, farfrr,
-    epc, ppndf, min_weighted_error_rate_threshold
+    frr_threshold, far_threshold, farfrr,
+    ppndf, min_weighted_error_rate_threshold
 )
-from bob.measure.plot import (det, det_axis, roc_for_far, log_values, epc)
+from bob.measure import plot
 from . import error_utils
-
-
-class Metrics(measure_figure.Metrics):
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(Metrics, self).__init__(ctx, scores, evaluation, func_load)
-
-    ''' Compute metrics from score files'''
-
-    def compute(self, idx, input_scores, input_names):
-        ''' Compute metrics for the given criteria'''
-        # extract pos and negative and remove NaNs
-        neg_list, pos_list, _ = get_fta_list(input_scores)
-        dev_neg, dev_pos = neg_list[0], pos_list[0]
-        criter = self._criterion or 'eer'
-        threshold = error_utils.calc_threshold(criter, dev_neg, dev_pos) \
-            if self._thres is None else self._thres[idx]
-        far, frr = farfrr(neg_list[1], pos_list[1], threshold)
-        iapmr, _ = farfrr(neg_list[3], pos_list[1], threshold)
-        title = self._legends[idx] if self._legends is not None else None
-        headers = ['' or title, '%s (threshold=%.2g)' %
-                   (criter.upper(), threshold)]
-        rows = []
-        rows.append(['FMR (%)', '{:>5.1f}%'.format(100 * far)])
-        rows.append(['FNMR (%)', '{:>5.1f}%'.format(frr * 100)])
-        rows.append(['HTER (%)', '{:>5.1f}%'.format(50 * (far + frr))])
-        rows.append(['IAPMR (%)', '{:>5.1f}%'.format(100 * iapmr)])
-        click.echo(
-            tabulate(rows, headers, self._tablefmt),
-            file=self.log_file
-        )
 
 
 def _iapmr_dot(threshold, iapmr, real_data, **kwargs):
@@ -185,7 +152,7 @@ class Epc(PadPlot):
         mpl.gcf().clear()
         mpl.grid()
 
-        epc(
+        plot.epc(
             licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
             self._points,
             color='C0', linestyle=self._linestyles[idx],
@@ -227,7 +194,6 @@ class Epc(PadPlot):
             ax1.yaxis.label.set_color('C0')
             ax1.tick_params(axis='y', colors='C0')
             ax1.spines['left'].set_color('C0')
-
 
         title = self._legends[idx] if self._legends is not None else self._title
         if title.replace(' ', ''):
@@ -448,7 +414,7 @@ class BaseVulnDetRoc(PadPlot):
         super(BaseVulnDetRoc, self).__init__(
             ctx, scores, evaluation, func_load)
         self._no_spoof = no_spoof
-        self._hlines_at = ctx.meta.get('hlines_at', [])
+        self._fnmrs_at = ctx.meta.get('fnmr', [])
         self._real_data = True if real_data is None else real_data
         self._legend_loc = None
 
@@ -469,7 +435,7 @@ class BaseVulnDetRoc(PadPlot):
         if not self._no_spoof and spoof_neg is not None:
             ax1 = mpl.gca()
             ax2 = ax1.twiny()
-            ax2.set_xlabel('IAPMR', color='C3')
+            ax2.set_xlabel('IAPMR (%)', color='C3')
             ax2.set_xticklabels(ax2.get_xticks())
             ax2.tick_params(axis='x', colors='C3')
             ax2.xaxis.label.set_color('C3')
@@ -487,10 +453,10 @@ class BaseVulnDetRoc(PadPlot):
             )
             mpl.sca(ax1)
 
-        if self._hlines_at is None:
+        if self._fnmrs_at is None:
             return
 
-        for line in self._hlines_at:
+        for line in self._fnmrs_at:
             thres_baseline = frr_threshold(licit_neg, licit_pos, line)
 
             axlim = mpl.axis()
@@ -547,7 +513,6 @@ class BaseVulnDetRoc(PadPlot):
                 label=label_spoof
             )  # FAR point, spoof scenario
 
-
     def end_process(self):
         ''' Set title, legend, axis labels, grid colors, save figures and
         close pdf is needed '''
@@ -594,9 +559,9 @@ class DetVuln(BaseVulnDetRoc):
     def __init__(self, ctx, scores, evaluation, func_load, real_data,
                  no_spoof):
         super(DetVuln, self).__init__(ctx, scores, evaluation, func_load,
-                                  real_data, no_spoof)
-        self._x_label = self._x_label or "FMR"
-        self._y_label = self._y_label or "FNMR"
+                                      real_data, no_spoof)
+        self._x_label = self._x_label or "FMR (%)"
+        self._y_label = self._y_label or "FNMR (%)"
         add = ''
         if not self._no_spoof:
             add = " and overlaid SPOOF scenario"
@@ -605,16 +570,16 @@ class DetVuln(BaseVulnDetRoc):
 
     def _set_axis(self):
         if self._axlim is not None and None not in self._axlim:
-            det_axis(self._axlim)
+            plot.det_axis(self._axlim)
         else:
-            det_axis([0.01, 99, 0.01, 99])
+            plot.det_axis([0.01, 99, 0.01, 99])
 
     def _get_farfrr(self, x, y, thres):
         points = farfrr(x, y, thres)
         return points, [ppndf(i) for i in points]
 
     def _plot(self, x, y, points, **kwargs):
-        det(
+        plot.det(
             x, y, points,
             color=kwargs.get('color'),
             linestyle=kwargs.get('linestyle'),
@@ -639,9 +604,9 @@ class RocVuln(BaseVulnDetRoc):
         self._legend_loc = self._legend_loc or best_legend
 
     def _plot(self, x, y, points, **kwargs):
-        roc_for_far(
+        plot.roc_for_far(
             x, y,
-            far_values=log_values(self._min_dig or -4),
+            far_values=plot.log_values(self._min_dig or -4),
             CAR=self._semilogx,
             color=kwargs.get('color'), linestyle=kwargs.get('linestyle'),
             label=kwargs.get('label')
@@ -694,8 +659,8 @@ class FmrIapmr(PadPlot):
         title = self._title if self._title is not None else "FMR vs IAPMR"
         if title.replace(' ', ''):
             mpl.title(title)
-        mpl.xlabel(self._x_label or "FMR (%)")
-        mpl.ylabel(self._y_label or "IAPMR (%)")
+        mpl.xlabel(self._x_label or "FMR")
+        mpl.ylabel(self._y_label or "IAPMR")
         mpl.grid(True, color=self._grid_color)
         if self._disp_legend:
             mpl.legend(loc=self._legend_loc)

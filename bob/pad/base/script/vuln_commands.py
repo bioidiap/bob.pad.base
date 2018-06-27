@@ -2,17 +2,12 @@
 """
 
 import os
-import logging
 import numpy
 import click
-import pkg_resources
-from click_plugins import with_plugins
 from click.types import FLOAT
 from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import (verbosity_option,
-                                                open_file_mode_option,
-                                               bool_option,
-                                               AliasedGroup, list_float_option)
+from bob.extension.scripts.click_helper import (
+    verbosity_option, bool_option, list_float_option)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
@@ -23,15 +18,15 @@ NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
 
 
-def hlines_at_option(dflt=' ', **kwargs):
-    '''Get option to draw const FNMRlines'''
-    return list_float_option(
-        name='hlines-at', short_name='hla',
-        desc='If given, draw horizontal lines at the given axis positions. '
-        'Your values must be separated with a comma (,) without space. '
-        'This option works in ROC and DET curves.',
-        nitems=None, dflt=dflt, **kwargs
-    )
+def fnmr_at_option(dflt=' ', **kwargs):
+  '''Get option to draw const FNMR lines'''
+  return list_float_option(
+      name='fnmr', short_name='fnmr',
+      desc='If given, draw horizontal lines at the given FNMR position. '
+      'Your values must be separated with a comma (,) without space. '
+      'This option works in ROC and DET curves.',
+      nitems=None, dflt=dflt, **kwargs
+  )
 
 
 def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
@@ -49,7 +44,6 @@ def gen_score_distr(mean_gen, mean_zei, mean_pa, sigma_gen=1, sigma_zei=1,
   return genuine_scores, zei_scores, pa_scores
 
 
-
 def write_scores_to_file(neg, pos, filename, attack=False):
   """Writes score distributions into 4-column score files. For the format of
     the 4-column score files, please refer to Bob's documentation.
@@ -65,14 +59,13 @@ def write_scores_to_file(neg, pos, filename, attack=False):
   """
   create_directories_safe(os.path.dirname(filename))
   with open(filename, 'wt') as f:
-      for i in pos:
-          f.write('x x foo %f\n' % i)
-      for i in neg:
-          if attack:
-              f.write('x attack foo %f\n' % i)
-          else:
-              f.write('x y foo %f\n' % i)
-
+    for i in pos:
+      f.write('x x foo %f\n' % i)
+    for i in neg:
+      if attack:
+        f.write('x attack foo %f\n' % i)
+      else:
+        f.write('x y foo %f\n' % i)
 
 
 @click.command()
@@ -108,7 +101,6 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
                        attack=True)
 
 
-
 @click.command()
 @common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_roc.pdf')
@@ -128,7 +120,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
-@hlines_at_option()
+@fnmr_at_option()
 @click.pass_context
 def roc(ctx, scores, real_data, **kwargs):
   """Plot ROC
@@ -167,7 +159,7 @@ def roc(ctx, scores, real_data, **kwargs):
 @click.option('--real-data/--no-real-data', default=True, show_default=True,
               help='If False, will annotate the plots hypothetically, instead '
               'of with real data values of the calculated error rates.')
-@hlines_at_option()
+@fnmr_at_option()
 @click.pass_context
 def det(ctx, scores, real_data, **kwargs):
   """Plot DET
@@ -187,7 +179,6 @@ def det(ctx, scores, real_data, **kwargs):
   """
   process = figure.DetVuln(ctx, scores, True, load.split, real_data, False)
   process.run()
-
 
 
 @click.command()
@@ -234,7 +225,6 @@ def epc(ctx, scores, **kwargs):
   process.run()
 
 
-
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_epsc.pdf')
@@ -270,43 +260,42 @@ def epc(ctx, scores, **kwargs):
 @click.pass_context
 def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
          **kwargs):
-    """Plot EPSC (expected performance spoofing curve):
+  """Plot EPSC (expected performance spoofing curve):
 
-    You need to provide 4 score
-    files for each biometric system in this order:
+  You need to provide 4 score
+  files for each biometric system in this order:
 
-    \b
-    * licit development scores
-    * licit evaluation scores
-    * spoof development scores
-    * spoof evaluation scores
+  \b
+  * licit development scores
+  * licit evaluation scores
+  * spoof development scores
+  * spoof evaluation scores
 
-    See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
-    vulnerability analysis.
+  See :ref:`bob.pad.base.vulnerability` in the documentation for a guide on
+  vulnerability analysis.
 
-    Note that when using 3D plots with option ``--three-d``, you cannot plot
-    both WER and IAPMR on the same figure (which is possible in 2D).
+  Note that when using 3D plots with option ``--three-d``, you cannot plot
+  both WER and IAPMR on the same figure (which is possible in 2D).
 
-    Examples:
-        $ bob vuln epsc -v -o my_epsc.pdf dev-scores1 eval-scores1
+  Examples:
+      $ bob vuln epsc -v -o my_epsc.pdf dev-scores1 eval-scores1
 
-        $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
-    """
-    if three_d:
-        if (ctx.meta['wer'] and ctx.meta['iapmr']):
-            raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
-        ctx.meta['sampling'] = sampling
-        process = figure.Epsc3D(
-            ctx, scores, True, load.split,
-            criteria, var_param, fixed_param
-        )
-    else:
-        process = figure.Epsc(
-            ctx, scores, True, load.split,
-            criteria, var_param, fixed_param
-        )
-    process.run()
-
+      $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
+  """
+  if three_d:
+    if (ctx.meta['wer'] and ctx.meta['iapmr']):
+      raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
+    ctx.meta['sampling'] = sampling
+    process = figure.Epsc3D(
+        ctx, scores, True, load.split,
+        criteria, var_param, fixed_param
+    )
+  else:
+    process = figure.Epsc(
+        ctx, scores, True, load.split,
+        criteria, var_param, fixed_param
+    )
+  process.run()
 
 
 @click.command()
@@ -366,38 +355,6 @@ def hist(ctx, scores, evaluation, **kwargs):
   process.run()
 
 
-
-@click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
-@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.table_option()
-@common_options.criterion_option(lcriteria=['eer', 'min-hter'])
-@common_options.thresholds_option()
-@open_file_mode_option()
-@common_options.output_log_metric_option()
-@common_options.legends_option()
-@verbosity_option()
-@click.pass_context
-def metrics(ctx, scores, **kwargs):
-  """Generate table of metrics for vulnerability PAD
-
-  You need to provide 4 scores
-  files for each vuln system in this order:
-
-  \b
-  * licit development scores
-  * licit evaluation scores
-  * spoof development scores
-  * spoof evaluation scores
-
-
-  Examples:
-      $ bob vuln vuln_metrics -v {licit,spoof}/scores-{dev,eval}
-  """
-  process = figure.Metrics(ctx, scores, True, load.split)
-  process.run()
-
-
-
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='fmr_iapmr.pdf')
@@ -416,52 +373,10 @@ def metrics(ctx, scores, **kwargs):
 @common_options.semilogx_option()
 @click.pass_context
 def fmr_iapmr(ctx, scores, **kwargs):
-    """Plot FMR vs IAPMR
+  """Plot FMR vs IAPMR
 
-    You need to provide 4 scores
-    files for each vuln system in this order:
-
-    \b
-    * licit development scores
-    * licit evaluation scores
-    * spoof development scores
-    * spoof evaluation scores
-
-    Examples:
-        $ bob vuln fmr_iapmr -v dev-scores eval-scores
-
-        $ bob vuln fmr_iapmr -v {licit,spoof}/scores-{dev,eval}
-    """
-    process = figure.FmrIapmr(ctx, scores, True, load.split)
-    process.run()
-
-
-
-@click.command()
-@common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.legends_option()
-@common_options.sep_dev_eval_option()
-@common_options.table_option()
-@common_options.output_log_metric_option()
-@common_options.output_plot_file_option(default_out='vuln_eval.pdf')
-@common_options.points_curve_option()
-@common_options.lines_at_option()
-@common_options.const_layout_option()
-@common_options.figsize_option(dflt=None)
-@common_options.style_option()
-@common_options.linestyles_option()
-@verbosity_option()
-@click.pass_context
-def evaluate(ctx, scores, **kwargs):
-  '''Runs error analysis on score sets for vulnerability studies
-
-  \b
-  1. Computes bob vuln vuln_metrics
-  2. Plots EPC, EPSC, vulnerability histograms, fmr vs IAPMR to a multi-page
-     PDF file
-
-
-  You need to provide 4 score files for each biometric system in this order:
+  You need to provide 4 scores
+  files for each vuln system in this order:
 
   \b
   * licit development scores
@@ -470,31 +385,9 @@ def evaluate(ctx, scores, **kwargs):
   * spoof evaluation scores
 
   Examples:
-      $ bob vuln evaluate -o my_epsc.pdf dev-scores1 eval-scores1
+      $ bob vuln fmr_iapmr -v dev-scores eval-scores
 
-      $ bob vuln evaluate -D {licit,spoof}/scores-{dev,eval}
-  '''
-  # first time erase if existing file
-  click.echo("Computing vuln metrics...")
-  ctx.invoke(metrics, scores=scores, evaluation=True)
-  if 'log' in ctx.meta and ctx.meta['log'] is not None:
-      click.echo("[metrics] => %s" % ctx.meta['log'])
-
-  # avoid closing pdf file before all figures are plotted
-  ctx.meta['closef'] = False
-  click.echo("Computing histograms...")
-  ctx.meta['criterion'] = 'eer'  # no criterion passed in evaluate
-  ctx.forward(hist)  # use class defaults plot settings
-  click.echo("Computing DET...")
-  ctx.forward(det)  # use class defaults plot settings
-  click.echo("Computing ROC...")
-  ctx.forward(roc)  # use class defaults plot settings
-  click.echo("Computing EPC...")
-  ctx.forward(epc)  # use class defaults plot settings
-  click.echo("Computing EPSC...")
-  ctx.forward(epsc)  # use class defaults plot settings
-  click.echo("Computing FMR vs IAPMR...")
-  ctx.meta['closef'] = True
-  ctx.forward(fmr_iapmr)  # use class defaults plot settings
-  click.echo("Vuln successfully completed!")
-  click.echo("[plots] => %s" % (ctx.meta['output']))
+      $ bob vuln fmr_iapmr -v {licit,spoof}/scores-{dev,eval}
+  """
+  process = figure.FmrIapmr(ctx, scores, True, load.split)
+  process.run()
