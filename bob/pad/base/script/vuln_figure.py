@@ -11,7 +11,9 @@ from bob.measure import (
 )
 from bob.measure import plot
 from . import error_utils
+import logging
 
+LOGGER = logging.getLogger("bob.pad.base")
 
 def _iapmr_dot(threshold, iapmr, real_data, **kwargs):
     # plot a dot on threshold versus IAPMR line and show IAPMR as a number
@@ -151,14 +153,12 @@ class Epc(PadPlot):
 
         mpl.gcf().clear()
         mpl.grid()
-
+        LOGGER.info("EPC using %s", '%s-%s' % (input_names[0], input_names[1]))
         plot.epc(
             licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
             self._points,
             color='C0', linestyle=self._linestyles[idx],
-            label=self._label(
-                'WER', '%s-%s' % (input_names[0], input_names[1]), idx
-            ),
+            label=self._label('WER', idx)
         )
         mpl.xlabel(self._x_label)
         mpl.ylabel(self._y_label)
@@ -177,10 +177,10 @@ class Epc(PadPlot):
                     100. * error_utils.calc_pass_rate(k, spoof_eval_neg)
                 )
 
+            LOGGER.info("IAPMR in EPC plot using %s",
+                        '%s-%s' % (input_names[0], input_names[1]))
             mpl.plot(
-                thres, mix_prob_y, label=self._label(
-                    'IAPMR', '%s-%s' % (input_names[0], input_names[1]), idx
-                ), color='C3'
+                thres, mix_prob_y, label=self._label('IAPMR', idx), color='C3'
             )
 
             prob_ax.set_yticklabels(prob_ax.get_yticks())
@@ -424,13 +424,14 @@ class BaseVulnDetRoc(PadPlot):
         licit_pos = input_scores[0][1]
         spoof_neg = input_scores[1][0]
         spoof_pos = input_scores[1][1]
+        LOGGER.info("FNMR licit using %s", input_names[0])
         self._plot(
             licit_neg,
             licit_pos,
             self._points,
             color='C0',
             linestyle='-',
-            label=self._label("licit", input_names[0], idx)
+            label=self._label("licit", idx)
         )
         if not self._no_spoof and spoof_neg is not None:
             ax1 = mpl.gca()
@@ -443,13 +444,14 @@ class BaseVulnDetRoc(PadPlot):
             ax2.spines['bottom'].set_color('C0')
             ax1.xaxis.label.set_color('C0')
             ax1.tick_params(axis='x', colors='C0')
+            LOGGER.info("Spoof IAPMR using %s", input_names[1])
             self._plot(
                 spoof_neg,
                 spoof_pos,
                 self._points,
                 color='C3',
                 linestyle=':',
-                label=self._label("spoof", input_names[1], idx)
+                label=self._label("spoof", idx)
             )
             mpl.sca(ax1)
 
@@ -579,6 +581,7 @@ class DetVuln(BaseVulnDetRoc):
         return points, [ppndf(i) for i in points]
 
     def _plot(self, x, y, points, **kwargs):
+        LOGGER.info("Plot DET")
         plot.det(
             x, y, points,
             color=kwargs.get('color'),
@@ -604,6 +607,7 @@ class RocVuln(BaseVulnDetRoc):
         self._legend_loc = self._legend_loc or best_legend
 
     def _plot(self, x, y, points, **kwargs):
+        LOGGER.info("Plot ROC")
         plot.roc_for_far(
             x, y,
             far_values=plot.log_values(self._min_dig or -4),
@@ -646,7 +650,8 @@ class FmrIapmr(PadPlot):
             # for fmr.
             fmr_list[i] = farfrr(licit_eval_neg, licit_eval_pos, thr)[0]
         label = self._legends[idx] if self._legends is not None else \
-            '(%s/%s)' % (input_names[1], input_names[3])
+                ('curve %d' % (idx + 1))
+        LOGGER.info("Plot FmrIapmr using: %s/%s", input_names[1], input_names[3])
         if self._semilogx:
             mpl.semilogx(fmr_list, iapmr_list, label=label)
         else:
