@@ -7,35 +7,21 @@ from .error_utils import calc_threshold
 ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
 
 
-class Metrics(measure_figure.Metrics):
+class Metrics(bio_figure.Metrics):
     '''Compute metrics from score files'''
 
-    def __init__(self, ctx, scores, evaluation, func_load):
+    def __init__(self, ctx, scores, evaluation, func_load,
+                names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'ACER=(APCER + '
+                       'BPCER) / 2')):
         super(Metrics, self).__init__(
-            ctx, scores, evaluation, func_load,
-            names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'ACER'))
+            ctx, scores, evaluation, func_load, names
+        )
 
     def get_thres(self, criterion, dev_neg, dev_pos, far):
         if self._criterion == 'bpcer20':
             return calc_threshold('bpcer20', dev_neg, dev_pos)
         else:
             return super(Metrics, self).get_thres(
-                criterion, dev_neg, dev_pos, far)
-
-
-class MultiMetrics(measure_figure.MultiMetrics):
-    '''Compute metrics from score files'''
-
-    def __init__(self, ctx, scores, evaluation, func_load):
-        super(MultiMetrics, self).__init__(
-            ctx, scores, evaluation, func_load,
-            names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'ACER'))
-
-    def get_thres(self, criterion, dev_neg, dev_pos, far):
-        if self._criterion == 'bpcer20':
-            return calc_threshold('bpcer20', dev_neg, dev_pos)
-        else:
-            return super(MultiMetrics, self).get_thres(
                 criterion, dev_neg, dev_pos, far)
 
 
