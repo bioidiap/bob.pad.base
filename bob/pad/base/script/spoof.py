@@ -15,7 +15,7 @@ import logging
 
 logger = logging.getLogger("bob.pad.base")
 
-from .. import tools
+from bob.pad.base import tools
 import bob.bio.base.tools as biotools
 
 
