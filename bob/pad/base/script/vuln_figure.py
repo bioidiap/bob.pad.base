@@ -15,6 +15,7 @@ import logging
 
 LOGGER = logging.getLogger("bob.pad.base")
 
+
 def _iapmr_dot(threshold, iapmr, real_data, **kwargs):
     # plot a dot on threshold versus IAPMR line and show IAPMR as a number
     axlim = mpl.axis()
@@ -97,11 +98,11 @@ class HistVuln(measure_figure.Hist):
             ax2.spines['right'].set_color('red')
 
 
-class PadPlot(measure_figure.PlotBase):
-    '''Base class for PAD plots'''
+class VulnPlot(measure_figure.PlotBase):
+    '''Base class for vulnerability analysis plots'''
 
     def __init__(self, ctx, scores, evaluation, func_load):
-        super(PadPlot, self).__init__(ctx, scores, evaluation, func_load)
+        super(VulnPlot, self).__init__(ctx, scores, evaluation, func_load)
         mpl.rcParams['figure.constrained_layout.use'] = self._clayout
 
     def end_process(self):
@@ -124,7 +125,7 @@ class PadPlot(measure_figure.PlotBase):
                              fancybox=True, framealpha=0.5)
 
 
-class Epc(PadPlot):
+class Epc(VulnPlot):
     ''' Handles the plotting of EPC '''
 
     def __init__(self, ctx, scores, evaluation, func_load):
@@ -134,7 +135,7 @@ class Epc(PadPlot):
         self._title = self._title or ('EPC and IAPMR' if self._iapmr else
                                       'EPC')
         self._x_label = self._x_label or r"Weight $\beta$"
-        self._y_label = self._y_label or "WER (%)"
+        self._y_label = self._y_label or "HTER (%)"
         self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
@@ -158,7 +159,7 @@ class Epc(PadPlot):
             licit_dev_neg, licit_dev_pos, licit_eval_neg, licit_eval_pos,
             self._points,
             color='C0', linestyle=self._linestyles[idx],
-            label=self._label('WER', idx)
+            label=self._label('HTER (licit)', idx)
         )
         mpl.xlabel(self._x_label)
         mpl.ylabel(self._y_label)
@@ -180,7 +181,7 @@ class Epc(PadPlot):
             LOGGER.info("IAPMR in EPC plot using %s",
                         '%s-%s' % (input_names[0], input_names[1]))
             mpl.plot(
-                thres, mix_prob_y, label=self._label('IAPMR', idx), color='C3'
+                thres, mix_prob_y, label=self._label('IAPMR (spoof)', idx), color='C3'
             )
 
             prob_ax.set_yticklabels(prob_ax.get_yticks())
@@ -189,7 +190,7 @@ class Epc(PadPlot):
             prob_ax.spines['right'].set_color('C3')
             ylabels = prob_ax.get_yticks()
             prob_ax.yaxis.set_ticklabels(["%.0f" % val for val in ylabels])
-            prob_ax.set_ylabel('IAPMR', color='C3')
+            prob_ax.set_ylabel('IAPMR (%)', color='C3')
             prob_ax.set_axisbelow(True)
             ax1.yaxis.label.set_color('C0')
             ax1.tick_params(axis='y', colors='C0')
@@ -204,7 +205,7 @@ class Epc(PadPlot):
         self._pdf_page.savefig(mpl.gcf())
 
 
-class Epsc(PadPlot):
+class Epsc(VulnPlot):
     ''' Handles the plotting of EPSC '''
 
     def __init__(self, ctx, scores, evaluation, func_load,
@@ -220,7 +221,7 @@ class Epsc(PadPlot):
         self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
-        self._title = ''
+        self._title = ctx.meta.get('title')
         self._sampling = ctx.meta.get('sampling', 5)
 
         if self._min_arg != 4:
@@ -406,7 +407,7 @@ class Epsc3D(Epsc):
         self._pdf_page.savefig()
 
 
-class BaseVulnDetRoc(PadPlot):
+class BaseVulnDetRoc(VulnPlot):
     '''Base for DET and ROC'''
 
     def __init__(self, ctx, scores, evaluation, func_load, real_data,
@@ -431,7 +432,7 @@ class BaseVulnDetRoc(PadPlot):
             self._points,
             color='C0',
             linestyle='-',
-            label=self._label("licit", idx)
+            label=self._label("Licit scenario", idx)
         )
         if not self._no_spoof and spoof_neg is not None:
             ax1 = mpl.gca()
@@ -451,7 +452,7 @@ class BaseVulnDetRoc(PadPlot):
                 self._points,
                 color='C3',
                 linestyle=':',
-                label=self._label("spoof", idx)
+                label=self._label("Spoof scenario", idx)
             )
             mpl.sca(ax1)
 
@@ -494,7 +495,7 @@ class BaseVulnDetRoc(PadPlot):
                     ('FMNR', farfrr_licit[1] * 100))
 
             if not self._real_data:
-                label_licit = '%s @ operating point' % self._y_label
+                label_licit = '%s @ operating point' % self._x_label
                 label_spoof = 'IAPMR @ operating point'
             else:
                 label_licit = 'FMR=%.2f%%' % (farfrr_licit[0] * 100)
@@ -622,16 +623,15 @@ class RocVuln(BaseVulnDetRoc):
         return points, points2
 
 
-class FmrIapmr(PadPlot):
+class FmrIapmr(VulnPlot):
     '''FMR vs IAPMR'''
 
     def __init__(self, ctx, scores, evaluation, func_load):
         super(FmrIapmr, self).__init__(ctx, scores, evaluation, func_load)
-        self._eval = True  # always eval data with EPC
+        self._eval = True  # Always ask for eval data
         self._split = False
         self._nb_figs = 1
-        self._semilogx = False if 'semilogx' not in ctx.meta else\
-            ctx.meta['semilogx']
+        self._semilogx = ctx.meta.get('semilogx', False)
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
                                      "spoof}/{dev,eval}")
@@ -644,14 +644,15 @@ class FmrIapmr(PadPlot):
         fmr_list = np.linspace(0, 1, 100)
         iapmr_list = []
         for i, fmr in enumerate(fmr_list):
-            thr = far_threshold(licit_eval_neg, licit_eval_pos, fmr, True)
+            thr = far_threshold(licit_eval_neg, licit_eval_pos, fmr)
             iapmr_list.append(farfrr(spoof_eval_neg, licit_eval_pos, thr)[0])
             # re-calculate fmr since threshold might give a different result
             # for fmr.
             fmr_list[i] = farfrr(licit_eval_neg, licit_eval_pos, thr)[0]
         label = self._legends[idx] if self._legends is not None else \
-                ('curve %d' % (idx + 1))
-        LOGGER.info("Plot FmrIapmr using: %s/%s", input_names[1], input_names[3])
+            ('curve %d' % (idx + 1))
+        LOGGER.info("Plot FmrIapmr using: %s/%s",
+                    input_names[1], input_names[3])
         if self._semilogx:
             mpl.semilogx(fmr_list, iapmr_list, label=label)
         else:
@@ -672,7 +673,6 @@ class FmrIapmr(PadPlot):
         self._set_axis()
         fig = mpl.gcf()
         mpl.xticks(rotation=self._x_rotation)
-        mpl.tick_params(axis='both', which='major', labelsize=4)
 
         self._pdf_page.savefig(fig)
 

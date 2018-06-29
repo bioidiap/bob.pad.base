@@ -365,7 +365,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option(dflt=None)
+@common_options.figsize_option()
 @verbosity_option()
 @common_options.axes_val_option()
 @common_options.x_rotation_option()
