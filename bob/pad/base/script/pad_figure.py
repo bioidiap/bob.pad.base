@@ -24,6 +24,22 @@ class Metrics(bio_figure.Metrics):
                 criterion, dev_neg, dev_pos, far)
 
 
+class MultiMetrics(measure_figure.MultiMetrics):
+    '''Compute metrics from score files'''
+
+    def __init__(self, ctx, scores, evaluation, func_load):
+        super(MultiMetrics, self).__init__(
+            ctx, scores, evaluation, func_load,
+            names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'ACER'))
+
+    def get_thres(self, criterion, dev_neg, dev_pos, far):
+        if self._criterion == 'bpcer20':
+            return calc_threshold('bpcer20', dev_neg, dev_pos)
+        else:
+            return super(MultiMetrics, self).get_thres(
+                criterion, dev_neg, dev_pos, far)
+
+
 class Roc(bio_figure.Roc):
     '''ROC for PAD'''
 
