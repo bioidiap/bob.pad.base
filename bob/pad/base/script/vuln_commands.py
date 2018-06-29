@@ -7,7 +7,8 @@ import click
 from click.types import FLOAT
 from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (
-    verbosity_option, bool_option, list_float_option)
+    verbosity_option, bool_option, list_float_option, CONTEXT_SETTINGS
+)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
@@ -68,7 +69,7 @@ def write_scores_to_file(neg, pos, filename, attack=False):
         f.write('x y foo %f\n' % i)
 
 
-@click.command(context_settings=common_options.CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('outdir')
 @click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
 @click.option('--mean-zei', default=3, type=FLOAT, show_default=True)

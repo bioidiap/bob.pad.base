@@ -2,7 +2,7 @@
 """
 import click
 from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import verbosity_option
+from bob.extension.scripts.click_helper import verbosity_option, CONTEXT_SETTINGS
 import bob.bio.base.script.gen as bio_gen
 import bob.measure.script.figure as measure_figure
 from bob.bio.base.score import load
@@ -14,7 +14,7 @@ SCORE_FORMAT = (
 CRITERIA = ('eer', 'min-hter', 'bpcer20')
 
 
-@click.command(context_settings=common_options.CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('outdir')
 @click.option('-mm', '--mean-match', default=10, type=click.FLOAT,
               show_default=True)
