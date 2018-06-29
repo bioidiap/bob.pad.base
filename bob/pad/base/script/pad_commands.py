@@ -14,7 +14,7 @@ SCORE_FORMAT = (
 CRITERIA = ('eer', 'min-hter', 'bpcer20')
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @click.argument('outdir')
 @click.option('-mm', '--mean-match', default=10, type=click.FLOAT,
               show_default=True)

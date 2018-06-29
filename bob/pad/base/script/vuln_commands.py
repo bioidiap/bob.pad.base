@@ -68,7 +68,7 @@ def write_scores_to_file(neg, pos, filename, attack=False):
         f.write('x y foo %f\n' % i)
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @click.argument('outdir')
 @click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
 @click.option('--mean-zei', default=3, type=FLOAT, show_default=True)
@@ -101,7 +101,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
                        attack=True)
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_roc.pdf')
 @common_options.legends_option()
@@ -141,7 +141,7 @@ def roc(ctx, scores, real_data, **kwargs):
   process.run()
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(min_arg=2, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_det.pdf')
 @common_options.legends_option()
@@ -181,7 +181,7 @@ def det(ctx, scores, real_data, **kwargs):
   process.run()
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_epc.pdf')
 @common_options.legends_option()
@@ -225,7 +225,7 @@ def epc(ctx, scores, **kwargs):
   process.run()
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_epsc.pdf')
 @common_options.legends_option()
@@ -298,7 +298,7 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
   process.run()
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(nargs=-1, min_arg=2)
 @common_options.output_plot_file_option(default_out='vuln_hist.pdf')
 @common_options.n_bins_option()
@@ -355,7 +355,7 @@ def hist(ctx, scores, evaluation, **kwargs):
   process.run()
 
 
-@click.command()
+@click.command(context_settings=common_options.CONTEXT_SETTINGS)
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='fmr_iapmr.pdf')
 @common_options.legends_option()
