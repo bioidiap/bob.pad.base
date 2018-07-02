@@ -229,7 +229,7 @@ def epc(ctx, scores, **kwargs):
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
 @common_options.output_plot_file_option(default_out='vuln_epsc.pdf')
-@common_options.legends_option()
+@common_options.titles_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option()
 @common_options.const_layout_option()
@@ -252,14 +252,13 @@ def epc(ctx, scores, **kwargs):
 @click.option('-vp', '--var-param', default="omega", show_default=True,
               help='Name of the varying parameter',
               type=click.Choice(('omega', 'beta')))
-@click.option('-fp', '--fixed-param', default=0.5, show_default=True,
-              help='Value of the fixed parameter',
-              type=click.FLOAT)
+@list_float_option(name='fixed-params', short_name='fp', dflt='0.5',
+                   desc='Values of the fixed parameter, separated by commas')
 @click.option('-s', '--sampling', default=5, show_default=True,
               help='Sampling of the EPSC 3D surface', type=click.INT)
 @verbosity_option()
 @click.pass_context
-def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
+def epsc(ctx, scores, criteria, var_param, three_d, sampling,
          **kwargs):
   """Plot EPSC (expected performance spoofing curve):
 
@@ -283,18 +282,19 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 
       $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
   """
+  fixed_params = ctx.meta.get('fixed_params', [0.5])
   if three_d:
     if (ctx.meta['wer'] and ctx.meta['iapmr']):
       raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
     ctx.meta['sampling'] = sampling
     process = figure.Epsc3D(
         ctx, scores, True, load.split,
-        criteria, var_param, fixed_param
+        criteria, var_param, fixed_params
     )
   else:
     process = figure.Epsc(
         ctx, scores, True, load.split,
-        criteria, var_param, fixed_param
+        criteria, var_param, fixed_params
     )
   process.run()
 

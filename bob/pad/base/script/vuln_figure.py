@@ -209,19 +209,19 @@ class Epsc(VulnPlot):
     ''' Handles the plotting of EPSC '''
 
     def __init__(self, ctx, scores, evaluation, func_load,
-                 criteria, var_param, fixed_param):
+                 criteria, var_param, fixed_params):
         super(Epsc, self).__init__(ctx, scores, evaluation, func_load)
         self._iapmr = False if 'iapmr' not in self._ctx.meta else \
             self._ctx.meta['iapmr']
         self._wer = True if 'wer' not in self._ctx.meta else \
             self._ctx.meta['wer']
-        self._criteria = 'eer' if criteria is None else criteria
-        self._var_param = "omega" if var_param is None else var_param
-        self._fixed_param = 0.5 if fixed_param is None else fixed_param
+        self._criteria = criteria or 'eer'
+        self._var_param = var_param or "omega"
+        self._fixed_params = fixed_params or [0.5]
+        self._titles = ctx.meta.get('titles', [])
         self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
-        self._title = ctx.meta.get('title')
         self._sampling = ctx.meta.get('sampling', 5)
 
         if self._min_arg != 4:
@@ -238,59 +238,55 @@ class Epsc(VulnPlot):
         spoof_dev_pos = input_scores[2][1]
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
-        title = self._legends[idx] if self._legends is not None else None
 
         mpl.gcf().clear()
         points = 10
-
-        if self._var_param == 'omega':
-            omega, beta, thrs = error_utils.epsc_thresholds(
-                licit_dev_neg,
-                licit_dev_pos,
-                spoof_dev_neg,
-                spoof_dev_pos,
-                points=points,
-                criteria=self._criteria,
-                beta=self._fixed_param)
-        else:
-            omega, beta, thrs = error_utils.epsc_thresholds(
-                licit_dev_neg,
-                licit_dev_pos,
-                spoof_dev_neg,
-                spoof_dev_pos,
-                points=points,
-                criteria=self._criteria,
-                omega=self._fixed_param
-            )
-
-        errors = error_utils.all_error_rates(
-            licit_eval_neg, licit_eval_pos, spoof_eval_neg,
-            spoof_eval_pos, thrs, omega, beta
-        )  # error rates are returned in a list in the
-        # following order: frr, far, IAPMR, far_w, wer_w
-
-        ax1 = mpl.subplot(
-            111
-        )  # EPC like curves for FVAS fused scores for weighted error rates
-        # between the negatives (impostors and Presentation attacks)
-        if self._wer:
+        for pi, fp in enumerate(self._fixed_params):
             if self._var_param == 'omega':
-                mpl.plot(
-                    omega,
-                    100. * errors[4].flatten(),
-                    color='C0',
-                    linestyle='-',
-                    label=r"WER$_{\omega,\beta}$")
-                mpl.xlabel(self._x_label or r"Weight $\omega$")
+                omega, beta, thrs = error_utils.epsc_thresholds(
+                    licit_dev_neg,
+                    licit_dev_pos,
+                    spoof_dev_neg,
+                    spoof_dev_pos,
+                    points=points,
+                    criteria=self._criteria,
+                    beta=fp)
             else:
-                mpl.plot(
-                    beta,
-                    100. * errors[4].flatten(),
-                    color='C0',
-                    linestyle='-',
-                    label=r"WER$_{\omega,\beta}$")
-                mpl.xlabel(self._x_label or r"Weight $\beta$")
-            mpl.ylabel(self._y_label or r"WER$_{\omega,\beta}$ (%)")
+                omega, beta, thrs = error_utils.epsc_thresholds(
+                    licit_dev_neg,
+                    licit_dev_pos,
+                    spoof_dev_neg,
+                    spoof_dev_pos,
+                    points=points,
+                    criteria=self._criteria,
+                    omega=fp
+                )
+
+            errors = error_utils.all_error_rates(
+                licit_eval_neg, licit_eval_pos, spoof_eval_neg,
+                spoof_eval_pos, thrs, omega, beta
+            )  # error rates are returned in a list in the
+            # following order: frr, far, IAPMR, far_w, wer_w
+
+            # between the negatives (impostors and Presentation attacks)
+            if self._wer:
+                if self._var_param == 'omega':
+                    mpl.plot(
+                        omega,
+                        100. * errors[4].flatten(),
+                        color=self._colors[pi],
+                        linestyle='-',
+                        label=r"WER$_{\omega,\beta}$")
+                    mpl.xlabel(self._x_label or r"Weight $\omega$")
+                else:
+                    mpl.plot(
+                        beta,
+                        100. * errors[4].flatten(),
+                        color=self._colors[pi],
+                        linestyle='-',
+                        label=r"WER$_{\omega,\beta}$")
+                    mpl.xlabel(self._x_label or r"Weight $\beta$")
+                mpl.ylabel(self._y_label or r"WER$_{\omega,\beta}$ (%)")
 
         if self._iapmr:
             axis = mpl.gca()
@@ -302,7 +298,7 @@ class Epsc(VulnPlot):
                     omega,
                     100. * errors[2].flatten(),
                     color='C3',
-                    linestyle='-',
+                    linestyle='--',
                     label='IAPMR')
                 mpl.xlabel(self._x_label or r"Weight $\omega$")
             else:
@@ -310,7 +306,7 @@ class Epsc(VulnPlot):
                     beta,
                     100. * errors[2].flatten(),
                     color='C3',
-                    linestyle='-',
+                    linestyle='--',
                     label='IAPMR')
                 mpl.xlabel(self._x_label or r"Weight $\beta$")
             mpl.ylabel(self._y_label or r"IAPMR  (%)")
@@ -320,19 +316,19 @@ class Epsc(VulnPlot):
                 axis.yaxis.label.set_color('red')
                 axis.spines['right'].set_color('red')
 
-        if self._var_param == 'omega':
-            if title is not None and title.replace(' ', ''):
-                mpl.title(title or (r"EPSC with $\beta$ = %.2f" %
-                                    self._fixed_param))
-        else:
-            if title is not None and title.replace(' ', ''):
-                mpl.title(title or (r"EPSC with $\omega$ = %.2f" %
-                                    self._fixed_param))
-
+        str_list = ', '.join([str(i) for i in self._fixed_params])
+        title = r"EPSC with %s = %s" % (
+            r"$\beta$" if self._var_param == 'omega' else r"$\omega$", str_list
+        )
+        if self._titles is not None and len(self._titles) > idx:
+            title = self._titles[idx] if self._titles[idx].replace(' ', '') \
+            else None
+        mpl.title(title)
         mpl.grid()
         self._plot_legends()
-        ax1.set_xticklabels(ax1.get_xticks())
-        ax1.set_yticklabels(ax1.get_yticks())
+        ax = mpl.gca()
+        ax.set_xticklabels(ax.get_xticks())
+        ax.set_yticklabels(ax.get_yticks())
         mpl.xticks(rotation=self._x_rotation)
         self._pdf_page.savefig()
 
