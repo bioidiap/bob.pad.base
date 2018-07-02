@@ -173,10 +173,22 @@ def test_epsc_vuln():
 
         result = runner.invoke(vuln_commands.epsc,
                                ['--output', 'epsc.pdf', '-I',
+                                '-fp', '0.1,0.3',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
         assert result.exit_code == 0, (result.exit_code, result.output)
 
+def test_epsc_3D_vuln():
+    licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/licit/scores-dev')
+    licit_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/licit/scores-eval')
+    spoof_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/spoof/scores-dev')
+    spoof_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/spoof/scores-eval')
+    runner = CliRunner()
+    with runner.isolated_filesystem():
         result = runner.invoke(vuln_commands.epsc,
                                ['--output', 'epsc.pdf', '-D',
                                 licit_dev, licit_test,

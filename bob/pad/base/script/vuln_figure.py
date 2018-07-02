@@ -238,10 +238,15 @@ class Epsc(VulnPlot):
         spoof_dev_pos = input_scores[2][1]
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
-
-        mpl.gcf().clear()
+        merge_sys = (self._fixed_params is None or len(self._fixed_params)
+                     == 1) and self.n_systems > 1
+        if not merge_sys:
+            mpl.gcf().clear()
         points = 10
         for pi, fp in enumerate(self._fixed_params):
+            if merge_sys:
+                assert pi == 0
+                pi = idx
             if self._var_param == 'omega':
                 omega, beta, thrs = error_utils.epsc_thresholds(
                     licit_dev_neg,
@@ -268,23 +273,28 @@ class Epsc(VulnPlot):
             )  # error rates are returned in a list in the
             # following order: frr, far, IAPMR, far_w, wer_w
 
+
             # between the negatives (impostors and Presentation attacks)
             if self._wer:
                 if self._var_param == 'omega':
+                    label = r"WER$_{\omega,\beta=%.1f}$" % fp if not merge_sys\
+                            else r"WER%s$_{\omega,\beta}$" % str(idx + 1)
                     mpl.plot(
                         omega,
                         100. * errors[4].flatten(),
                         color=self._colors[pi],
                         linestyle='-',
-                        label=r"WER$_{\omega,\beta}$")
+                        label=label)
                     mpl.xlabel(self._x_label or r"Weight $\omega$")
                 else:
+                    label = r"WER$_{\omega=%.1f,\beta}$" % fp if not merge_sys\
+                            else r"WER%s$_{\omega,\beta}$" % str(idx + 1)
                     mpl.plot(
                         beta,
                         100. * errors[4].flatten(),
                         color=self._colors[pi],
                         linestyle='-',
-                        label=r"WER$_{\omega,\beta}$")
+                        label=label)
                     mpl.xlabel(self._x_label or r"Weight $\beta$")
                 mpl.ylabel(self._y_label or r"WER$_{\omega,\beta}$ (%)")
 
@@ -293,21 +303,22 @@ class Epsc(VulnPlot):
             if self._wer:
                 axis = mpl.twinx()
                 axis.grid(False)
+            iapmr_color = 'C3' if not merge_sys else self._colors[idx]
             if self._var_param == 'omega':
                 mpl.plot(
                     omega,
                     100. * errors[2].flatten(),
-                    color='C3',
+                    color=iapmr_color,
                     linestyle='--',
-                    label='IAPMR')
+                    label='IAPMR%d' % (idx + 1))
                 mpl.xlabel(self._x_label or r"Weight $\omega$")
             else:
                 mpl.plot(
                     beta,
                     100. * errors[2].flatten(),
-                    color='C3',
+                    color=iapmr_color,
                     linestyle='--',
-                    label='IAPMR')
+                    label='IAPMR%d' % (idx + 1))
                 mpl.xlabel(self._x_label or r"Weight $\beta$")
             mpl.ylabel(self._y_label or r"IAPMR  (%)")
             if self._wer:
@@ -330,7 +341,9 @@ class Epsc(VulnPlot):
         ax.set_xticklabels(ax.get_xticks())
         ax.set_yticklabels(ax.get_yticks())
         mpl.xticks(rotation=self._x_rotation)
-        self._pdf_page.savefig()
+        if self._fixed_params is None or len(self._fixed_params) > 1 or \
+           idx == self.n_systems - 1:
+            self._pdf_page.savefig()
 
 
 class Epsc3D(Epsc):
