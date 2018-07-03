@@ -35,9 +35,10 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys):
 
 
 @common_options.metrics_command(common_options.METRICS_HELP.format(
-    names='FtA, FAR, FRR, APCER, BPCER, ACER',
+    names='FtA, APCER, BPCER, FAR, FRR, ACER',
     criteria=CRITERIA, score_format=SCORE_FORMAT,
-    hter_note='Note that ACER = (APCER + BPCER) / 2',
+    hter_note='Note that FAR = APCER * (1 - FtA), FRR = FtA + BPCER * (1 - FtA) '
+    'and ACER = (FMR + FMNR) / 2.',
     command='bob pad metrics'), criteria=CRITERIA)
 def metrics(ctx, scores, evaluation, **kwargs):
   process = figure.Metrics(ctx, scores, evaluation, load.split)
