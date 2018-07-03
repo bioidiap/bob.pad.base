@@ -104,6 +104,7 @@ class VulnPlot(measure_figure.PlotBase):
     def __init__(self, ctx, scores, evaluation, func_load):
         super(VulnPlot, self).__init__(ctx, scores, evaluation, func_load)
         mpl.rcParams['figure.constrained_layout.use'] = self._clayout
+        self._nlegends = ctx.meta.get('legends_ncol', 3)
 
     def end_process(self):
         '''Close pdf '''
@@ -122,7 +123,8 @@ class VulnPlot(measure_figure.PlotBase):
             labels += la
         if self._disp_legend:
             mpl.gca().legend(lines, labels, loc=self._legend_loc,
-                             fancybox=True, framealpha=0.5)
+                             ncol=self._nlegends, fancybox=True,
+                             framealpha=0.5)
 
 
 class Epc(VulnPlot):
@@ -218,12 +220,15 @@ class Epsc(VulnPlot):
         self._criteria = criteria or 'eer'
         self._var_param = var_param or "omega"
         self._fixed_params = fixed_params or [0.5]
-        self._titles = ctx.meta.get('titles', [])
+        self._titles = ctx.meta.get('titles', []) * 2
+        self._legend_loc = self._legend_loc or 'upper center'
         self._eval = True  # always eval data with EPC
         self._split = False
         self._nb_figs = 1
         self._sampling = ctx.meta.get('sampling', 5)
         mpl.grid(True)
+        self._axis1 = None
+        self._axis2 = None
 
         if self._min_arg != 4:
             raise click.BadParameter("You must provide 4 scores files:{licit,"
@@ -241,12 +246,20 @@ class Epsc(VulnPlot):
         spoof_eval_pos = input_scores[3][1]
         merge_sys = (self._fixed_params is None or
                      len(self._fixed_params) == 1) and self.n_systems > 1
+        legend = self._legends[idx] if self._legends is not None and \
+                idx < len(self._legends) else 'Sys%d' % (idx + 1)
+
+        n_col = 1 if self._iapmr else 0
+        n_col += 1 if self._wer else 0
 
         if not merge_sys or idx == 0:
-            mpl.gcf().clear()
             # axes should only be created once
-            self._axis1 = mpl.gca()
-            self._axis2 = mpl.twinx()
+            mpl.figure()
+            self._axis1 = mpl.subplot(1, n_col, 1)
+            if n_col == 2:
+                self._axis2 = mpl.subplot(1, n_col, 2)
+            else:
+                self._axis2 = self._axis1
         points = 10
         for pi, fp in enumerate(self._fixed_params):
             if merge_sys:
@@ -280,64 +293,72 @@ class Epsc(VulnPlot):
 
             mpl.sca(self._axis1)
             # between the negatives (impostors and Presentation attacks)
+            base = r"(%s) " % legend
             if self._wer:
+                set_title = self._titles[idx] if self._titles is not None and \
+                        len(self._titles) > idx else None
+                display = set_title.replace(' ', '') if set_title is not None\
+                        else True
+                wer_title = set_title or "WER"
+                if display:
+                    mpl.title(wer_title)
                 if self._var_param == 'omega':
-                    label = r"WER$_{\omega,\beta=%.1f}$" % fp if not merge_sys\
-                            else r"WER%s$_{\omega,\beta}$" % str(idx + 1)
+                    label = r"%s$\beta=%.1f$" % (base, fp)
                     mpl.plot(
                         omega, 100. * errors[4].flatten(),
                         color=self._colors[pi], linestyle='-', label=label)
                     mpl.xlabel(self._x_label or r"Weight $\omega$")
                 else:
-                    label = r"WER$_{\omega=%.1f,\beta}$" % fp if not merge_sys\
-                            else r"WER%s$_{\omega,\beta}$" % str(idx + 1)
+                    label = r"%s$\omega=%.1f$" % (base, fp)
                     mpl.plot(
                         beta, 100. * errors[4].flatten(),
                         color=self._colors[pi], linestyle='-', label=label)
                     mpl.xlabel(self._x_label or r"Weight $\beta$")
                 mpl.ylabel(self._y_label or r"WER$_{\omega,\beta}$ (%)")
 
-        if self._iapmr:
-            mpl.sca(self._axis2)
-            iapmr_color = 'C3' if not merge_sys else self._colors[idx]
-            if self._var_param == 'omega':
-                mpl.plot(
-                    omega, 100. * errors[2].flatten(),
-                    color=iapmr_color, linestyle='--',
-                    label='IAPMR%d' % (idx + 1)
-                )
-                mpl.xlabel(self._x_label or r"Weight $\omega$")
-            else:
-                mpl.plot(
-                    beta, 100. * errors[2].flatten(), color=iapmr_color,
-                    linestyle='--', label='IAPMR%d' % (idx + 1)
-                )
-                mpl.xlabel(self._x_label or r"Weight $\beta$")
+            if self._iapmr:
+                mpl.sca(self._axis2)
+                set_title = self._titles[idx + self.n_systems] \
+                        if self._titles is not None and \
+                        len(self._titles) > self.n_systems + idx else None
+                display = set_title.replace(' ', '') if set_title is not None\
+                        else True
+                iapmr_title = set_title or "IAPMR"
+                if display:
+                    mpl.title(iapmr_title)
+                if self._var_param == 'omega':
+                    label = r"$%s $\beta=%.1f$" % (base, fp)
+                    mpl.plot(
+                        omega, 100. * errors[2].flatten(),
+                        color=self._colors[pi], linestyle='-', label=label
+                    )
+                    mpl.xlabel(self._x_label or r"Weight $\omega$")
+                else:
+                    label = r"%s $\omega=%.1f$" % (base, fp)
+                    mpl.plot(
+                        beta, 100. * errors[2].flatten(), color=self._colors[pi],
+                        linestyle='-', label=label
+                    )
+                    mpl.xlabel(self._x_label or r"Weight $\beta$")
 
-            mpl.ylabel(self._y_label or r"IAPMR  (%)")
-            if self._wer and idx == 0:
+                mpl.ylabel(self._y_label or r"IAPMR  (%)")
+                self._axis2.set_xticklabels(self._axis2.get_xticks())
                 self._axis2.set_yticklabels(self._axis2.get_yticks())
-                self._axis2.tick_params(axis='y', colors='red')
-                self._axis2.yaxis.label.set_color('red')
-                self._axis2.spines['right'].set_color('red')
 
-        str_list = ', '.join([str(i) for i in self._fixed_params])
-        title = r"EPSC with %s = %s" % (
-            r"$\beta$" if self._var_param == 'omega' else r"$\omega$", str_list
-        )
-        if self._titles is not None and len(self._titles) > idx:
-            title = self._titles[idx] if self._titles[idx].replace(' ', '') \
-                else None
 
-        mpl.title(title)
-        mpl.grid()
-        self._plot_legends()
         self._axis1.set_xticklabels(self._axis1.get_xticks())
         self._axis1.set_yticklabels(self._axis1.get_yticks())
         mpl.xticks(rotation=self._x_rotation)
         if self._fixed_params is None or len(self._fixed_params) > 1 or \
            idx == self.n_systems - 1:
-            self._pdf_page.savefig()
+            # all plots share same legends
+            lines, labels = self._axis1.get_legend_handles_labels()
+            mpl.gcf().legend(
+                lines, labels, loc=self._legend_loc, fancybox=True,
+                framealpha=0.5, ncol=self._nlegends, bbox_to_anchor=(0.5, 1.12)
+            )
+            mpl.tight_layout()
+            self._pdf_page.savefig(bbox_inches='tight')
 
 
 class Epsc3D(Epsc):
