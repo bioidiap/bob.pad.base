@@ -71,9 +71,9 @@ def write_scores_to_file(neg, pos, filename, attack=False):
 
 @click.command()
 @click.argument('outdir')
-@click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
-@click.option('--mean-zei', default=3, type=FLOAT, show_default=True)
-@click.option('--mean-pa', default=5, type=FLOAT, show_default=True)
+@click.option('-mg', '--mean-gen', default=7, type=FLOAT, show_default=True)
+@click.option('-mz', '--mean-zei', default=3, type=FLOAT, show_default=True)
+@click.option('-mp', '--mean-pa', default=5, type=FLOAT, show_default=True)
 @verbosity_option()
 def gen(outdir, mean_gen, mean_zei, mean_pa):
   """Generate random scores.
@@ -104,7 +104,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_roc.pdf')
+@common_options.output_plot_file_option(default_out='roc.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option(dflt='upper-right')
@@ -144,7 +144,7 @@ def roc(ctx, scores, real_data, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_det.pdf')
+@common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option(dflt='upper-right')
@@ -184,7 +184,7 @@ def det(ctx, scores, real_data, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_epc.pdf')
+@common_options.output_plot_file_option(default_out='epc.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option()
@@ -228,7 +228,7 @@ def epc(ctx, scores, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_epsc.pdf')
+@common_options.output_plot_file_option(default_out='epsc.pdf')
 @common_options.titles_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option()
@@ -301,7 +301,7 @@ def epsc(ctx, scores, criteria, var_param, three_d, sampling,
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
-@common_options.output_plot_file_option(default_out='vuln_hist.pdf')
+@common_options.output_plot_file_option(default_out='hist.pdf')
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
@@ -346,6 +346,8 @@ def hist(ctx, scores, evaluation, **kwargs):
   computed from dev-scores.
 
   Examples:
+
+      $ bob vuln hist -v licit/scores-dev spoof/scores-dev
 
       $ bob vuln hist -e -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval

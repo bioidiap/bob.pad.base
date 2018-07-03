@@ -239,12 +239,12 @@ class Epsc(VulnPlot):
         spoof_dev_pos = input_scores[2][1]
         spoof_eval_neg = input_scores[3][0]
         spoof_eval_pos = input_scores[3][1]
-        merge_sys = (self._fixed_params is None or len(self._fixed_params)
-                     == 1) and self.n_systems > 1
+        merge_sys = (self._fixed_params is None or
+                     len(self._fixed_params) == 1) and self.n_systems > 1
 
         if not merge_sys or idx == 0:
             mpl.gcf().clear()
-            # axis should only be created and twin onece
+            # axes should only be created once
             self._axis1 = mpl.gca()
             self._axis2 = mpl.twinx()
         points = 10
@@ -327,7 +327,7 @@ class Epsc(VulnPlot):
         )
         if self._titles is not None and len(self._titles) > idx:
             title = self._titles[idx] if self._titles[idx].replace(' ', '') \
-            else None
+                else None
 
         mpl.title(title)
         mpl.grid()
