@@ -246,8 +246,11 @@ class Epsc(VulnPlot):
         spoof_eval_pos = input_scores[3][1]
         merge_sys = (self._fixed_params is None or
                      len(self._fixed_params) == 1) and self.n_systems > 1
-        legend = self._legends[idx] if self._legends is not None and \
-                idx < len(self._legends) else 'Sys%d' % (idx + 1)
+        legend = ''
+        if self._legends is not None and idx < len(self._legends):
+            legend = self._legends[idx]
+        elif self.n_systems > 1:
+            legend = 'Sys%d' % (idx + 1)
 
         n_col = 1 if self._iapmr else 0
         n_col += 1 if self._wer else 0
@@ -293,13 +296,13 @@ class Epsc(VulnPlot):
 
             mpl.sca(self._axis1)
             # between the negatives (impostors and Presentation attacks)
-            base = r"(%s) " % legend
+            base = r"(%s) " % legend if legend.strip() else ""
             if self._wer:
                 set_title = self._titles[idx] if self._titles is not None and \
-                        len(self._titles) > idx else None
+                    len(self._titles) > idx else None
                 display = set_title.replace(' ', '') if set_title is not None\
-                        else True
-                wer_title = set_title or "WER"
+                    else True
+                wer_title = set_title or ""
                 if display:
                     mpl.title(wer_title)
                 if self._var_param == 'omega':
@@ -319,11 +322,11 @@ class Epsc(VulnPlot):
             if self._iapmr:
                 mpl.sca(self._axis2)
                 set_title = self._titles[idx + self.n_systems] \
-                        if self._titles is not None and \
-                        len(self._titles) > self.n_systems + idx else None
+                    if self._titles is not None and \
+                    len(self._titles) > self.n_systems + idx else None
                 display = set_title.replace(' ', '') if set_title is not None\
-                        else True
-                iapmr_title = set_title or "IAPMR"
+                    else True
+                iapmr_title = set_title or ""
                 if display:
                     mpl.title(iapmr_title)
                 if self._var_param == 'omega':
@@ -336,15 +339,14 @@ class Epsc(VulnPlot):
                 else:
                     label = r"%s $\omega=%.1f$" % (base, fp)
                     mpl.plot(
-                        beta, 100. * errors[2].flatten(), color=self._colors[pi],
-                        linestyle='-', label=label
+                        beta, 100. * errors[2].flatten(), linestyle='-',
+                        color=self._colors[pi], label=label
                     )
                     mpl.xlabel(self._x_label or r"Weight $\beta$")
 
                 mpl.ylabel(self._y_label or r"IAPMR  (%)")
                 self._axis2.set_xticklabels(self._axis2.get_xticks())
                 self._axis2.set_yticklabels(self._axis2.get_yticks())
-
 
         self._axis1.set_xticklabels(self._axis1.get_xticks())
         self._axis1.set_yticklabels(self._axis1.get_yticks())
@@ -354,8 +356,8 @@ class Epsc(VulnPlot):
             # all plots share same legends
             lines, labels = self._axis1.get_legend_handles_labels()
             mpl.gcf().legend(
-                lines, labels, loc=self._legend_loc, fancybox=True,
-                framealpha=0.5, ncol=self._nlegends, bbox_to_anchor=(0.5, 1.12)
+                lines, labels, loc=self._legend_loc, fancybox=True, mode="expand",
+                framealpha=0.5, ncol=self._nlegends, bbox_to_anchor=(0., 1.12, 1., .102)
             )
             mpl.tight_layout()
             self._pdf_page.savefig(bbox_inches='tight')

@@ -2,6 +2,7 @@
 """
 
 import os
+import logging
 import numpy
 import click
 from click.types import FLOAT
@@ -14,6 +15,7 @@ from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
 from . import vuln_figure as figure
 
+LOGGER = logging.getLogger(__name__)
 NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
@@ -236,16 +238,17 @@ def epc(ctx, scores, **kwargs):
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option(dflt=None)
+@common_options.figsize_option(dflt='5,3')
 @common_options.style_option()
 @common_options.bool_option(
     'wer', 'w', 'Whether to plot the WER related lines or not.', True
 )
 @common_options.bool_option(
-    'three-d', 'D', 'If true, generate 3D plots', False
+    'three-d', 'D', 'If true, generate 3D plots. You need to turn off '
+    'wer or iapmr when using this option.', False
 )
 @common_options.bool_option(
-    'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', False
+    'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', True
 )
 @click.option('-c', '--criteria', default="eer", show_default=True,
               help='Criteria for threshold selection',
@@ -286,7 +289,8 @@ def epsc(ctx, scores, criteria, var_param, three_d, sampling,
   fixed_params = ctx.meta.get('fixed_params', [0.5])
   if three_d:
     if (ctx.meta['wer'] and ctx.meta['iapmr']):
-      raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
+      LOGGER.info('Cannot plot both WER and IAPMR in 3D. Will turn IAPMR off.')
+      ctx.meta['iapmr'] = False
     ctx.meta['sampling'] = sampling
     process = figure.Epsc3D(
         ctx, scores, True, load.split,
