@@ -7,13 +7,14 @@ from .error_utils import calc_threshold
 ALL_CRITERIA = ('bpcer20', 'eer', 'min-hter')
 
 
-class Metrics(measure_figure.Metrics):
+class Metrics(bio_figure.Metrics):
     '''Compute metrics from score files'''
 
-    def __init__(self, ctx, scores, evaluation, func_load):
+    def __init__(self, ctx, scores, evaluation, func_load,
+                names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'HTER')):
         super(Metrics, self).__init__(
-            ctx, scores, evaluation, func_load,
-            names=('FtA', 'APCER', 'BPCER', 'FAR', 'FRR', 'ACER'))
+            ctx, scores, evaluation, func_load, names
+        )
 
     def get_thres(self, criterion, dev_neg, dev_pos, far):
         if self._criterion == 'bpcer20':
@@ -61,7 +62,7 @@ class Hist(measure_figure.Hist):
     def _setup_hist(self, neg, pos):
         self._title_base = 'PAD'
         self._density_hist(
-            pos[0], n=0, label='Bona Fide', color='C1'
+            pos[0], n=0, label='Bona-fide', color='C1'
         )
         self._density_hist(
             neg[0], n=1, label='Presentation attack', alpha=0.4, color='C7',

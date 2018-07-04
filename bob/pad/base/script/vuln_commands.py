@@ -2,17 +2,20 @@
 """
 
 import os
+import logging
 import numpy
 import click
 from click.types import FLOAT
 from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import (
-    verbosity_option, bool_option, list_float_option)
+    verbosity_option, bool_option, list_float_option
+)
 from bob.core import random
 from bob.io.base import create_directories_safe
 from bob.bio.base.score import load
 from . import vuln_figure as figure
 
+LOGGER = logging.getLogger(__name__)
 NUM_GENUINE_ACCESS = 5000
 NUM_ZEIMPOSTORS = 5000
 NUM_PA = 5000
@@ -70,9 +73,9 @@ def write_scores_to_file(neg, pos, filename, attack=False):
 
 @click.command()
 @click.argument('outdir')
-@click.option('--mean-gen', default=7, type=FLOAT, show_default=True)
-@click.option('--mean-zei', default=3, type=FLOAT, show_default=True)
-@click.option('--mean-pa', default=5, type=FLOAT, show_default=True)
+@click.option('-mg', '--mean-gen', default=7, type=FLOAT, show_default=True)
+@click.option('-mz', '--mean-zei', default=3, type=FLOAT, show_default=True)
+@click.option('-mp', '--mean-pa', default=5, type=FLOAT, show_default=True)
 @verbosity_option()
 def gen(outdir, mean_gen, mean_zei, mean_pa):
   """Generate random scores.
@@ -103,7 +106,7 @@ def gen(outdir, mean_gen, mean_zei, mean_pa):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_roc.pdf')
+@common_options.output_plot_file_option(default_out='roc.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option(dflt='upper-right')
@@ -143,7 +146,7 @@ def roc(ctx, scores, real_data, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_det.pdf')
+@common_options.output_plot_file_option(default_out='det.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option(dflt='upper-right')
@@ -183,7 +186,7 @@ def det(ctx, scores, real_data, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_epc.pdf')
+@common_options.output_plot_file_option(default_out='epc.pdf')
 @common_options.legends_option()
 @common_options.no_legend_option()
 @common_options.legend_loc_option()
@@ -227,23 +230,25 @@ def epc(ctx, scores, **kwargs):
 
 @click.command()
 @common_options.scores_argument(min_arg=2, force_eval=True, nargs=-1)
-@common_options.output_plot_file_option(default_out='vuln_epsc.pdf')
+@common_options.output_plot_file_option(default_out='epsc.pdf')
+@common_options.titles_option()
 @common_options.legends_option()
 @common_options.no_legend_option()
-@common_options.legend_loc_option()
+@common_options.legend_ncols_option()
 @common_options.const_layout_option()
 @common_options.x_label_option()
 @common_options.y_label_option()
-@common_options.figsize_option(dflt=None)
+@common_options.figsize_option(dflt='5,3')
 @common_options.style_option()
 @common_options.bool_option(
     'wer', 'w', 'Whether to plot the WER related lines or not.', True
 )
 @common_options.bool_option(
-    'three-d', 'D', 'If true, generate 3D plots', False
+    'three-d', 'D', 'If true, generate 3D plots. You need to turn off '
+    'wer or iapmr when using this option.', False
 )
 @common_options.bool_option(
-    'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', False
+    'iapmr', 'I', 'Whether to plot the IAPMR related lines or not.', True
 )
 @click.option('-c', '--criteria', default="eer", show_default=True,
               help='Criteria for threshold selection',
@@ -251,14 +256,13 @@ def epc(ctx, scores, **kwargs):
 @click.option('-vp', '--var-param', default="omega", show_default=True,
               help='Name of the varying parameter',
               type=click.Choice(('omega', 'beta')))
-@click.option('-fp', '--fixed-param', default=0.5, show_default=True,
-              help='Value of the fixed parameter',
-              type=click.FLOAT)
+@list_float_option(name='fixed-params', short_name='fp', dflt='0.5',
+                   desc='Values of the fixed parameter, separated by commas')
 @click.option('-s', '--sampling', default=5, show_default=True,
               help='Sampling of the EPSC 3D surface', type=click.INT)
 @verbosity_option()
 @click.pass_context
-def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
+def epsc(ctx, scores, criteria, var_param, three_d, sampling,
          **kwargs):
   """Plot EPSC (expected performance spoofing curve):
 
@@ -282,25 +286,27 @@ def epsc(ctx, scores, criteria, var_param, fixed_param, three_d, sampling,
 
       $ bob vuln epsc -v -D {licit,spoof}/scores-{dev,eval}
   """
+  fixed_params = ctx.meta.get('fixed_params', [0.5])
   if three_d:
     if (ctx.meta['wer'] and ctx.meta['iapmr']):
-      raise click.BadParameter('Cannot plot both WER and IAPMR in 3D')
+      LOGGER.info('Cannot plot both WER and IAPMR in 3D. Will turn IAPMR off.')
+      ctx.meta['iapmr'] = False
     ctx.meta['sampling'] = sampling
     process = figure.Epsc3D(
         ctx, scores, True, load.split,
-        criteria, var_param, fixed_param
+        criteria, var_param, fixed_params
     )
   else:
     process = figure.Epsc(
         ctx, scores, True, load.split,
-        criteria, var_param, fixed_param
+        criteria, var_param, fixed_params
     )
   process.run()
 
 
 @click.command()
 @common_options.scores_argument(nargs=-1, min_arg=2)
-@common_options.output_plot_file_option(default_out='vuln_hist.pdf')
+@common_options.output_plot_file_option(default_out='hist.pdf')
 @common_options.n_bins_option()
 @common_options.criterion_option()
 @common_options.thresholds_option()
@@ -346,10 +352,12 @@ def hist(ctx, scores, evaluation, **kwargs):
 
   Examples:
 
-      $ bob vuln vuln_hist -e -v licit/scores-dev licit/scores-eval \
+      $ bob vuln hist -v licit/scores-dev spoof/scores-dev
+
+      $ bob vuln hist -e -v licit/scores-dev licit/scores-eval \
                           spoof/scores-dev spoof/scores-eval
 
-      $ bob vuln vuln_hist -e -v {licit,spoof}/scores-{dev,eval}
+      $ bob vuln hist -e -v {licit,spoof}/scores-{dev,eval}
   '''
   process = figure.HistVuln(ctx, scores, evaluation, load.split)
   process.run()
@@ -364,7 +372,7 @@ def hist(ctx, scores, evaluation, **kwargs):
 @common_options.title_option()
 @common_options.const_layout_option()
 @common_options.style_option()
-@common_options.figsize_option(dflt=None)
+@common_options.figsize_option()
 @verbosity_option()
 @common_options.axes_val_option()
 @common_options.x_rotation_option()

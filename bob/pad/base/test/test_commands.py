@@ -13,7 +13,7 @@ def test_det_pad():
         result = runner.invoke(pad_commands.det, ['-e', '--output',
                                                   'DET.pdf',
                                                   licit_dev, licit_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_det_vuln():
@@ -32,7 +32,7 @@ def test_det_vuln():
                                                    'DET.pdf',
                                                    licit_dev, licit_test,
                                                    spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_fmr_iapmr_vuln():
@@ -50,13 +50,13 @@ def test_fmr_iapmr_vuln():
             '--output', 'FMRIAPMR.pdf', licit_dev, licit_test, spoof_dev,
             spoof_test
         ])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
         result = runner.invoke(vuln_commands.fmr_iapmr, [
             '--output', 'FMRIAPMR.pdf', licit_dev, licit_test, spoof_dev,
             spoof_test, '-G', '-L', '1e-7,1,0,1'
         ])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_hist_pad():
@@ -71,7 +71,7 @@ def test_hist_pad():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(pad_commands.hist, [licit_dev])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
     with runner.isolated_filesystem():
         result = runner.invoke(pad_commands.hist, ['--criterion', 'min-hter',
@@ -79,7 +79,7 @@ def test_hist_pad():
                                                    'HISTO.pdf', '-b',
                                                    '30,20',
                                                    licit_dev, spoof_dev])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
     with runner.isolated_filesystem():
         result = runner.invoke(pad_commands.hist, ['-e', '--criterion', 'eer',
@@ -87,7 +87,7 @@ def test_hist_pad():
                                                    'HISTO.pdf', '-b', '30',
                                                    licit_dev, licit_test,
                                                    spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_hist_vuln():
@@ -105,7 +105,7 @@ def test_hist_vuln():
                                ['--criterion', 'eer', '--output',
                                 'HISTO.pdf', '-b', '30', '-ts', 'A,B',
                                 licit_dev, licit_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
     with runner.isolated_filesystem():
         result = runner.invoke(vuln_commands.hist,
@@ -113,7 +113,7 @@ def test_hist_vuln():
                                 'HISTO.pdf', '-b', '2,20,30', '-e',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_metrics_pad():
@@ -127,7 +127,7 @@ def test_metrics_pad():
             pad_commands.metrics,
             ['-e', licit_dev, licit_test]
         )
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_epc_vuln():
@@ -145,13 +145,13 @@ def test_epc_vuln():
                                ['--output', 'epc.pdf',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
         result = runner.invoke(vuln_commands.epc,
                                ['--output', 'epc.pdf', '-I',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_epsc_vuln():
@@ -173,22 +173,34 @@ def test_epsc_vuln():
 
         result = runner.invoke(vuln_commands.epsc,
                                ['--output', 'epsc.pdf', '-I',
+                                '-fp', '0.1,0.3',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
+def test_epsc_3D_vuln():
+    licit_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/licit/scores-dev')
+    licit_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/licit/scores-eval')
+    spoof_dev = pkg_resources.resource_filename('bob.pad.base.test',
+                                                'data/spoof/scores-dev')
+    spoof_test = pkg_resources.resource_filename('bob.pad.base.test',
+                                                 'data/spoof/scores-eval')
+    runner = CliRunner()
+    with runner.isolated_filesystem():
         result = runner.invoke(vuln_commands.epsc,
                                ['--output', 'epsc.pdf', '-D',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
         result = runner.invoke(vuln_commands.epsc,
                                ['--output', 'epsc.pdf', '-D',
                                 '-I', '--no-wer',
                                 licit_dev, licit_test,
                                 spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
 
 
 def test_evaluate_pad():
@@ -204,4 +216,4 @@ def test_evaluate_pad():
     with runner.isolated_filesystem():
         result = runner.invoke(pad_commands.evaluate,
                                [licit_dev, licit_test, spoof_dev, spoof_test])
-        assert result.exit_code == 0, (result.exit_code, result.output)
+        assert result.exit_code == 0, (result.exit_code, result.output, result.exception)
