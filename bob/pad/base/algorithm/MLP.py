@@ -56,7 +56,7 @@ class MLP(Algorithm):
 
         Parameters
         ----------
-        training_features : :py:obj:`list` of :py:class:`numpy.ndarray` 
+        training_features : :py:class:`list` of :py:class:`numpy.ndarray` 
           Data used to train the MLP. The real attempts are in training_features[0] and the attacks are in training_features[1]
         projector_file : str
           Filename where to save the trained model.
