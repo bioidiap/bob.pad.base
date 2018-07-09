@@ -19,7 +19,7 @@ class MLP(Algorithm):
 
     Attributes
     ----------
-    hidden_units : :py:obj:`tuple` of int
+    hidden_units : :py:obj:`tuple` of :any:`int`
       The number of hidden units in each hidden layer
     max_iter : int
       The maximum number of training iterations
@@ -54,10 +54,10 @@ class MLP(Algorithm):
     def train_projector(self, training_features, projector_file):
         """Trains the MLP
 
-        Parameters:
-        -----------
-        training_features : :py:obj:`list` of :py:class:`numpy.ndarray` or :py:class:`bob.bio.video.utils.FrameContainer`
-          Data used to train the MLP. The real data are in training_features[0] and the attacks are in training_features[1]
+        Parameters
+        ----------
+        training_features : :py:obj:`list` of :py:class:`numpy.ndarray` 
+          Data used to train the MLP. The real attempts are in training_features[0] and the attacks are in training_features[1]
         projector_file : str
           Filename where to save the trained model.
         
@@ -71,11 +71,6 @@ class MLP(Algorithm):
         label_attack = numpy.zeros((len(training_features[1]), 2), dtype='float64')
         label_attack[:, 1] = 0
         
-        #if isinstance(training_features[0][0], FrameContainer): 
-        #    real = convert_frame_cont_to_array(training_features[0])
-        #if isinstance(training_features[1][0], FrameContainer): 
-        #    attack = convert_frame_cont_to_array(training_features[1])
-
         real = numpy.array(training_features[0])
         attack = numpy.array(training_features[1])
         X = numpy.vstack([real, attack])
@@ -115,7 +110,8 @@ class MLP(Algorithm):
         
         Parameters
         ----------
-        feature : :py:class:`numpy.ndarray` or :py:class:`bob.bio.video.utils.FrameContainer`
+        feature : :py:class:`numpy.ndarray` 
+          The feature to classify
 
         Returns
         -------
