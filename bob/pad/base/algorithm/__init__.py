@@ -5,6 +5,7 @@ from .LogRegr import LogRegr
 from .SVMCascadePCA import SVMCascadePCA
 from .Predictions import Predictions
 
+from .MLP import MLP
 
 # to fix sphinx warnings of not able to find classes, when path is shortened
 def __appropriate__(*args):
