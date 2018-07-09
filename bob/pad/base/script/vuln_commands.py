@@ -77,7 +77,7 @@ def write_scores_to_file(neg, pos, filename, attack=False):
 @click.option('-mz', '--mean-zei', default=3, type=FLOAT, show_default=True)
 @click.option('-mp', '--mean-pa', default=5, type=FLOAT, show_default=True)
 @verbosity_option()
-def gen(outdir, mean_gen, mean_zei, mean_pa):
+def gen(outdir, mean_gen, mean_zei, mean_pa, **kwargs):
   """Generate random scores.
   Generates random scores for three types of verification attempts:
   genuine users, zero-effort impostors and spoofing attacks and writes them

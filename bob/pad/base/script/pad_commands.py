@@ -23,7 +23,7 @@ CRITERIA = ('eer', 'min-hter', 'bpcer20')
 @click.option('-n', '--n-sys', default=1, type=click.INT, show_default=True)
 @verbosity_option()
 @click.pass_context
-def gen(ctx, outdir, mean_match, mean_non_match, n_sys):
+def gen(ctx, outdir, mean_match, mean_non_match, n_sys, **kwargs):
   """Generate random scores.
   Generates random scores in 4col or 5col format. The scores are generated
   using Gaussian distribution whose mean is an input
