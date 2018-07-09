@@ -203,9 +203,36 @@ def test_MLP():
     mlp.train_projector(training_features, '/tmp/mlp.hdf5')
 
     real_sample = real_array[0]
-
     prob = mlp.project(real_sample)
-
     assert prob[0] > prob[1]
 
+
+def test_LDA():
+    """
+    Test the LDA PAD algorithm.
+    """
+
+    random.seed(7)
+
+    N = 20000
+    mu = 1
+    sigma = 1
+    real_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+    mu = 5
+    sigma = 1
+    attack_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+    training_features = [real_array, attack_array]
+
+    lda = PadLDA()
+    lda.train_projector(training_features, '/tmp/lda.hdf5')
+
+    real_sample = real_array[0]
+    prob = lda.project(real_sample)
+    assert prob[0] > prob[1]
 

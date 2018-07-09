@@ -28,6 +28,7 @@ Algorithm
 .. autosummary::
    bob.pad.base.tools.train_projector
    bob.pad.base.tools.project
+   bob.pad.base.algorithm
 
 Scoring
 ~~~~~~~

@@ -21,8 +21,12 @@ class MLP(Algorithm):
     ----------
     hidden_units : :py:obj:`tuple` of :any:`int`
       The number of hidden units in each hidden layer
-    max_iter : int
+    max_iter : :any:`int`
       The maximum number of training iterations
+    precision : :any:`float`
+      criterion to stop the training: if the difference
+      between current and last loss is smaller than
+      this number, then stop training.
     """
 
     def __init__(self, hidden_units=(10, 10), max_iter=1000, precision=0.001, **kwargs):
