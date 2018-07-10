@@ -8,8 +8,8 @@ class PadLDA(LDA):
     """Wrapper for bob.bio.base.algorithm.LDA,
     
     Here, LDA is used in a PAD context. This means that the feature
-    will be projected on a two-dimensional subspace, where the two
-    dimensions represents the real and attack classes.
+    will be projected on a single dimension subspace, which acts as a score
+
 
     For more details, you may want to have a look at 
     `bob.learn.linear Documentation`_
