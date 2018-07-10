@@ -98,12 +98,12 @@ class MLP(Algorithm):
         n_iter = 0
         previous_cost = 0
         current_cost = 1
-        while (n_iter < self.max_iter) or (abs(previous_cost - current_cost) > self.precision): 
+        while (n_iter < self.max_iter) and (abs(previous_cost - current_cost) > self.precision): 
             previous_cost = current_cost
             trainer.train(self.mlp, X, Y)
             current_cost = trainer.cost(self.mlp, X, Y)
             n_iter += 1
-            logger.debug("Iteration {} -> cost = {} (previous = {})".format(n_iter, trainer.cost(self.mlp, X, Y), previous_cost))
+            logger.debug("Iteration {} -> cost = {} (previous = {}, max_iter = {})".format(n_iter, trainer.cost(self.mlp, X, Y), previous_cost, self.max_iter))
 
         f = bob.io.base.HDF5File(projector_file, 'w')
         self.mlp.save(f)
