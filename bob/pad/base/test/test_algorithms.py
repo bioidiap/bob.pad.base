@@ -12,6 +12,8 @@ import bob.pad.base
 
 from bob.pad.base.algorithm import SVM
 from bob.pad.base.algorithm import OneClassGMM
+from bob.pad.base.algorithm import MLP
+from bob.pad.base.algorithm import PadLDA
 
 import random
 
@@ -173,3 +175,61 @@ def test_convert_list_of_frame_cont_to_array():
   assert isinstance(features_array[0], np.ndarray)
   features_fm = convert_array_to_list_of_frame_cont(real_array)
   assert isinstance(features_fm[0], bob.bio.video.FrameContainer)
+
+
+def test_MLP():
+    """
+    Test the MLP PAD algorithm.
+    """
+
+    random.seed(7)
+
+    N = 20000
+    mu = 1
+    sigma = 1
+    real_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+    mu = 5
+    sigma = 1
+    attack_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+
+    training_features = [real_array, attack_array]
+
+    mlp = MLP(max_iter=100)
+    mlp.train_projector(training_features, '/tmp/mlp.hdf5')
+
+    real_sample = real_array[0]
+    prob = mlp.project(real_sample)
+    assert prob[0] > prob[1]
+
+
+def test_LDA():
+    """
+    Test the LDA PAD algorithm.
+    """
+
+    random.seed(7)
+
+    N = 20000
+    mu = 1
+    sigma = 1
+    real_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+    mu = 5
+    sigma = 1
+    attack_array = np.transpose(
+        np.vstack([[random.gauss(mu, sigma) for _ in range(N)],
+                   [random.gauss(mu, sigma) for _ in range(N)]]))
+
+    training_features = [real_array, attack_array]
+
+    lda = PadLDA()
+    lda.train_projector(training_features, '/tmp/lda.hdf5')
+    assert lda.machine.shape == (2, 1)

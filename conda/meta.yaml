@@ -29,6 +29,7 @@ requirements:
     - bob.bio.video
     - bob.learn.linear
     - bob.learn.libsvm
+    - bob.learn.mlp
     - scikit-learn
   run:
     - python
