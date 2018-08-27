@@ -93,9 +93,9 @@ class HistVuln(measure_figure.Hist):
                 int(idx / self._step_print) * self._step_print
             if col == self._ncols - 1 or n == rest_print - 1:
                 ax2.set_ylabel("IAPMR (%)", color='C3')
-            ax2.tick_params(axis='y', colors='red')
-            ax2.yaxis.label.set_color('red')
-            ax2.spines['right'].set_color('red')
+            ax2.tick_params(axis='y', colors='C3')
+            ax2.yaxis.label.set_color('C3')
+            ax2.spines['right'].set_color('C3')
 
 
 class VulnPlot(measure_figure.PlotBase):
