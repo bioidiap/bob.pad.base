@@ -66,9 +66,9 @@ def convert_and_prepare_features(features):
     if isinstance(
             features[0],
             bob.bio.video.FrameContainer):  # if FrameContainer convert to 2D numpy array
-        return convert_list_of_frame_cont_to_array(features)
+        return convert_list_of_frame_cont_to_array(features).astype('float64')
     else:
-        return np.vstack(features)
+        return np.vstack(features).astype('float64')
 
 
 def convert_list_of_frame_cont_to_array(frame_containers):
@@ -273,9 +273,9 @@ def mean_std_normalize(features,
         features_mean = np.mean(features, axis=0)
 
         features_std = np.std(features, axis=0)
-        
+
     features_std[features_std==0.0]=1.0
-    
+
     row_norm_list = []
 
     for row in features:  # row is a sample
