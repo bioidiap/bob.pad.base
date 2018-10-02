@@ -7,7 +7,8 @@ import math
 import os
 import yaml
 from bob.bio.base.score.load import split
-from bob.extension.scripts.click_helper import verbosity_option, bool_option
+from bob.extension.scripts.click_helper import (
+    verbosity_option, bool_option, log_parameters)
 from bob.measure import eer_threshold, farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
@@ -17,7 +18,15 @@ from tabulate import tabulate
 logger = logging.getLogger(__name__)
 
 
-@click.command(context_settings=dict(token_normalize_func=lambda x: x.lower()))
+@click.command(epilog='''\b
+Examples:
+
+  $ bin/bob pad cross 'results/{{ evaluation.database }}/{{ algorithm }}/{{ evaluation.protocol }}/scores/scores-{{ group }}' -td replaymobile -d replaymobile -p grandtest -d oulunpu -p Protocol_1 \
+    -a replaymobile_frame-diff-svm \
+    -a replaymobile_qm-svm-64 \
+    -a replaymobile_lbp-svm-64 \
+    > replaymobile.rst &
+''')
 @click.argument('score_jinja_template')
 @click.option('-d', '--database', 'databases', multiple=True, required=True,
               show_default=True,
@@ -41,8 +50,7 @@ def cross(ctx, score_jinja_template, databases, protocols, algorithms,
           train_database, groups, sort, **kwargs):
     """Cross-db analysis metrics
     """
-    logger.debug('ctx.meta: %s', ctx.meta)
-    logger.debug('ctx.params: %s', ctx.params)
+    log_parameters(logger)
 
     env = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
