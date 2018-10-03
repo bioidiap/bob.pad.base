@@ -30,7 +30,7 @@ requirements:
     - bob.learn.linear
     - bob.learn.libsvm
     - bob.learn.mlp
-    - scikit-learn
+    - scikit-learn {{ scikit_learn }}
   run:
     - python
     - setuptools
