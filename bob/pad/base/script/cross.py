@@ -117,7 +117,7 @@ def cross(ctx, score_jinja_template, databases, protocols, algorithms,
         algorithms = sorted(algorithms, key=sort_key)
 
     for algorithm in algorithms:
-        rows.append([algorithm.replace(train_database + '_', '')])
+        rows.append([algorithm.replace(train_database + '_', '').replace(train_protocol + '_', '')])
         for database, protocol in zip(databases, protocols):
             cell = []
             for group in groups:
