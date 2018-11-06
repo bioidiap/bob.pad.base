@@ -24,24 +24,7 @@ def convert_frame_cont_to_array(frame_container):
         An array containing features for all frames.
         The rows are samples, the columns are features.
     """
-
-    feature_vectors = []
-
-    frame_dictionary = {}
-
-    for frame in frame_container:
-        frame_dictionary[frame[0]] = frame[1]
-
-    sorted_keys = np.sort([int(key) for key in frame_dictionary.keys()])
-
-    for idx, _ in enumerate(frame_container):
-        # Frames are stored in a mixed order, therefore we get them using incrementing frame index.
-        # Also, some frames might be missing, this is also addressed.
-        feature_vectors.append(frame_dictionary[str(sorted_keys[idx])])
-
-    features_array = np.vstack(feature_vectors)
-
-    return features_array
+    return frame_container.as_array()
 
 
 def convert_and_prepare_features(features):
