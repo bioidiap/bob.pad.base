@@ -58,7 +58,7 @@ def train_extractor(extractor, preprocessor, allow_missing_files=False, force=Fa
         bob.io.base.create_directories_safe(os.path.dirname(fs.extractor_file))
         # read training files
         train_files = fs.training_list(
-            'preprocessed', 'train_extractor', combined=~extractor.split_training_data_by_client)
+            'preprocessed', 'train_extractor', combined=not extractor.split_training_data_by_client)
         train_data = read_preprocessed_data(
             train_files, preprocessor, extractor.split_training_data_by_client, allow_missing_files)
         if extractor.split_training_data_by_client:
