@@ -477,6 +477,8 @@ class SVM(Algorithm):
 
             features_array = feature
 
+        features_array = features_array.astype('float64')
+
         if not (self.machine_type == 'ONE_CLASS'):  # two-class SVM case
 
             probabilities = self.machine.predict_class_and_probabilities(

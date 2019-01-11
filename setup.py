@@ -147,6 +147,8 @@ setup(
             'epc              = bob.pad.base.script.pad_commands:epc',
             'gen              = bob.pad.base.script.pad_commands:gen',
             'evaluate         = bob.pad.base.script.pad_commands:evaluate',
+            'cross            = bob.pad.base.script.cross:cross',
+            'finalize-scores  = bob.pad.base.script.finalize_scores:finalize_scores',
         ],
 
         # bob vuln scripts
