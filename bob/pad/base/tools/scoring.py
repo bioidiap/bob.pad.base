@@ -23,7 +23,7 @@ from .FileSelector import FileSelector
 from bob.bio.base import utils
 
 
-def _compute_scores(algorithm, toscore_objects, allow_missing_files):
+def _compute_scores(algorithm, extractor, toscore_objects, allow_missing_files):
     """Compute scores for the given list of objects using provided algorithm.
     """
     # the scores to be computed
@@ -37,7 +37,10 @@ def _compute_scores(algorithm, toscore_objects, allow_missing_files):
             scores.insert(i, [numpy.nan])
             continue
         # read toscore
-        toscore = algorithm.read_toscore_object(toscore_element)
+        if algorithm.performs_projection:
+            toscore = algorithm.read_feature(toscore_element)
+        else:
+            toscore = extractor.read_feature(toscore_element)
         # compute score
         if isinstance(toscore, list) or isinstance(toscore[0], numpy.ndarray):
             scores.insert(i, algorithm.score_for_multiple_projections(toscore))
@@ -120,7 +123,7 @@ def _save_scores(score_file, scores, toscore_objects, write_compressed=False):
     _close_written(score_file, f, write_compressed)
 
 
-def _scores_all(algorithm, group, force, allow_missing_files=False, write_compressed=False):
+def _scores_all(algorithm, extractor, group, force, allow_missing_files=False, write_compressed=False):
     """Computes scores for all (real, attack) files in a given group using the provided algorithm."""
     # the file selector object
     fs = FileSelector.instance()
@@ -148,7 +151,7 @@ def _scores_all(algorithm, group, force, allow_missing_files=False, write_compre
             # get the attack files
             current_files = fs.get_paths(current_objects, 'projected' if algorithm.performs_projection else 'extracted')
             # compute scores for the list of File objects
-            cur_scores = _compute_scores(algorithm, current_files, allow_missing_files)
+            cur_scores = _compute_scores(algorithm, extractor, current_files, allow_missing_files)
             total_scores += cur_scores
             # Save scores to text file
             _save_scores(score_file, cur_scores, current_objects, write_compressed)
@@ -164,7 +167,7 @@ def _scores_all(algorithm, group, force, allow_missing_files=False, write_compre
                          current_toscore_objects[0]+current_toscore_objects[1], write_compressed)
 
 
-def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing_files=False, write_compressed=False):
+def compute_scores(algorithm, extractor, force=False, groups=['dev', 'eval'], allow_missing_files=False, write_compressed=False):
     """Computes the scores for the given groups.
 
     This function computes all scores for the experiment and writes them to score files.
@@ -174,6 +177,8 @@ def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing
 
     algorithm : py:class:`bob.bio.base.algorithm.Algorithm` or derived
       The algorithm, used for enrolling model and writing them to file.
+
+    extractor : py:class:`bob.bio.base.extractor.Extractor` or derived
 
     force : bool
       If given, files are regenerated, even if they already exist.
@@ -192,4 +197,4 @@ def compute_scores(algorithm, force=False, groups=['dev', 'eval'], allow_missing
         algorithm.load_projector(fs.projector_file)
 
     for group in groups:
-        _scores_all(algorithm, group, force, allow_missing_files, write_compressed)
+        _scores_all(algorithm, extractor, group, force, allow_missing_files, write_compressed)
