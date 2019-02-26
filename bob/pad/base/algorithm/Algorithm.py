@@ -85,7 +85,9 @@ class Algorithm(object):
         **Parameters:**
 
         toscore : object
-          The object to compute the score for.
+          The object to compute the score for. This will be the output of
+          extractor if performs_projection is False, otherwise this will be the
+          output of project method of the algorithm.
 
         **Returns:**
 
@@ -158,27 +160,6 @@ class Algorithm(object):
           The feature that was read from file.
         """
         return utils.load(feature_file)
-
-    def read_toscore_object(self, toscore_object_file):
-        """read_toscore_object(toscore_object_file) -> toscore_object
-
-        Reads the toscore_object feature from a file.
-        By default, the toscore_object feature is identical to the projected feature.
-        Hence, this base class implementation simply calls :py:meth:`read_feature`.
-
-        If your algorithm requires different behavior, please overwrite this function.
-
-        **Parameters:**
-
-        toscore_object_file : str or :py:class:`bob.io.base.HDF5File`
-          The file open for reading, or the file name to read from.
-
-        **Returns:**
-
-        toscore_object : object
-          The toscore_object that was read from file.
-        """
-        return self.read_feature(toscore_object_file)
 
     def train_projector(self, training_features, projector_file):
         """This function can be overwritten to train the feature projector.

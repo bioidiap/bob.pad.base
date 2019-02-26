@@ -6,12 +6,12 @@ from bob.bio.base.algorithm import LDA
 
 class PadLDA(LDA):
     """Wrapper for bob.bio.base.algorithm.LDA,
-    
+
     Here, LDA is used in a PAD context. This means that the feature
     will be projected on a single dimension subspace, which acts as a score
 
 
-    For more details, you may want to have a look at 
+    For more details, you may want to have a look at
     `bob.learn.linear Documentation`_
 
     .. _bob.learn.linear Documentation:
@@ -58,26 +58,5 @@ class PadLDA(LDA):
             **kwargs
           )
 
-    def read_toscore_object(self, toscore_object_file):
-        """Reads the toscore_object feature from a file.
-      
-        By default, the toscore_object feature is identical to the projected feature.
-        Hence, this base class implementation simply calls :py:meth:`bob.pad.base.algorithm.Algorithm.read_feature`.
-
-        If your algorithm requires different behavior, please overwrite this function.
-
-        Parameters
-        ----------
-        toscore_object_file : str or :py:class:`bob.io.base.HDF5File`
-          The file open for reading, or the file name to read from.
-
-        Returns
-        -------
-        object:
-          The toscore_object that was read from file.
-        
-        """
-        return self.read_feature(toscore_object_file)
-  
     def score(self, toscore):
         return [toscore[0]]

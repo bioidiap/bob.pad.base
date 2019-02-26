@@ -202,6 +202,7 @@ def execute(args):
     elif args.sub_task == 'compute-scores':
         tools.compute_scores(
             args.algorithm,
+            args.extractor,
             groups=[args.group],
             allow_missing_files=args.allow_missing_files,
             force=args.force,
