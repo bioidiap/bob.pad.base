@@ -1,3 +1,4 @@
+
 '''Runs error analysis on score sets, outputs metrics and plots'''
 
 import bob.measure.script.figure as measure_figure
@@ -46,7 +47,9 @@ class Roc(bio_figure.Roc):
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Roc, self).__init__(ctx, scores, evaluation, func_load)
         self._x_label = ctx.meta.get('x_label') or 'APCER'
-        self._y_label = ctx.meta.get('y_label') or '1 - BPCER'
+        default_y_label = '1-BPCER' if self._semilogx \
+            else 'BPCER'
+        self._y_label = ctx.meta.get('y_label') or default_y_label
 
 
 class Det(bio_figure.Det):
