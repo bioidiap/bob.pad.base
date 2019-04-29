@@ -81,16 +81,19 @@ class Metrics(bio_figure.Metrics):
     def _strings(self, metrics):
         n_dec = ".%df" % self._decimal
         for k, v in metrics.items():
-            if k in ("prec", "recall", "f1"):
+            if k in ("precision", "recall", "f1_score"):
                 metrics[k] = "%s" % format(v, n_dec)
             elif k in ("np", "nn", "fp", "fn"):
                 continue
             elif k in ("fpr", "fnr"):
-                metrics[k] = "%s%% (%d/%d)" % (
-                    format(100 * v, n_dec),
-                    metrics["fp" if k == "fpr" else "fn"],
-                    metrics["np" if k == "fpr" else "nn"],
-                )
+                if "fp" in metrics:
+                    metrics[k] = "%s%% (%d/%d)" % (
+                        format(100 * v, n_dec),
+                        metrics["fp" if k == "fpr" else "fn"],
+                        metrics["np" if k == "fpr" else "nn"],
+                    )
+                else:
+                    metrics[k] = "%s%%" % format(100 * v, n_dec)
             elif k == "apcer_pais":
                 metrics[k] = {
                     k1: "%s%%" % format(100 * v1, n_dec) for k1, v1 in v.items()
@@ -191,15 +194,15 @@ class MultiMetrics(Metrics):
 
     def _compute_headers(self, pais):
         names = list(self.names)
-        idx = names.index("apcer_pais")
-        if idx > -1:
+        if "apcer_pais" in names:
+            idx = names.index("apcer_pais")
             names = (
                 [n.upper() for n in names[:idx]]
                 + self.pais
                 + [n.upper() for n in names[idx + 1 :]]
             )
         self.headers = ["Methods"] + names
-        if self._eval:
+        if self._eval and "hter" in self.names:
             self.headers.insert(1, "HTER (dev)")
 
     def _strings(self, metrics):
@@ -223,8 +226,8 @@ class MultiMetrics(Metrics):
 
     def _structured_array(self, metrics):
         names = list(metrics[0].keys())
-        idx = names.index("apcer_pais")
-        if idx > -1:
+        if "apcer_pais" in names:
+            idx = names.index("apcer_pais")
             pais = list(f"APCER ({pai})" for pai in metrics[0]["apcer_pais"].keys())
             names = names[:idx] + pais + names[idx + 1 :]
             self.pais = self.pais or pais
@@ -274,9 +277,9 @@ class MultiMetrics(Metrics):
 
         dev_metrics = self._strings(self._dev_metrics)
 
-        if self._eval:
+        if self._eval and "hter" in dev_metrics:
             self.rows.append([title, dev_metrics["hter"]])
-        else:
+        elif not self._eval:
             row = [title]
             for name in self.names:
                 if name == "apcer_pais":
@@ -285,6 +288,8 @@ class MultiMetrics(Metrics):
                 else:
                     row += [dev_metrics[name]]
             self.rows.append(row)
+        else:
+            self.rows.append([title])
 
         if self._eval:
             eval_metrics = self._strings(self._eval_metrics)
