@@ -13,11 +13,14 @@ import numpy as np
 def _normalize_input_scores(input_score, input_name):
     pos, negs = input_score
     # convert scores to sorted numpy arrays and keep a copy of all negatives
-    pos = np.ascontiguousarray(sorted(pos))
-    all_negs = np.ascontiguousarray(sorted(s for neg in negs.values() for s in neg))
+    pos = np.ascontiguousarray(pos)
+    pos.sort()
+    all_negs = np.ascontiguousarray([s for neg in negs.values() for s in neg])
+    all_negs.sort()
     # FTA is calculated on pos and all_negs so we remove nans from negs
     for k, v in negs.items():
-        v = np.ascontiguousarray(sorted(v))
+        v = np.ascontiguousarray(v)
+        v.sort()
         negs[k] = v[~np.isnan(v)]
     neg_list, pos_list, fta_list = get_fta_list([(all_negs, pos)])
     all_negs, pos, fta = neg_list[0], pos_list[0], fta_list[0]
@@ -34,7 +37,12 @@ class Metrics(bio_figure.Metrics):
 
     def get_thres(self, criterion, pos, negs, all_negs, far_value):
         return calc_threshold(
-            criterion, pos, negs.values(), all_negs, far_value, is_sorted=True
+            criterion,
+            pos=pos,
+            negs=negs.values(),
+            all_negs=all_negs,
+            far_value=far_value,
+            is_sorted=True,
         )
 
     def _numbers(self, threshold, pos, negs, all_negs, fta):
