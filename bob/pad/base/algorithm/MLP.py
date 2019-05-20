@@ -7,11 +7,8 @@ from bob.pad.base.algorithm import Algorithm
 import bob.learn.mlp
 import bob.io.base
 
-from bob.bio.video.utils import FrameContainer
-from bob.pad.base.utils import convert_frame_cont_to_array
-
-from bob.core.log import setup
-logger = setup("bob.pad.base")
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MLP(Algorithm):
@@ -42,11 +39,11 @@ class MLP(Algorithm):
           criterion to stop the training: if the difference
           between current and last loss is smaller than
           this number, then stop training.
-        
+
         """
-        Algorithm.__init__(self,  
+        Algorithm.__init__(self,
                            performs_projection=True,
-                           requires_projector_training=True, 
+                           requires_projector_training=True,
                            **kwargs)
 
         self.hidden_units = hidden_units
@@ -54,32 +51,31 @@ class MLP(Algorithm):
         self.precision = precision
         self.mlp = None
 
-
     def train_projector(self, training_features, projector_file):
         """Trains the MLP
 
         Parameters
         ----------
-        training_features : :any:`list` of :py:class:`numpy.ndarray` 
+        training_features : :any:`list` of :py:class:`numpy.ndarray`
           Data used to train the MLP. The real attempts are in training_features[0] and the attacks are in training_features[1]
         projector_file : str
           Filename where to save the trained model.
-        
+
         """
         # training is done in batch (i.e. using all training data)
         batch_size = len(training_features[0]) + len(training_features[1])
-        
+
         # The labels
         label_real = numpy.zeros((len(training_features[0]), 2), dtype='float64')
         label_real[:, 0] = 1
         label_attack = numpy.zeros((len(training_features[1]), 2), dtype='float64')
         label_attack[:, 1] = 0
-        
+
         real = numpy.array(training_features[0])
         attack = numpy.array(training_features[1])
         X = numpy.vstack([real, attack])
         Y = numpy.vstack([label_real, label_attack])
-      
+
         # Building MLP architecture
         input_dim = real.shape[1]
         shape = []
@@ -89,16 +85,16 @@ class MLP(Algorithm):
         # last layer contains two units: one for each class (i.e. real and attack)
         shape.append(2)
         shape = tuple(shape)
-    
+
         self.mlp = bob.learn.mlp.Machine(shape)
         self.mlp.output_activation = bob.learn.activation.Logistic()
         self.mlp.randomize()
         trainer = bob.learn.mlp.BackProp(batch_size, bob.learn.mlp.CrossEntropyLoss(self.mlp.output_activation), self.mlp, train_biases=True)
-    
+
         n_iter = 0
         previous_cost = 0
         current_cost = 1
-        while (n_iter < self.max_iter) and (abs(previous_cost - current_cost) > self.precision): 
+        while (n_iter < self.max_iter) and (abs(previous_cost - current_cost) > self.precision):
             previous_cost = current_cost
             trainer.train(self.mlp, X, Y)
             current_cost = trainer.cost(self.mlp, X, Y)
@@ -107,14 +103,13 @@ class MLP(Algorithm):
 
         f = bob.io.base.HDF5File(projector_file, 'w')
         self.mlp.save(f)
-    
 
     def project(self, feature):
         """Project the given feature
-        
+
         Parameters
         ----------
-        feature : :py:class:`numpy.ndarray` 
+        feature : :py:class:`numpy.ndarray`
           The feature to classify
 
         Returns
@@ -126,18 +121,17 @@ class MLP(Algorithm):
        #     feature = convert_frame_cont_to_array(feature)
         return self.mlp(feature)
 
-
     def score(self, toscore):
         """Returns the probability of the real class.
 
         Parameters
         ----------
         toscore : :py:class:`numpy.ndarray`
-       
+
         Returns
         -------
         float
-         probability of the authentication attempt to be real. 
+         probability of the authentication attempt to be real.
         """
         if toscore.ndim == 1:
             return [toscore[0]]
