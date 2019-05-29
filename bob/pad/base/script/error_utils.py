@@ -47,7 +47,7 @@ def calc_threshold(method, pos, negs, all_negs, far_value=None, is_sorted=False)
         threshold = apcer_threshold(desired_apcer, pos, *negs, is_sorted=is_sorted)
     elif "apcer" in method:
         desired_bpcer = 1 / float(method.replace("apcer", ""))
-        threshold = frr_threshold(all_negs, pos, desired_bpcer, True)
+        threshold = frr_threshold(all_negs, pos, desired_bpcer, is_sorted=is_sorted)
     elif method == "far":
         threshold = far_threshold(all_negs, pos, far_value, is_sorted=is_sorted)
     elif method == "eer":
