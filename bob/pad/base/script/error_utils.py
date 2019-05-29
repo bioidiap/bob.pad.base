@@ -5,7 +5,7 @@
 
 import bob.measure
 import numpy
-from bob.measure import far_threshold, eer_threshold, min_hter_threshold, farfrr
+from bob.measure import far_threshold, eer_threshold, min_hter_threshold, farfrr, frr_threshold
 from bob.bio.base.score.load import four_column
 from collections import defaultdict
 import re
