@@ -29,6 +29,18 @@ CRITERIA = (
     "bpcer5",
     "bpcer2",
     "bpcer1",
+    "apcer5000",
+    "apcer2000",
+    "apcer1000",
+    "apcer500",
+    "apcer200",
+    "apcer100",
+    "apcer50",
+    "apcer20",
+    "apcer10",
+    "apcer5",
+    "apcer2",
+    "apcer1",
 )
 
 
