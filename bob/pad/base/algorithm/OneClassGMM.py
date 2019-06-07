@@ -1,24 +1,21 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 Created on Mon Aug 28 16:47:47 2017
-
 @author: Olegs Nikisins
 """
 
 # ==============================================================================
 # Import what is needed here:
 
-from bob.pad.base.algorithm import Algorithm
 from bob.bio.video.utils import FrameContainer
-
+from bob.pad.base.algorithm import Algorithm
+from bob.pad.base.utils import convert_frame_cont_to_array, mean_std_normalize, convert_and_prepare_features
+from sklearn import mixture
+import bob.io.base
+import logging
 import numpy as np
 
-import bob.io.base
-
-from sklearn import mixture
-
-from bob.pad.base.utils import convert_frame_cont_to_array, mean_std_normalize, convert_and_prepare_features
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Main body :
@@ -44,7 +41,7 @@ class OneClassGMM(Algorithm):
 
     ``random_state`` : :py:class:`int`
         A seed for the random number generator used in the initialization of
-        the OneClassGMM. Default: 7 .
+        the OneClassGMM. Default: 3 .
 
     ``frame_level_scores_flag`` : :py:class:`bool`
         Return scores for each frame individually if True. Otherwise, return a
@@ -54,7 +51,10 @@ class OneClassGMM(Algorithm):
     def __init__(self,
                  n_components=1,
                  random_state=3,
-                 frame_level_scores_flag=False):
+                 frame_level_scores_flag=False,
+                 covariance_type='full',
+                 reg_covar=1e-06,
+                 ):
 
         Algorithm.__init__(
             self,
@@ -65,15 +65,13 @@ class OneClassGMM(Algorithm):
             requires_projector_training=True)
 
         self.n_components = n_components
-
         self.random_state = random_state
-
         self.frame_level_scores_flag = frame_level_scores_flag
+        self.covariance_type = covariance_type
+        self.reg_covar = reg_covar
 
         self.machine = None  # this argument will be updated with pretrained OneClassGMM machine
-
         self.features_mean = None  # this argument will be updated with features mean
-
         self.features_std = None  # this argument will be updated with features std
 
         # names of the arguments of the pretrained OneClassGMM machine to be saved/loaded to/from HDF5 file:
@@ -84,7 +82,7 @@ class OneClassGMM(Algorithm):
         ]
 
     # ==========================================================================
-    def train_gmm(self, real, n_components, random_state):
+    def train_gmm(self, real):
         """
         Train OneClassGMM classifier given real class. Prior to the training the data is
         mean-std normalized.
@@ -93,13 +91,6 @@ class OneClassGMM(Algorithm):
 
         ``real`` : 2D :py:class:`numpy.ndarray`
             Training features for the real class.
-
-        ``n_components`` : :py:class:`int`
-            Number of Gaussians in the OneClassGMM. Default: 1 .
-
-        ``random_state`` : :py:class:`int`
-            A seed for the random number generator used in the initialization of
-            the OneClassGMM. Default: 7 .
 
         **Returns:**
 
@@ -113,16 +104,41 @@ class OneClassGMM(Algorithm):
             Standart deviation of the features.
         """
 
-        features_norm, features_mean, features_std = mean_std_normalize(
-            real)
         # real is now mean-std normalized
+        features_norm, features_mean, features_std = mean_std_normalize(real, copy=False)
 
-        machine = mixture.GaussianMixture(
-            n_components=n_components,
-            random_state=random_state,
-            covariance_type='full')
+        if isinstance(self.n_components, (tuple, list)) or isinstance(self.covariance_type, (tuple, list)):
+            # perform grid search on covariance_type and n_components
+            n_components = self.n_components if isinstance(self.n_components, (tuple, list)) else [self.n_components]
+            covariance_type = self.covariance_type if isinstance(self.covariance_type, (tuple, list)) else [self.covariance_type]
+            logger.info("Performing grid search for GMM on covariance_type: %s and n_components: %s", self.covariance_type, self.n_components)
+            bic = []
+            lowest_bic = np.infty
+            for cv_type in covariance_type:
+                for nc in n_components:
+                    logger.info("Testing for n_components: %s, covariance_type: %s", nc, cv_type)
+                    gmm = mixture.GaussianMixture(
+                        n_components=nc, covariance_type=cv_type,
+                        reg_covar=self.reg_covar)
+                    try:
+                        gmm.fit(features_norm)
+                    except Exception:
+                        logger.warn("Failed to train current GMM", exc_info=True)
+                        continue
+                    bic.append(gmm.bic(features_norm))
+                    if bic[-1] < lowest_bic:
+                        lowest_bic = bic[-1]
+                        logger.info("Best parameters so far: nc %s, cv_type: %s", nc, cv_type)
+                        machine = gmm
 
-        machine.fit(features_norm)
+        else:
+            machine = mixture.GaussianMixture(
+                n_components=self.n_components,
+                random_state=self.random_state,
+                covariance_type=self.covariance_type,
+                reg_covar=self.reg_covar)
+
+            machine.fit(features_norm)
 
         return machine, features_mean, features_std
 
@@ -150,19 +166,17 @@ class OneClassGMM(Algorithm):
             Standart deviation of the features.
         """
 
-        f = bob.io.base.HDF5File(projector_file,
-                                 'w')  # open hdf5 file to save to
+        # open hdf5 file to save to
+        with bob.io.base.HDF5File(projector_file, 'w') as f:
 
-        for key in self.gmm_param_keys:
-            data = getattr(machine, key)
+            for key in self.gmm_param_keys:
+                data = getattr(machine, key)
 
-            f.set(key, data)
+                f.set(key, data)
 
-        f.set("features_mean", features_mean)
+            f.set("features_mean", features_mean)
 
-        f.set("features_std", features_std)
-
-        del f
+            f.set("features_std", features_std)
 
     # ==========================================================================
     def train_projector(self, training_features, projector_file):
@@ -183,18 +197,16 @@ class OneClassGMM(Algorithm):
             ``bob.pad.base`` framework.
         """
 
+        del training_features[1]
         # training_features[0] - training features for the REAL class.
-        real = convert_and_prepare_features(
-            training_features[0])  # output is array
+        real = convert_and_prepare_features(training_features[0], dtype=None)
+        del training_features[0]
 
         # training_features[1] - training features for the ATTACK class.
         #        attack = self.convert_and_prepare_features(training_features[1]) # output is array
 
         # Train the OneClassGMM machine and get normalizers:
-        machine, features_mean, features_std = self.train_gmm(
-            real=real,
-            n_components=self.n_components,
-            random_state=self.random_state)
+        machine, features_mean, features_std = self.train_gmm(real=real)
 
         # Save the GNN machine and normalizers:
         self.save_gmm_machine_and_mean_std(projector_file, machine,
@@ -224,23 +236,19 @@ class OneClassGMM(Algorithm):
             Standart deviation of the features.
         """
 
-        f = bob.io.base.HDF5File(projector_file,
-                                 'r')  # file to read the machine from
+        # file to read the machine from
+        with bob.io.base.HDF5File(projector_file, 'r') as f:
 
-        # initialize the machine:
-        machine = mixture.GaussianMixture()
+            # initialize the machine:
+            machine = mixture.GaussianMixture()
 
-        # set the params of the machine:
-        for key in self.gmm_param_keys:
-            data = f.read(key)
+            # set the params of the machine:
+            for key in self.gmm_param_keys:
+                data = f.read(key)
+                setattr(machine, key, data)
 
-            setattr(machine, key, data)
-
-        features_mean = f.read("features_mean")
-
-        features_std = f.read("features_std")
-
-        del f
+            features_mean = f.read("features_mean")
+            features_std = f.read("features_std")
 
         return machine, features_mean, features_std
 
@@ -272,9 +280,7 @@ class OneClassGMM(Algorithm):
             projector_file)
 
         self.machine = machine
-
         self.features_mean = features_mean
-
         self.features_std = features_std
 
     # ==========================================================================
@@ -320,7 +326,7 @@ class OneClassGMM(Algorithm):
             features_array = feature
 
         features_array_norm, _, _ = mean_std_normalize(
-            features_array, self.features_mean, self.features_std)
+            features_array, self.features_mean, self.features_std, copy=False)
 
         scores = self.machine.score_samples(features_array_norm)
 

@@ -27,7 +27,7 @@ def convert_frame_cont_to_array(frame_container):
     return frame_container.as_array()
 
 
-def convert_and_prepare_features(features):
+def convert_and_prepare_features(features, dtype='float64'):
     """
     This function converts a list or a frame container of features into a 2D array of features.
     If the input is a list of frame containers, features from different frame containers (individuals)
@@ -49,9 +49,14 @@ def convert_and_prepare_features(features):
     if isinstance(
             features[0],
             bob.bio.video.FrameContainer):  # if FrameContainer convert to 2D numpy array
-        return convert_list_of_frame_cont_to_array(features).astype('float64')
-    else:
-        return np.vstack(features).astype('float64')
+        features = convert_list_of_frame_cont_to_array(features)
+    elif not isinstance(features, np.ndarray):
+        features = np.vstack(features)
+
+    if dtype is not None:
+        features = features.astype(dtype)
+
+    return features
 
 
 def convert_list_of_frame_cont_to_array(frame_containers):
@@ -218,7 +223,9 @@ def convert_array_to_list_of_frame_cont(data):
 
 def mean_std_normalize(features,
                        features_mean=None,
-                       features_std=None):
+                       features_std=None,
+                       copy=True,
+                       ):
     """
     The features in the input 2D array are mean-std normalized.
     The rows are samples, the columns are features. If ``features_mean``
@@ -249,7 +256,10 @@ def mean_std_normalize(features,
         Standart deviation of the features.
     """
 
-    features = np.copy(features)
+    if copy:
+        features = np.copy(features)
+    else:
+        features = np.asarray(features)
 
     # Compute mean and std if not given:
     if features_mean is None:
@@ -257,17 +267,9 @@ def mean_std_normalize(features,
 
         features_std = np.std(features, axis=0)
 
-    features_std[features_std==0.0]=1.0
+    features_std[features_std == 0.0] = 1.0
 
-    row_norm_list = []
-
-    for row in features:  # row is a sample
-
-        row_norm = (row - features_mean) / features_std
-
-        row_norm_list.append(row_norm)
-
-    features_norm = np.vstack(row_norm_list)
+    features_norm = (features - features_mean) / features_std
 
     return features_norm, features_mean, features_std
 
