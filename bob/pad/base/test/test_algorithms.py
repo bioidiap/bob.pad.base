@@ -42,9 +42,6 @@ def test_padfile_to_label():
 
 
 def test_video_svm_pad_algorithm():
-    """
-    Test the SVM PAD algorithm.
-    """
 
     random.seed(7)
 
@@ -107,9 +104,6 @@ def test_video_svm_pad_algorithm():
 
 
 def test_video_gmm_pad_algorithm():
-    """
-    Test the OneClassGMM PAD algorithm.
-    """
 
     random.seed(7)
 
@@ -144,9 +138,7 @@ def test_video_gmm_pad_algorithm():
 
     # Train the OneClassGMM machine and get normalizers:
     machine, features_mean, features_std = algorithm.train_gmm(
-        real=real_array_converted,
-        n_components=algorithm.n_components,
-        random_state=algorithm.random_state)
+        real=real_array_converted)
 
     algorithm.machine = machine
 
@@ -178,9 +170,6 @@ def test_convert_list_of_frame_cont_to_array():
 
 
 def test_MLP():
-    """
-    Test the MLP PAD algorithm.
-    """
 
     random.seed(7)
 
@@ -209,9 +198,6 @@ def test_MLP():
 
 
 def test_LDA():
-    """
-    Test the LDA PAD algorithm.
-    """
 
     random.seed(7)
 

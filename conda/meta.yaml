@@ -27,6 +27,7 @@ requirements:
     - bob.io.base
     - bob.bio.base
     - bob.bio.video
+    - bob.bio.gmm
     - bob.learn.linear
     - bob.learn.libsvm
     - bob.learn.mlp
