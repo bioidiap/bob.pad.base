@@ -244,17 +244,16 @@ class ScikitClassifier(Algorithm):
 
         Parameters
         ----------
-
         training_features : [FrameContainer]
                 A list of FrameContainers
 
-        step  :`int`
+        step : `int`
                 Data selection step.
 
-        **Returns:**
-
+        Returns
+        -------
         training_features_subset : [FrameContainer]
-                A list with selected FrameContainers
+            A list with selected FrameContainers
         """
 
         indexes = range(0, len(training_features), step)
