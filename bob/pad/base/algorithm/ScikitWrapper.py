@@ -9,7 +9,7 @@ import logging
 from bob.pad.base.utils import convert_frame_cont_to_array, convert_list_of_frame_cont_to_array
 
 
-class ScikitClassifier(Algorithm):
+class ScikitWrapper(Algorithm):
     """
     This class is designed to train any generic scikit-learn binary or anomaly detectors (one class classifiers)
     classifier given Frame Containers with features of real and attack classes. The procedure is the following:
