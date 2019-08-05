@@ -435,6 +435,7 @@ class BaseVulnDetRoc(VulnPlot):
         self._fnmrs_at = ctx.meta.get('fnmr', [])
         self._real_data = True if real_data is None else real_data
         self._legend_loc = None
+        self._min_dig = -4 if self._min_dig is None else self._min_dig
 
     def compute(self, idx, input_scores, input_names):
         ''' Implements plots'''
@@ -626,12 +627,14 @@ class RocVuln(BaseVulnDetRoc):
 
     def _plot(self, x, y, points, **kwargs):
         LOGGER.info("Plot ROC")
-        plot.roc_for_far(
+        plot.roc(
             x, y,
-            far_values=plot.log_values(self._min_dig or -4),
+            npoints=self._points,
             CAR=self._semilogx,
-            color=kwargs.get('color'), linestyle=kwargs.get('linestyle'),
-            label=kwargs.get('label')
+            min_far=self._min_dig,
+            color=kwargs.get('color'),
+            linestyle=kwargs.get('linestyle'),
+            label=kwargs.get('label'),
         )
 
     def _get_farfrr(self, x, y, thres):
