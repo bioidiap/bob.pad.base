@@ -16,7 +16,7 @@ import bob.io.base
 
 import pickle
 
-from bob.pad.base.utils import convert_frame_cont_to_array, convert_list_of_frame_cont_to_array
+from bob.pad.base.utils import convert_frame_cont_to_array, convert_list_of_frame_cont_to_array, convert_and_prepare_features
 
 #==============================================================================
 
@@ -300,11 +300,11 @@ class ScikitClassifier(Algorithm):
 
         if self.subsample_videos_flag:  # subsample videos of the real class
 
-            real = convert_list_of_frame_cont_to_array(self.subsample_train_videos(training_features[0], self.video_subsampling_step))  # output is array
+            real = convert_and_prepare_features(self.subsample_train_videos(training_features[0], self.video_subsampling_step))  # output is array
 
         else:
 
-            real = convert_list_of_frame_cont_to_array(training_features[0])  # output is array
+            real = convert_and_prepare_features(training_features[0])  # output is array
 
         if self.subsample_train_data_flag:
 
@@ -312,11 +312,11 @@ class ScikitClassifier(Algorithm):
 
         if self.subsample_videos_flag:  # subsample videos of the real class
 
-            attack = convert_list_of_frame_cont_to_array(self.subsample_train_videos(training_features[1], self.video_subsampling_step))  # output is array
+            attack = convert_and_prepare_features(self.subsample_train_videos(training_features[1], self.video_subsampling_step))  # output is array
 
         else:
 
-            attack = convert_list_of_frame_cont_to_array(training_features[1])  # output is array
+            attack = convert_and_prepare_features(training_features[1])  # output is array
 
         if self.subsample_train_data_flag:
 
@@ -419,13 +419,8 @@ class ScikitClassifier(Algorithm):
         """
 
         # 1. Convert input array to numpy array if necessary.
-        if isinstance(feature, FrameContainer):  # if FrameContainer convert to 2D numpy array
 
-            features_array = convert_frame_cont_to_array(feature)
-
-        else:
-
-            features_array = feature.copy()
+        features_array=convert_and_prepare_features(feature)
 
         features_array_norm = self._normalize(features_array, train =False)
 
