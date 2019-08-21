@@ -5,7 +5,7 @@ from .OneClassGMM2 import OneClassGMM2
 from .LogRegr import LogRegr
 from .SVMCascadePCA import SVMCascadePCA
 from .Predictions import Predictions, VideoPredictions
-from .ScikitWrapper import ScikitWrapper
+from .ScikitClassifier import ScikitClassifier
 from .MLP import MLP
 from .PadLDA import PadLDA
 
