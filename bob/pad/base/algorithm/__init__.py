@@ -37,6 +37,7 @@ __appropriate__(
     SVMCascadePCA,
     Predictions,
     VideoPredictions,
+    ScikitClassifier,
     MLP,
     PadLDA
 )
