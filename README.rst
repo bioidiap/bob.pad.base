@@ -2,14 +2,14 @@
 .. Pavel Korshunov <pavel.korshunov@idiap.ch>
 .. Wed 19 Oct 22:36:22 2016 CET
 
-.. image:: http://img.shields.io/badge/docs-v2.2.1-yellow.png
-   :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/v2.2.1/index.html
+.. image:: http://img.shields.io/badge/docs-stable-yellow.png
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/stable/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.png
    :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/master/index.html
-.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/v2.2.1/build.svg
-   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/v2.2.1
-.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/v2.2.1/coverage.svg
-   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/v2.2.1
+.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/build.svg
+   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
+.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/coverage.svg
+   :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base
 .. image:: http://img.shields.io/pypi/v/bob.pad.base.png
