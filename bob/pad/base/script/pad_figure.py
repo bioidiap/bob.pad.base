@@ -328,7 +328,7 @@ class Roc(bio_figure.Roc):
     def __init__(self, ctx, scores, evaluation, func_load):
         super(Roc, self).__init__(ctx, scores, evaluation, func_load)
         self._x_label = ctx.meta.get("x_label") or "APCER"
-        default_y_label = "1-BPCER" if self._semilogx else "BPCER"
+        default_y_label = "1-BPCER" if self._tpr else "BPCER"
         self._y_label = ctx.meta.get("y_label") or default_y_label
 
 
