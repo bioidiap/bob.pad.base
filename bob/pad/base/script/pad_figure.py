@@ -98,7 +98,7 @@ class Metrics(bio_figure.Metrics):
                     metrics[k] = "%s%% (%d/%d)" % (
                         format(100 * v, n_dec),
                         metrics["fp" if k == "fpr" else "fn"],
-                        metrics["np" if k == "fpr" else "nn"],
+                        metrics["nn" if k == "fpr" else "np"],
                     )
                 else:
                     metrics[k] = "%s%%" % format(100 * v, n_dec)
