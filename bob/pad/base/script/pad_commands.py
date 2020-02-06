@@ -50,7 +50,7 @@ def metrics_option(
     name="metrics",
     help="List of metrics to print. Provide a string with comma separated metric "
     "names. For possible values see the default value.",
-    default="apcer_pais,apcer,bpcer,acer,fta,fpr,fnr,hter,far,frr,precision,recall,f1_score",
+    default="apcer_pais,apcer_ap,bpcer,acer,fta,fpr,fnr,hter,far,frr,precision,recall,f1_score",
     **kwargs
 ):
     """The metrics option"""
@@ -143,13 +143,13 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys, **kwargs):
 
 @common_options.metrics_command(
     common_options.METRICS_HELP.format(
-        names="FtA, APCER, BPCER, FPR, FNR, FAR, FRR, ACER, HTER, precision, recall, f1_score",
+        names="FtA, APCER_AP, BPCER, FPR, FNR, FAR, FRR, ACER, HTER, precision, recall, f1_score",
         criteria=CRITERIA,
         score_format=SCORE_FORMAT,
-        hter_note="Note that APCER = max(APCER_pais), BPCER=FNR, "
+        hter_note="Note that APCER_AP = max(APCER_pais), BPCER=FNR, "
         "FAR = FPR * (1 - FtA), "
         "FRR = FtA + FNR * (1 - FtA), "
-        "ACER = (APCER + BPCER) / 2, "
+        "ACER = (APCER_AP + BPCER) / 2, "
         "and HTER = (FPR + FNR) / 2. "
         "You can control which metrics are printed using the --metrics option. "
         "You can use --regexps and --regexp_column options to change the behavior "
@@ -160,7 +160,7 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys, **kwargs):
     epilog="""\b
 More Examples:
 \b
-bob pad metrics -vvv -e -lg IQM,LBP -r print -r video -m fta,apcer_pais,apcer,bpcer,acer,hter \
+bob pad metrics -vvv -e -lg IQM,LBP -r print -r video -m fta,apcer_pais,apcer_ap,bpcer,acer,hter \
 /scores/oulunpu/{qm-svm,lbp-svm}/Protocol_1/scores/scores-{dev,eval}
 
 See also ``bob pad multi-metrics``.
@@ -241,7 +241,7 @@ See also ``bob pad metrics``.
 )
 @regexps_option()
 @regexp_column_option()
-@metrics_option(default="fta,apcer_pais,apcer,bpcer,acer,hter")
+@metrics_option(default="fta,apcer_pais,apcer_ap,bpcer,acer,hter")
 def multi_metrics(
     ctx, scores, evaluation, protocols_number, regexps, regexp_column, metrics, **kwargs
 ):

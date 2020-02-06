@@ -47,9 +47,9 @@ class Metrics(bio_figure.Metrics):
 
     def _numbers(self, threshold, pos, negs, all_negs, fta):
         pais = list(negs.keys())
-        apcer_pais, apcer, bpcer = apcer_bpcer(threshold, pos, *[negs[k] for k in pais])
+        apcer_pais, apcer_ap, bpcer = apcer_bpcer(threshold, pos, *[negs[k] for k in pais])
         apcer_pais = {k: apcer_pais[i] for i, k in enumerate(pais)}
-        acer = (apcer + bpcer) / 2.0
+        acer = (apcer_ap + bpcer) / 2.0
         fpr, fnr = farfrr(all_negs, pos, threshold)
         hter = (fpr + fnr) / 2.0
         far = fpr * (1 - fta)
@@ -67,7 +67,7 @@ class Metrics(bio_figure.Metrics):
         f1_score = f_score(all_negs, pos, threshold, 1)
         metrics = dict(
             apcer_pais=apcer_pais,
-            apcer=apcer,
+            apcer_ap=apcer_ap,
             bpcer=bpcer,
             acer=acer,
             fta=fta,
