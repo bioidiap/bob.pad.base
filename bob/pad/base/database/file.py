@@ -30,3 +30,6 @@ class PadFile(bob.bio.base.database.BioFile):
         # just copy the information
         # The attack type of the sample, None if it is a genuine sample.
         self.attack_type = attack_type
+
+    def __repr__(self):
+        return f"<File({self.id}: {self.path}, {self.client_id}, {self.attack_type})>"

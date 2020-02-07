@@ -8,6 +8,7 @@ import logging
 import numpy as np
 from collections.abc import Iterable
 from multiprocessing import cpu_count
+from sklearn.externals import joblib
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class OneClassGMM2(Algorithm):
         update_means=True,
         update_variances=True,
         n_threads=cpu_count(),
+        preprocessor=None,  # a scikit learn preprocessor, can be PCA for example
         **kwargs
     ):
         kwargs.setdefault("performs_projection", True)
@@ -65,11 +67,16 @@ class OneClassGMM2(Algorithm):
             n_threads=n_threads,
         )
         self.number_of_gaussians = number_of_gaussians
+        self.preprocessor = preprocessor
 
     def train_projector(self, training_features, projector_file):
         del training_features[1]
         real = convert_and_prepare_features(training_features[0], dtype="float64")
         del training_features[0]
+
+        if self.preprocessor is not None:
+            real = self.preprocessor.fit_transform(real)
+            joblib.dump(self.preprocessor, projector_file + ".pkl")
 
         if isinstance(self.number_of_gaussians, Iterable):
             logger.info(
@@ -101,9 +108,14 @@ class OneClassGMM2(Algorithm):
 
     def load_projector(self, projector_file):
         self.gmm_alg.load_ubm(projector_file)
+        if self.preprocessor is not None:
+            self.preprocessor = joblib.load(projector_file + ".pkl")
 
     def project(self, feature):
         feature = convert_and_prepare_features([feature], dtype="float64")[0]
+
+        if self.preprocessor is not None:
+            feature = self.preprocessor.transform(feature)
 
         return self.gmm_alg.ubm(feature)
 

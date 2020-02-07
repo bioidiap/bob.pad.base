@@ -54,6 +54,7 @@ class OneClassGMM(Algorithm):
                  frame_level_scores_flag=False,
                  covariance_type='full',
                  reg_covar=1e-06,
+                 normalize_features=False,
                  ):
 
         Algorithm.__init__(
@@ -69,6 +70,7 @@ class OneClassGMM(Algorithm):
         self.frame_level_scores_flag = frame_level_scores_flag
         self.covariance_type = covariance_type
         self.reg_covar = reg_covar
+        self.normalize_features = normalize_features
 
         self.machine = None  # this argument will be updated with pretrained OneClassGMM machine
         self.features_mean = None  # this argument will be updated with features mean
@@ -105,7 +107,12 @@ class OneClassGMM(Algorithm):
         """
 
         # real is now mean-std normalized
-        features_norm, features_mean, features_std = mean_std_normalize(real, copy=False)
+        if self.normalize_features:
+            features_norm, features_mean, features_std = mean_std_normalize(real, copy=False)
+        else:
+            features_norm = real
+            features_mean = np.zeros(real.shape[1:], dtype=real.dtype)
+            features_std = np.ones(real.shape[1:], dtype=real.dtype)
 
         if isinstance(self.n_components, (tuple, list)) or isinstance(self.covariance_type, (tuple, list)):
             # perform grid search on covariance_type and n_components
@@ -119,7 +126,8 @@ class OneClassGMM(Algorithm):
                     logger.info("Testing for n_components: %s, covariance_type: %s", nc, cv_type)
                     gmm = mixture.GaussianMixture(
                         n_components=nc, covariance_type=cv_type,
-                        reg_covar=self.reg_covar)
+                        reg_covar=self.reg_covar,
+                        verbose=logger.level)
                     try:
                         gmm.fit(features_norm)
                     except Exception:
@@ -136,7 +144,8 @@ class OneClassGMM(Algorithm):
                 n_components=self.n_components,
                 random_state=self.random_state,
                 covariance_type=self.covariance_type,
-                reg_covar=self.reg_covar)
+                reg_covar=self.reg_covar,
+                verbose=logger.level)
 
             machine.fit(features_norm)
 
@@ -211,6 +220,7 @@ class OneClassGMM(Algorithm):
         # Save the GNN machine and normalizers:
         self.save_gmm_machine_and_mean_std(projector_file, machine,
                                            features_mean, features_std)
+        logger.info("Finished training the GMM.")
 
     # ==========================================================================
     def load_gmm_machine_and_mean_std(self, projector_file):
@@ -319,16 +329,17 @@ class OneClassGMM(Algorithm):
                 feature,
                 FrameContainer):  # if FrameContainer convert to 2D numpy array
 
-            features_array = convert_frame_cont_to_array(feature)
+            features = convert_frame_cont_to_array(feature)
 
         else:
 
-            features_array = feature
+            features = feature
 
-        features_array_norm, _, _ = mean_std_normalize(
-            features_array, self.features_mean, self.features_std, copy=False)
+        features_norm, _, _ = mean_std_normalize(
+            features, self.features_mean, self.features_std, copy=False)
+        del features
 
-        scores = self.machine.score_samples(features_array_norm)
+        scores = self.machine.score_samples(features_norm)
 
         return scores
 

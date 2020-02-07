@@ -29,6 +29,8 @@ class VideoPredictions(Algorithm):
 
     def score(self, predictions):
         # Assuming the predictions are the output of a softmax layer
+        if len(predictions) == 0:
+            return [float("nan")]
         predictions = predictions.as_array()[:, self.axis]
 
         if self.frame_level_scoring:
