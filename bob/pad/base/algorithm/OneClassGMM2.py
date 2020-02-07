@@ -8,6 +8,9 @@ import logging
 import numpy as np
 from collections.abc import Iterable
 from multiprocessing import cpu_count
+from bob.bio.video.utils import FrameContainer
+
+from bob.pad.base.utils import convert_frame_cont_to_array, mean_std_normalize, convert_and_prepare_features
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +50,8 @@ class OneClassGMM2(Algorithm):
         update_weights=True,
         update_means=True,
         update_variances=True,
-        n_threads=cpu_count(),
+        n_threads=4,
+        frame_level_scores_flag=True,
         **kwargs
     ):
         kwargs.setdefault("performs_projection", True)
@@ -62,9 +66,9 @@ class OneClassGMM2(Algorithm):
             update_weights=update_weights,
             update_means=update_means,
             update_variances=update_variances,
-            n_threads=n_threads,
         )
         self.number_of_gaussians = number_of_gaussians
+        self.frame_level_scores_flag =frame_level_scores_flag
 
     def train_projector(self, training_features, projector_file):
         del training_features[1]
@@ -103,9 +107,59 @@ class OneClassGMM2(Algorithm):
         self.gmm_alg.load_ubm(projector_file)
 
     def project(self, feature):
-        feature = convert_and_prepare_features([feature], dtype="float64")[0]
 
-        return self.gmm_alg.ubm(feature)
+
+        if isinstance(
+                feature,
+                FrameContainer):  # if FrameContainer convert to 2D numpy array
+
+            features_array = convert_frame_cont_to_array(feature)
+
+        else:
+
+            features_array = feature
+
+
+        print('features_array',features_array.shape)
+        
+        scores=[]
+
+
+        for feat in features_array:
+
+            score = self.gmm_alg.ubm(feat)
+            scores.append(score)
+
+        return np.array(scores)
 
     def score(self, toscore):
-        return [toscore]
+        """
+        Returns a probability of a sample being a real class.
+
+        **Parameters:**
+
+        ``toscore`` : 1D :py:class:`numpy.ndarray`
+            Vector with scores for each frame/sample defining the probability
+            of the frame being a sample of the real class.
+
+        **Returns:**
+
+        ``score`` : [:py:class:`float`]
+            If ``frame_level_scores_flag = False`` a single score is returned.
+            One score per video. This score is placed into a list, because
+            the ``score`` must be an iterable.
+            Score is a probability of a sample being a real class.
+            If ``frame_level_scores_flag = True`` a list of scores is returned.
+            One score per frame/sample.
+        """
+
+        print('toscore',toscore.shape)
+        if self.frame_level_scores_flag:
+
+            score = list(toscore)
+
+        else:
+
+            score = [np.mean(toscore)]  # compute a single score per video
+
+        return score
