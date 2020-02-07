@@ -2,11 +2,10 @@ from .Algorithm import Algorithm
 from .SVM import SVM
 from .OneClassGMM import OneClassGMM
 from .OneClassGMM2 import OneClassGMM2
-
 from .LogRegr import LogRegr
 from .SVMCascadePCA import SVMCascadePCA
 from .Predictions import Predictions, VideoPredictions
-from .ScikitClassifier import ScikitClassifier
+
 from .MLP import MLP
 from .PadLDA import PadLDA
 
@@ -38,7 +37,6 @@ __appropriate__(
     SVMCascadePCA,
     Predictions,
     VideoPredictions,
-    ScikitClassifier,
     MLP,
     PadLDA
 )
