@@ -18,6 +18,8 @@ from bob.measure.script import common_options
 from bob.measure.utils import get_fta
 from gridtk.generator import expand
 from tabulate import tabulate
+from .pad_commands import CRITERIA
+from .error_utils import calc_threshold
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +96,11 @@ Examples:
     default=["train", "dev", "eval"],
 )
 @bool_option("sort", "s", "whether the table should be sorted.", True)
+@common_options.criterion_option(lcriteria=CRITERIA, check=False)
+@common_options.far_option()
 @common_options.table_option()
 @common_options.output_log_metric_option()
+@common_options.decimal_option(dflt=2, short='-dec')
 @verbosity_option()
 @click.pass_context
 def cross(
@@ -109,6 +114,7 @@ def cross(
     pai_names,
     groups,
     sort,
+    decimal,
     verbose,
     **kwargs
 ):
@@ -161,7 +167,7 @@ def cross(
             threshold = metrics[(database, protocol, algorithm, "dev")][1]
         else:
             try:
-                threshold = eer_threshold(neg, pos)
+                threshold = calc_threshold(ctx.meta["criterion"], pos, [neg], neg, ctx.meta['far_value'])
             except RuntimeError:
                 logger.error("Something wrong with {}".format(score_path))
                 raise
@@ -185,8 +191,8 @@ def cross(
     rows = []
 
     # sort the algorithms based on HTER test, EER dev, EER train
+    train_protocol = protocols[databases.index(train_database)]
     if sort:
-        train_protocol = protocols[databases.index(train_database)]
 
         def sort_key(alg):
             r = []
@@ -212,7 +218,7 @@ def cross(
                     cell += [far, frr, hter]
                 else:
                     cell += [hter]
-            cell = [round(c * 100, 1) for c in cell]
+            cell = [round(c * 100, decimal) for c in cell]
             rows[-1].extend(cell)
 
     title = " Trained on {} ".format(train_database)

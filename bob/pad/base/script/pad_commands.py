@@ -50,7 +50,7 @@ def metrics_option(
     name="metrics",
     help="List of metrics to print. Provide a string with comma separated metric "
     "names. For possible values see the default value.",
-    default="apcer_pais,apcer_ap,bpcer,acer,fta,fpr,fnr,hter,far,frr,precision,recall,f1_score",
+    default="apcer_pais,apcer_ap,bpcer,acer,fta,fpr,fnr,hter,far,frr,precision,recall,f1_score,auc,auc-log-scale",
     **kwargs
 ):
     """The metrics option"""
@@ -157,6 +157,7 @@ def gen(ctx, outdir, mean_match, mean_non_match, n_sys, **kwargs):
         command="bob pad metrics",
     ),
     criteria=CRITERIA,
+    check_criteria=False,
     epilog="""\b
 More Examples:
 \b

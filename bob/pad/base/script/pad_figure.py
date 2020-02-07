@@ -2,7 +2,7 @@
 
 import bob.measure.script.figure as measure_figure
 from bob.measure.utils import get_fta_list
-from bob.measure import farfrr, precision_recall, f_score
+from bob.measure import farfrr, precision_recall, f_score, roc_auc_score
 import bob.bio.base.script.figure as bio_figure
 from .error_utils import calc_threshold, apcer_bpcer
 import click
@@ -65,6 +65,11 @@ class Metrics(bio_figure.Metrics):
 
         # f_score
         f1_score = f_score(all_negs, pos, threshold, 1)
+
+        # auc
+        auc = roc_auc_score(all_negs, pos)
+        auc_log = roc_auc_score(all_negs, pos, log_scale=True)
+
         metrics = dict(
             apcer_pais=apcer_pais,
             apcer_ap=apcer_ap,
@@ -83,13 +88,15 @@ class Metrics(bio_figure.Metrics):
             precision=precision,
             recall=recall,
             f1_score=f1_score,
+            auc=auc,
         )
+        metrics["auc-log-scale"] = auc_log
         return metrics
 
     def _strings(self, metrics):
         n_dec = ".%df" % self._decimal
         for k, v in metrics.items():
-            if k in ("precision", "recall", "f1_score"):
+            if k in ("precision", "recall", "f1_score", "auc", "auc-log-scale"):
                 metrics[k] = "%s" % format(v, n_dec)
             elif k in ("np", "nn", "fp", "fn"):
                 continue
