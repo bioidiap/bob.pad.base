@@ -128,11 +128,10 @@ class ScikitClassifier(Algorithm):
             if train:
                 self.scaler.fit(features)
 
-            features_norm = self.scaler.transform(features)
-        else:
-            features_norm=features.copy()
+            features = self.scaler.transform(features)
 
-        return features_norm
+
+        return features
 
     #==========================================================================
     def norm_train_data(self, real, attack):
@@ -206,11 +205,10 @@ class ScikitClassifier(Algorithm):
 
         if self.one_class:
 
-            X=real.copy()
 
             Y=np.ones(len(real))
 
-            self.clf.fit(X)
+            self.clf.fit(real)
 
         else:
             X = np.vstack([real, attack])

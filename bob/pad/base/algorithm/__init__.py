@@ -2,6 +2,8 @@ from .Algorithm import Algorithm
 from .SVM import SVM
 from .OneClassGMM import OneClassGMM
 from .OneClassGMM2 import OneClassGMM2
+from .OneClassGMM3 import OneClassGMM3
+
 from .LogRegr import LogRegr
 from .SVMCascadePCA import SVMCascadePCA
 from .Predictions import Predictions, VideoPredictions
@@ -33,6 +35,7 @@ __appropriate__(
     SVM,
     OneClassGMM,
     OneClassGMM2,
+    OneClassGMM3,
     LogRegr,
     SVMCascadePCA,
     Predictions,
