@@ -3,6 +3,7 @@
 
 import numpy as np
 import bob.bio.video
+from bob.io.base import vstack_features
 
 import itertools
 
@@ -78,18 +79,12 @@ def convert_list_of_frame_cont_to_array(frame_containers):
         An array containing features for all frames of all individuals.
     """
 
+    def reader(x):
+        if isinstance(x, bob.bio.video.FrameContainer):
+            return x.as_array()
+        return x
 
-    if isinstance( frame_containers[0], bob.bio.video.FrameContainer):
-
-      feature_vectors = []
-      for frame_container in frame_containers:
-          video_features_array = convert_frame_cont_to_array(
-            frame_container)
-          feature_vectors.append(video_features_array)
-    else:
-      feature_vectors = frame_containers
-
-    features_array = np.vstack(feature_vectors)
+    features_array = vstack_features(reader, frame_containers)
 
     return features_array
 
