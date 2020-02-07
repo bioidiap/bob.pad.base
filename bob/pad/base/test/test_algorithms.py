@@ -11,7 +11,7 @@ import bob.bio.video
 import bob.pad.base
 
 from bob.pad.base.algorithm import SVM
-from bob.pad.base.algorithm import OneClassGMM, OneClassGMM3
+from bob.pad.base.algorithm import OneClassGMM
 from bob.pad.base.algorithm import MLP
 from bob.pad.base.algorithm import PadLDA
 from bob.pad.base.algorithm import ScikitClassifier
