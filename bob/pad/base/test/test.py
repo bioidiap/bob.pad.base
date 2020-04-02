@@ -25,6 +25,10 @@ Base = declarative_base()
 
 
 class TestFile (Base, bob.pad.base.database.PadFile):
+
+    # tell test runners (such as nose and pytest) that this class is not a test class
+    __test__ = False
+
     __tablename__ = "file"
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, unique=True)
@@ -49,6 +53,10 @@ def create_database():
 
 
 class TestDatabase (bob.pad.base.database.PadDatabase, bob.db.base.SQLiteDatabase):
+
+    # tell test runners (such as nose and pytest) that this class is not a test class
+    __test__ = False
+
     def __init__(self):
         bob.pad.base.database.PadDatabase.__init__(self, 'pad_test', original_directory="original/directory", original_extension=".orig")
         bob.db.base.SQLiteDatabase.__init__(self, dbfile, TestFile)
