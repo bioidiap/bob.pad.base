@@ -2,18 +2,14 @@
 .. Pavel Korshunov <pavel.korshunov@idiap.ch>
 .. Wed 19 Oct 22:36:22 2016 CET
 
-.. image:: http://img.shields.io/badge/docs-stable-yellow.png
-   :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/stable/index.html
-.. image:: http://img.shields.io/badge/docs-latest-orange.png
+.. image:: https://img.shields.io/badge/docs-available-orage.svg
    :target: https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/master/index.html
-.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/build.svg
+.. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/pipeline.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
 .. image:: https://gitlab.idiap.ch/bob/bob.pad.base/badges/master/coverage.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.pad.base
-.. image:: http://img.shields.io/pypi/v/bob.pad.base.png
-   :target: https://pypi.python.org/pypi/bob.pad.base
 
 ========================================
 Scripts to run anti-spoofing experiments
