@@ -8,7 +8,7 @@ import logging
 import numpy as np
 from collections.abc import Iterable
 from multiprocessing import cpu_count
-from sklearn.externals import joblib
+import joblib
 
 logger = logging.getLogger(__name__)
 
