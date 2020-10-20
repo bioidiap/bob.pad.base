@@ -4,6 +4,7 @@
 import numpy as np
 import bob.bio.video
 from bob.io.base import vstack_features
+import bob.pipelines as mario
 
 import itertools
 
@@ -84,7 +85,7 @@ def convert_list_of_frame_cont_to_array(frame_containers):
             return x.as_array()
         return x
 
-    features_array = vstack_features(reader, frame_containers)
+    features_array = mario.utils.vstack_features(reader, frame_containers)
 
     return features_array
 

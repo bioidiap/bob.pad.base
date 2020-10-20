@@ -6,8 +6,7 @@
 #
 
 import abc
-import bob.bio.base
-import bob.pad.base
+from bob.db.base.utils import sort_files
 from bob.bio.base.database import BioDatabase
 
 
@@ -83,7 +82,6 @@ class PadDatabase(BioDatabase):
         """
         return []
 
-    @abc.abstractmethod
     def annotations(self, file):
         """
         Returns the annotations for the given File object, if available.
@@ -149,13 +147,13 @@ class PadDatabase(BioDatabase):
         files : [:py:class:`bob.pad.base.database.PadFile`]
             The sorted and unique list of all files of the database.
         """
-        realset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='real', **self.all_files_options))
-        attackset = self.sort(self.objects(protocol=self.protocol, groups=groups, purposes='attack', **self.all_files_options))
+        realset = sort_files(self.objects(protocol=self.protocol, groups=groups, purposes='real', **self.all_files_options))
+        attackset = sort_files(self.objects(protocol=self.protocol, groups=groups, purposes='attack', **self.all_files_options))
         if flat:
             return realset + attackset
         return [realset, attackset]
 
-    def training_files(self, step=None, arrange_by_client=False):
+    def training_files(self, step=None, arrange_by_client=False, **kwargs):
         """training_files(step = None, arrange_by_client = False) -> files
 
         Returns all training File objects
@@ -170,4 +168,4 @@ class PadDatabase(BioDatabase):
           The (arranged) list of files used for the training.
         """
 
-        return self.all_files(groups=('train',))
+        return self.all_files(groups=('train',), **kwargs)

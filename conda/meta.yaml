@@ -31,6 +31,24 @@ requirements:
     - bob.learn.linear
     - bob.learn.libsvm
     - bob.learn.mlp
+    - bob.learn.activation
+    - bob.learn.em
+    - bob.measure
+    - bob.sp
+    - bob.ip.base
+    - bob.ip.color
+    - bob.ip.draw
+    - bob.ip.gabor
+    - bob.measure
+    - bob.db.base
+    - bob.db.atnt
+    - bob.learn.boosting
+    - bob.ip.facedetect
+    - bob.ip.flandmark
+    - bob.io.video
+    - matplotlib {{ matplotlib }}
+    - six {{ six }}
+    - scipy {{ scipy }}
     - scikit-learn {{ scikit_learn }}
   run:
     - python
@@ -41,7 +59,7 @@ test:
   imports:
     - {{ name }}
   commands:
-    - spoof.py --help
+    - bob pad --help
     - nosetests --with-coverage --cover-package={{ name }} -sv {{ name }}
     - sphinx-build -aEW {{ project_dir }}/doc {{ project_dir }}/sphinx
     - sphinx-build -aEb doctest {{ project_dir }}/doc sphinx

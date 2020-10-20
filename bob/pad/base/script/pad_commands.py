@@ -11,7 +11,9 @@ from .error_utils import negatives_per_pai_and_positives
 from functools import partial
 
 SCORE_FORMAT = (
-    "Files must be 4-col format, see " ":py:func:`bob.bio.base.score.load.four_column`."
+    "Files must be 4-col or 5-col format, see "
+    ":py:func:`bob.bio.base_legacy.score.load.four_column` and"
+    ":py:func:`bob.bio.base_legacy.score.load.five_column`."
 )
 CRITERIA = (
     "eer",

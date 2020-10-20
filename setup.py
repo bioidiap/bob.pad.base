@@ -133,6 +133,7 @@ setup(
 
         # main entry for bob pad cli
         'bob.cli': [
+            'bio               = bob.bio.base_legacy.script.bio:bio',
             'pad               = bob.pad.base.script.pad:pad',
             'vulnerability     = bob.pad.base.script.vulnerability:vulnerability',
         ],
@@ -149,6 +150,7 @@ setup(
             'evaluate         = bob.pad.base.script.pad_commands:evaluate',
             'cross            = bob.pad.base.script.cross:cross',
             'finalize-scores  = bob.pad.base.script.finalize_scores:finalize_scores',
+            'vanilla-pad      = bob.pad.base.script.vanilla_pad:vanilla_pad',
         ],
 
         # bob vuln scripts
