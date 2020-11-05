@@ -1,12 +1,13 @@
 """Executes PAD pipeline"""
 
 import logging
-from os import pipe
 
 import bob.pipelines as mario
 import click
-from bob.extension.scripts.click_helper import (ConfigCommand, ResourceOption,
-                                                verbosity_option)
+import joblib
+from bob.extension.scripts.click_helper import ConfigCommand
+from bob.extension.scripts.click_helper import ResourceOption
+from bob.extension.scripts.click_helper import verbosity_option
 
 logger = logging.getLogger(__name__)
 
