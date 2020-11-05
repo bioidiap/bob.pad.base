@@ -1,18 +1,22 @@
-#!/usr/bin/env python
-# vim: set fileencoding=utf-8 :
-# @author: Pavel Korshunov <pavel.korshunov@idiap.ch>
-# @date:   Wed May 18 10:09:22 CET 2016
-#
-
 import bob.bio.base.database
+
 
 class PadFile(bob.bio.base.database.BioFile):
     """A simple base class that defines basic properties of File object for the use in PAD experiments"""
 
-    def __init__(self, client_id, path, attack_type=None, file_id=None):
-        """**Constructor Documentation**
-
-        Initialize the File object with the minimum required data.
+    def __init__(
+        self,
+        client_id,
+        path,
+        attack_type=None,
+        file_id=None,
+        original_directory=None,
+        original_extension=None,
+        annotation_directory=None,
+        annotation_extension=None,
+        annotation_type=None,
+    ):
+        """Initialize the File object with the minimum required data.
 
         Parameters:
 
@@ -22,7 +26,16 @@ class PadFile(bob.bio.base.database.BioFile):
 
         For client_id, path and file_id, please refer to :py:class:`bob.bio.base.database.BioFile` constructor
         """
-        super(PadFile, self).__init__(client_id, path, file_id)
+        super(PadFile, self).__init__(
+            client_id,
+            path,
+            file_id,
+            original_directory=original_directory,
+            original_extension=original_extension,
+            annotation_directory=annotation_directory,
+            annotation_extension=annotation_extension,
+            annotation_type=annotation_type,
+        )
 
         if attack_type is not None:
             assert isinstance(attack_type, str)
@@ -30,6 +43,3 @@ class PadFile(bob.bio.base.database.BioFile):
         # just copy the information
         # The attack type of the sample, None if it is a genuine sample.
         self.attack_type = attack_type
-
-    def __repr__(self):
-        return f"<File({self.id}: {self.path}, {self.client_id}, {self.attack_type})>"

@@ -1,13 +1,13 @@
 from .Algorithm import Algorithm
-from .SVM import SVM
+# from .SVM import SVM
 from .OneClassGMM import OneClassGMM
 from .OneClassGMM2 import OneClassGMM2
 from .GMM import GMM
 from .LogRegr import LogRegr
-from .SVMCascadePCA import SVMCascadePCA
+# from .SVMCascadePCA import SVMCascadePCA
 from .Predictions import Predictions, VideoPredictions
 
-from .MLP import MLP
+# from .MLP import MLP
 from .PadLDA import PadLDA
 
 # to fix sphinx warnings of not able to find classes, when path is shortened
@@ -31,14 +31,14 @@ def __appropriate__(*args):
 
 __appropriate__(
     Algorithm,
-    SVM,
+    # SVM,
     OneClassGMM,
     OneClassGMM2,
     LogRegr,
-    SVMCascadePCA,
+    # SVMCascadePCA,
     Predictions,
     VideoPredictions,
-    MLP,
+    # MLP,
     PadLDA
 )
 
