@@ -116,24 +116,8 @@ setup(
             'dummysql             = bob.pad.base.test.dummy.database_sql:database',  # for test purposes only
         ],
 
-        'bob.pad.preprocessor': [
-            'test             = bob.pad.base.test.dummy.preprocessor:preprocessor',  # for test purposes only
-        ],
-
-        'bob.pad.extractor': [
-            'test             = bob.pad.base.test.dummy.extractor:extractor',  # for test purposes only
-        ],
-
-        'bob.pad.algorithm': [
-            'test             = bob.pad.base.test.dummy.algorithm:algorithm',  # for test purposes only
-        ],
-        'bob.pad.grid': [
-            'demanding         = bob.pad.base.config.grid.demanding:grid',
-        ],
-
         # main entry for bob pad cli
         'bob.cli': [
-            'bio               = bob.bio.base_legacy.script.bio:bio',
             'pad               = bob.pad.base.script.pad:pad',
             'vulnerability     = bob.pad.base.script.vulnerability:vulnerability',
         ],

@@ -1,4 +1,4 @@
-"""Re-usable blocks for legacy bob.pad.base algorithms"""
+"""Re-usable blocks for legacy bob.pad.base databases"""
 
 from .abstract_classes import Database
 from bob.pipelines.sample import DelayedSample
