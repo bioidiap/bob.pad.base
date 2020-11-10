@@ -24,33 +24,33 @@ requirements:
     - setuptools {{ setuptools }}
     - bob.extension
     - bob.db.base
-    - bob.io.base
-    - bob.bio.base
-    - bob.bio.video
-    - bob.bio.gmm
-    - bob.learn.linear
-    - bob.learn.libsvm
-    - bob.learn.mlp
-    - bob.learn.activation
-    - bob.learn.em
-    - bob.measure
-    - bob.sp
-    - bob.ip.base
-    - bob.ip.color
-    - bob.ip.gabor
-    - bob.measure
-    - bob.db.base
     - bob.db.atnt
-    - bob.ip.facedetect
-    - bob.io.video
+    - bob.io.base
+    - bob.pipelines
+    - bob.measure
+    - bob.bio.base
+    - gridtk
+    - click {{ click }}
+    - click-plugins {{ click_plugins }}
+    - dask {{ dask }}
     - matplotlib {{ matplotlib }}
-    - six {{ six }}
-    - scipy {{ scipy }}
+    - numpy {{ numpy }}
     - scikit-learn {{ scikit_learn }}
+    - scipy {{ scipy }}
+    - sqlalchemy {{ sqlalchemy }}
+    - tabulate {{ tabulate }}
   run:
     - python
     - setuptools
+    - {{ pin_compatible('click') }}
+    - {{ pin_compatible('click-plugins') }}
+    - {{ pin_compatible('dask') }}
+    - {{ pin_compatible('matplotlib') }}
+    - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('scikit-learn', min_pin='x.x') }}
+    - {{ pin_compatible('scipy') }}
+    - {{ pin_compatible('sqlalchemy') }}
+    - {{ pin_compatible('tabulate') }}
 
 test:
   imports:
@@ -68,7 +68,6 @@ test:
     - coverage
     - sphinx
     - sphinx_rtd_theme
-    - gridtk
 
 about:
   home: https://www.idiap.ch/software/bob/

@@ -15,12 +15,13 @@
 Scripts to run anti-spoofing experiments
 ========================================
 
-This package is part of the signal-processing and machine learning toolbox
-Bob_. This package is the base of ``bob.pad`` family of packages, which allow to run comparable and reproducible
-presentation attack detection (PAD) experiments on publicly available databases.
+This package is part of the signal-processing and machine learning toolbox Bob_.
+This package is the base of ``bob.pad`` family of packages, which allow to run
+comparable and reproducible presentation attack detection (PAD) experiments on
+publicly available databases.
 
 This package contains basic functionality to run PAD experiments.
-It provides a generic ``./bin/spoof.py`` script that takes several parameters, including:
+It provides a generic API for PAD including:
 
 * A database and its evaluation protocol
 * A data preprocessing algorithm
@@ -28,9 +29,11 @@ It provides a generic ``./bin/spoof.py`` script that takes several parameters, i
 * A PAD algorithm
 
 All these steps of the PAD system are given as configuration files.
+All the algorithms are standardized on top of scikit-learn estimators.
 
-In this base class implementation, only a core functionality is implemented. The specialized algorithms should
-be provided by other packages, which are usually in the ``bob.pad`` namespace, like a ``bob.pad.voice`` package.
+In this base package, only a core functionality is implemented. The specialized
+algorithms should be provided by other packages, which are usually in the
+``bob.pad`` namespace, like ``bob.pad.face``.
 
 Installation
 ------------
@@ -50,5 +53,5 @@ development `mailing list`_.
 
 .. Place your references here:
 .. _bob: https://www.idiap.ch/software/bob
-.. _installation: https://gitlab.idiap.ch/bob/bob/wikis/Installation
+.. _installation: https://www.idiap.ch/software/bob/install
 .. _mailing list: https://groups.google.com/forum/?fromgroups#!forum/bob-devel
