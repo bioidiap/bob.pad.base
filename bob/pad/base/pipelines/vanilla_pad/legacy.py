@@ -1,9 +1,10 @@
 """Re-usable blocks for legacy bob.pad.base databases"""
 
-from .abstract_classes import Database
-from bob.pipelines.sample import DelayedSample
-import functools
 import logging
+
+from bob.pipelines.sample import DelayedSample
+
+from .abstract_classes import Database
 
 logger = logging.getLogger(__name__)
 
