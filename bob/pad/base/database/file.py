@@ -1,7 +1,7 @@
-import bob.bio.base.database
+from bob.bio.base.database import BioFile
 
 
-class PadFile(bob.bio.base.database.BioFile):
+class PadFile(BioFile):
     """A simple base class that defines basic properties of File object for the use in PAD experiments"""
 
     def __init__(
