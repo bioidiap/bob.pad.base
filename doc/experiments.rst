@@ -63,7 +63,7 @@ These five options are:
 * ``--sub-directory``: A descriptive name for your experiment, which will serve as a sub-directory
 
 The first four parameters, i.e., the ``database``, the ``preprocessor``, the ``extractor`` and the ``algorithm`` can be specified in several different ways.
-For the start, we will use only the registered :ref:`Resources <bob.bio.base.resources>`.
+For the start, we will use only the registered Resources.
 These resources define the source code that will be used to compute the experiments, as well as all the meta-parameters of the algorithms (which we will call the *configuration*).
 To get a list of registered resources, please call:
 
@@ -112,7 +112,7 @@ After the experiment has finished successfully, one or more text file containing
 all the scores are written. In this section, commands that helps to quickly
 evaluate a set of scores by generating metrics or plots are presented here.
 The scripts take as input either a 4-column or 5-column data format as specified
-in the documentation of :py:func:`bob.bio.base.score.load.four_column` or 
+in the documentation of :py:func:`bob.bio.base.score.load.four_column` or
 :py:func:`bob.bio.base.score.load.five_column`.
 
 Two sets of commands, ``bob pad`` and ``bob vuln`` are available for
