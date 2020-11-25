@@ -89,9 +89,7 @@ def vanilla_pad(ctx, pipeline, database, dask_client, groups, output, checkpoint
             ["checkpoint"], pipeline, features_dir=output, model_path=output
         )
 
-    if dask_client is not None:
-        pipeline = mario.wrap(["dask"], pipeline)
-    else:
+    if dask_client is None:
         logger.warning("`dask_client` not set. Your pipeline will run locally")
 
     # create an experiment info file
