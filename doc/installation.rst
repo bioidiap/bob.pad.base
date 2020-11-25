@@ -42,7 +42,7 @@ command line below will install all the required packages:
 
 .. code-block:: sh
 
-    $ source activate <bob_conda_environment>
+    $ conda activate <bob_conda_environment>
     $ conda install bob.bio.base \
                     bob.bio.spear \
                     bob.pad.base \

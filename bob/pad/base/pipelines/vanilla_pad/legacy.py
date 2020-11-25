@@ -48,3 +48,10 @@ class DatabaseConnector(Database):
     def predict_samples(self, group="dev"):
         objects = self.database.all_files(groups=group, flat=True)
         return [_padfile_to_delayed_sample(k, self.database) for k in objects]
+
+    def __repr__(self) -> str:
+        return f"""{self.__class__.__name__}(
+    database={self.database},
+    annotation_type={self.annotation_type},
+    fixed_positions={self.fixed_positions}
+)"""

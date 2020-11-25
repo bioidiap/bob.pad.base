@@ -15,14 +15,12 @@ Base Classes
 Most of the base classes are reused from :ref:`bob.bio.base <bob.bio.base>`.
 Only one base class that is presentation attack detection specific, ``Algorithm`` is implemented in this package.
 
-.. autosummary::
-   bob.pad.base.algorithm.Algorithm
-   bob.pad.base.algorithm.Predictions
-
 Implementations
 ~~~~~~~~~~~~~~~
 
 .. autosummary::
+   bob.pad.base.pipelines.vanilla_pad.Database
+   bob.pad.base.pipelines.vanilla_pad.DatabaseConnector
    bob.pad.base.database.PadDatabase
    bob.pad.base.database.PadFile
 
@@ -30,13 +28,7 @@ Preprocessors and Extractors
 ----------------------------
 
 Preprocessors and Extractors from the :ref:`bob.bio.base <bob.bio.base>`
-package can also be used in this package. Please see
-:any:`bob.bio.base.implemented` for more details.
-
-Algorithms
-----------
-
-.. automodule:: bob.pad.base.algorithm
+package can also be used in this package.
 
 
 Databases
