@@ -9,6 +9,10 @@
  Running Presentation Attack Detection Experiments
 ===================================================
 
+.. todo::
+
+   check and revamp
+
 The ``bob.pad`` packages provide open source tools to run comparable and reproducible presentation attack detection (PAD) experiments.
 To design such experiment, one has to choose:
 
@@ -47,10 +51,10 @@ Users Guide
     :maxdepth: 2
 
     installation
-    experiments
-    implementation
-    high_level_db_interface_guide
-    filedb_guide
+    pad_intro
+    vanilla_pad_intro
+    vanilla_pad_features
+    legacy
 
 
 Reference Manual

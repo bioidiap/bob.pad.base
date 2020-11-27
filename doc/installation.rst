@@ -5,6 +5,12 @@
 
 .. _bob.pad.base.installation:
 
+
+.. todo::
+
+   update and link to general bob install instructions.
+
+
 ===========================
  Installation Instructions
 ===========================
