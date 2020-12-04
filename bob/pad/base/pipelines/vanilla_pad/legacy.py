@@ -15,7 +15,7 @@ def _padfile_to_delayed_sample(padfile, database):
         subject=str(padfile.client_id),
         attack_type=padfile.attack_type,
         key=padfile.path,
-        annotations=padfile.annotations,
+        delayed_attributes=dict(annotations=lambda : padfile.annotations),
         is_bonafide=padfile.attack_type is None,
     )
 
