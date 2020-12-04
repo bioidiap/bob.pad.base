@@ -9,10 +9,6 @@
  Running Presentation Attack Detection Experiments
 ===================================================
 
-.. todo::
-
-   check and revamp
-
 The ``bob.pad`` packages provide open source tools to run comparable and reproducible presentation attack detection (PAD) experiments.
 To design such experiment, one has to choose:
 
@@ -26,7 +22,7 @@ For any of these parts, several different types are implemented in the ``bob.pad
 combination of the five parts can be executed.
 For each type, several meta-parameters can be tested.
 This results in a nearly infinite amount of possible experiments that can be run using the current setup.
-But it is also possible to use your own database, preprocessor, feature extractor, or PAD algorithm and test this against the baseline algorithms implemented in the our packages.
+But it is also possible to use your own database, preprocessor, feature extractor, or PAD algorithm and test this against the baseline algorithms implemented in our packages.
 
 .. note::
     The ``bob.pad.*`` packages are derived from the `bob.bio.* <http://pypi.python.org/pypi/bob.bio.base>`__, packages that are designed for biometric recognition experiments.
