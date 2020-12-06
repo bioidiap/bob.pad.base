@@ -1,6 +1,7 @@
 """Executes PAD pipeline"""
 
 
+from bob.pipelines.distributed import VALID_DASK_CLIENT_STRINGS
 import click
 from bob.extension.scripts.click_helper import ConfigCommand
 from bob.extension.scripts.click_helper import ResourceOption
@@ -37,9 +38,11 @@ from bob.extension.scripts.click_helper import verbosity_option
 @click.option(
     "--dask-client",
     "-l",
-    required=False,
-    cls=ResourceOption,
+    entry_point_group="dask.client",
+    string_exceptions=VALID_DASK_CLIENT_STRINGS,
+    default="single-threaded",
     help="Dask client for the execution of the pipeline.",
+    cls=ResourceOption,
 )
 @click.option(
     "--group",
@@ -66,7 +69,9 @@ from bob.extension.scripts.click_helper import verbosity_option
 )
 @verbosity_option(cls=ResourceOption)
 @click.pass_context
-def vanilla_pad(ctx, pipeline, database, dask_client, groups, output, checkpoint, **kwargs):
+def vanilla_pad(
+    ctx, pipeline, database, dask_client, groups, output, checkpoint, **kwargs
+):
     """Runs the simplest PAD pipeline."""
 
     import gzip
@@ -78,6 +83,7 @@ def vanilla_pad(ctx, pipeline, database, dask_client, groups, output, checkpoint
     import bob.pipelines as mario
     import dask.bag
     from bob.extension.scripts.click_helper import log_parameters
+    from bob.pipelines.distributed.sge import get_resource_requirements
 
     logger = logging.getLogger(__name__)
     log_parameters(logger)
@@ -120,7 +126,10 @@ def vanilla_pad(ctx, pipeline, database, dask_client, groups, output, checkpoint
             pattern = f"{prefix}*{postfix}"
             os.makedirs(os.path.dirname(prefix), exist_ok=True)
             logger.info("Writing bag results into files ...")
-            result.to_textfiles(pattern, last_endline=True, scheduler=dask_client)
+            resources = get_resource_requirements(pipeline)
+            result.to_textfiles(
+                pattern, last_endline=True, scheduler=dask_client, resources=resources
+            )
 
             with open(scores_path, "w") as f:
                 # concatenate scores into one score file
