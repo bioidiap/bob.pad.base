@@ -4,3 +4,5 @@ recursive-include bob *.txt *.hdf5
 recursive-include bob *.sql3
 recursive-include bob/pad/base/test/data scores-* *.sql3 *.wav
 recursive-include bob/pad/base/test/data/example_filelist *.lst
+recursive-include bob/pad/base/test/ *.csv
+recursive-include bob/pad/base/test/ *.tar.gz
