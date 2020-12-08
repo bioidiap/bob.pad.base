@@ -23,12 +23,10 @@ class CSVToSampleLoader(CSVBaseSampleLoader):
     Each CSV line of a PAD datasets should have at least a PATH and a SUBJECT id like
     in the example below:
 
-    ```      
-      .. code-block:: text
+    .. code-block:: text
 
-       PATH,SUBJECT
-       path_1,subject_1
-    ```
+    PATH,SUBJECT
+    path_1,subject_1
 
     """
 
