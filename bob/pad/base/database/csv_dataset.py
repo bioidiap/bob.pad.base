@@ -61,7 +61,7 @@ class CSVToSampleLoader(CSVBaseSampleLoader):
         kwargs = dict([[str(h).lower(), r] for h, r in zip(header[2:], row[2:])])
 
         if self.metadata_loader is not None:
-            metadata = self.metadata_loader(row, header=header, is_bonafide=is_bonafide)
+            metadata = self.metadata_loader(row, header=header)
             kwargs.update(metadata)
 
         return DelayedSample(
