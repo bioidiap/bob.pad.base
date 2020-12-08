@@ -21,3 +21,4 @@ build
 src/
 *.sql3
 record.txt
+*.DS_Store
