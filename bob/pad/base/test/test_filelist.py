@@ -23,51 +23,154 @@ Tests for the PAD Filelist database.
 
 import os
 import bob.io.base.test_utils
-from bob.pad.base.database import FileListPadDatabase
+from bob.pad.base.database import FileListPadDatabase, CSVPADDataset, LSTToSampleLoader
 
 
-example_dir = os.path.realpath(bob.io.base.test_utils.datafile('.', __name__, 'data/example_filelist'))
+example_dir = os.path.realpath(
+    bob.io.base.test_utils.datafile(".", __name__, "data/example_filelist")
+)
+
+csv_example_dir = os.path.realpath(
+    bob.io.base.test_utils.datafile(".", __name__, "data/csv_dataset")
+)
+
+csv_example_tarball = os.path.realpath(
+    bob.io.base.test_utils.datafile(".", __name__, "data/csv_dataset.tar.gz")
+)
 
 
 def test_query():
 
-    db = FileListPadDatabase(example_dir, 'test_padfilelist')
+    db = FileListPadDatabase(example_dir, "test_padfilelist")
     assert len(db.groups()) == 3  # 3 groups (dev, eval, train)
 
     print(db.client_ids())
     # 5 client ids for real data of train, dev and eval sets (ignore all ids that are in attacks only)
     assert len(db.client_ids()) == 5
-    assert len(db.client_ids(groups='train')) == 2  # 2 client ids for train
-    assert len(db.client_ids(groups='dev')) == 2  # 2 client ids for dev
-    assert len(db.client_ids(groups='eval')) == 1  # 2 client ids for eval
+    assert len(db.client_ids(groups="train")) == 2  # 2 client ids for train
+    assert len(db.client_ids(groups="dev")) == 2  # 2 client ids for dev
+    assert len(db.client_ids(groups="eval")) == 1  # 2 client ids for eval
 
-    assert len(db.objects(groups='train')) == 3  # 3 samples in the train set
+    assert len(db.objects(groups="train")) == 3  # 3 samples in the train set
 
-    assert len(db.objects(groups='dev', purposes='real')) == 2  # 2 samples of real data in the dev set
-    assert len(db.objects(groups='dev', purposes='attack')) == 1  # 1 attack in the dev set
+    assert (
+        len(db.objects(groups="dev", purposes="real")) == 2
+    )  # 2 samples of real data in the dev set
+    assert (
+        len(db.objects(groups="dev", purposes="attack")) == 1
+    )  # 1 attack in the dev set
 
 
 def test_query_protocol():
-    db = FileListPadDatabase(os.path.dirname(example_dir), 'test_padfilelist')
-    p = 'example_filelist'
+    db = FileListPadDatabase(os.path.dirname(example_dir), "test_padfilelist")
+    p = "example_filelist"
 
     assert len(db.groups(protocol=p)) == 3  # 3 groups (dev, eval, train)
 
     assert len(db.client_ids(protocol=p)) == 5  # 6 client ids for train, dev and eval
-    assert len(db.client_ids(groups='train', protocol=p)) == 2  # 2 client ids for train
-    assert len(db.client_ids(groups='dev', protocol=p)) == 2  # 2 client ids for dev
-    assert len(db.client_ids(groups='eval', protocol=p)) == 1  # 2 client ids for eval
+    assert len(db.client_ids(groups="train", protocol=p)) == 2  # 2 client ids for train
+    assert len(db.client_ids(groups="dev", protocol=p)) == 2  # 2 client ids for dev
+    assert len(db.client_ids(groups="eval", protocol=p)) == 1  # 2 client ids for eval
 
-    assert len(db.objects(groups='train', protocol=p)) == 3  # 3 samples in the train set
+    assert (
+        len(db.objects(groups="train", protocol=p)) == 3
+    )  # 3 samples in the train set
 
-    assert len(db.objects(groups='dev', purposes='real', protocol=p)) == 2  # 2 samples of real data in the dev set
-    assert len(db.objects(groups='dev', purposes='attack', protocol=p)) == 1  # 1 attack in the dev set
+    assert (
+        len(db.objects(groups="dev", purposes="real", protocol=p)) == 2
+    )  # 2 samples of real data in the dev set
+    assert (
+        len(db.objects(groups="dev", purposes="attack", protocol=p)) == 1
+    )  # 1 attack in the dev set
 
 
 def test_driver_api():
     from bob.db.base.script.dbmanage import main
-    assert main(('pad_filelist clients --list-directory=%s --self-test' % example_dir).split()) == 0
-    assert main(('pad_filelist dumplist --list-directory=%s --self-test' % example_dir).split()) == 0
-    assert main(('pad_filelist dumplist --list-directory=%s --purpose=real --group=dev --self-test' % 
-                 example_dir).split()) == 0
-    assert main(('pad_filelist checkfiles --list-directory=%s --self-test' % example_dir).split()) == 0
+
+    assert (
+        main(
+            (
+                "pad_filelist clients --list-directory=%s --self-test" % example_dir
+            ).split()
+        )
+        == 0
+    )
+    assert (
+        main(
+            (
+                "pad_filelist dumplist --list-directory=%s --self-test" % example_dir
+            ).split()
+        )
+        == 0
+    )
+    assert (
+        main(
+            (
+                "pad_filelist dumplist --list-directory=%s --purpose=real --group=dev --self-test"
+                % example_dir
+            ).split()
+        )
+        == 0
+    )
+    assert (
+        main(
+            (
+                "pad_filelist checkfiles --list-directory=%s --self-test" % example_dir
+            ).split()
+        )
+        == 0
+    )
+
+
+def test_csv_dataset():
+    def run(path):
+
+        dataset = CSVPADDataset(path, "protocol1")
+
+        # Train
+        assert len(dataset.fit_samples()) == 5
+        # 2 out of 5 are bonafides
+        assert sum([s.is_bonafide for s in dataset.fit_samples()]) == 2
+
+        # DEV
+        assert len(dataset.predict_samples()) == 5
+        # 2 out of 5 are bonafides
+        assert sum([s.is_bonafide for s in dataset.predict_samples()]) == 2
+
+        # EVAL
+        assert len(dataset.predict_samples(group="eval")) == 7
+        # 3 out of 5 are bonafides
+        assert sum([s.is_bonafide for s in dataset.predict_samples(group="eval")]) == 3
+
+    run(csv_example_dir)
+    run(csv_example_tarball)
+
+
+def test_csv_dataset_lst():
+
+    dataset = CSVPADDataset(
+        example_dir,
+        "",
+        csv_to_sample_loader=LSTToSampleLoader(
+            data_loader=bob.io.base.load,
+            metadata_loader=None,
+            dataset_original_directory="",
+            extension="",
+        ),
+    )
+
+    # Train
+    assert len(dataset.fit_samples()) == 3
+    # 2 out of 3 are bonafides
+    assert sum([s.is_bonafide for s in dataset.fit_samples()]) == 2
+
+    # DEV
+    assert len(dataset.predict_samples()) == 3
+    # 2 out of 3 are bonafides
+    assert sum([s.is_bonafide for s in dataset.predict_samples()]) == 2
+
+    # EVAL
+    assert len(dataset.predict_samples(group="eval")) == 2
+    # 1 out of 2 are bonafides
+    assert sum([s.is_bonafide for s in dataset.predict_samples(group="eval")]) == 1
+
