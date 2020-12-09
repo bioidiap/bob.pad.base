@@ -261,7 +261,7 @@ To achieve that, ``bob.pad`` is well-integrated with our SGE grid toolkit GridTK
 The ``./bin/spoof.py`` script can submit jobs either to the SGE grid, or to a local scheduler, keeping track of dependencies between the jobs.
 
 The GridTK_ keeps a list of jobs in a local database, which by default is called ``submitted.sql3``, but which can be overwritten with the ``--gridtk-database-file`` option.
-Please refer to the `GridTK documentation <http://pythonhosted.org/gridtk>`_ for more details on how to use the Job Manager ``./bin/jman``.
+Please refer to the `GridTK documentation <https://pypi.org/project/gridtk/>`_ for more details on how to use the Job Manager ``./bin/jman``.
 
 Two different types of ``grid`` resources are defined, which can be used with the ``--grid`` command line option.
 The first type of resources will submit jobs to an SGE grid.
