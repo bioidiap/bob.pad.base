@@ -22,6 +22,8 @@
 To easily run experiments in PAD, we offer a generic command called ``bob pad pipelines``.
 Such CLI command is an entry point to several pipelines, and this documentation will focus on the one called **vanilla-pad**.
 
+The following will introduce how a simple experiment can be run with this tool, from the samples data to a set of metrics and plots, as defined in :ref:`bob.pad.base.pad_intro`.
+
 
 Running a biometric experiment with vanilla-pad
 ===============================================
@@ -62,14 +64,13 @@ Building your own Vanilla PAD pipeline
 
 The Vanilla PAD pipeline is the backbone of any experiment in this library. It is composed of:
 
-   - Transformers: One or multiple instances in series of :py:class:`sklearn.base.BaseEstimator` and :py:class:`sklearn.base.TransformerMixin`. A transformer takes a sample as input applies a modification on it and outputs the resulting sample.
-      A transformer can be trained before using it.
+   - Transformers: One or multiple instances in series of :py:class:`sklearn.base.BaseEstimator` and :py:class:`sklearn.base.TransformerMixin`. A transformer takes a sample as input applies a modification on it and outputs the resulting sample. A transformer can be trained before being used.
 
    - A classifier: Instance of 
 
 .. todo::
 
-   instance of the classifier
+   Add the Instance of the classifier
 
 
 Transformers
@@ -78,11 +79,19 @@ Transformers
 A Transformer is an class that implements the fit and transform methods, which allow the application of an operation on a sample of data.
 For more details, see :ref:`bob.bio.base.transformer`.
 
+.. todo::
+
+   Explain where they are / how to build one
+
 
 Classifier
 ----------
 
 A Classifier is the final process of a Vanilla PAD pipeline. Its goal is to decide if a transformed sample given as input is originating from a genuine sample or if an impostor is trying to be recognized as someone else.
+
+.. todo::
+
+   Explain where they are / how to build one
 
 
 Running an experiment
@@ -90,5 +99,121 @@ Running an experiment
 
 Two part of an experiment have to be executed:
 
-- Fit: 
-- Predict: assessing a series of test samples for authenticity.
+- **Fit**: labeled data is fed to the system to train the algorithm to recognize attacks and licit proprieties.
+- **Predict**: assessing a series of test samples for authenticity, generating a score for each one.
+
+
+.. todo::
+
+   Examples
+
+
+Evaluation
+----------
+
+Once the scores are generated for each classes and groups, the evaluation tools can be used to assess the performance of the system, by either drawing plots or computing metrics values at specific operation points.
+
+Generally, the operation thresholds are computed on a specific set (development set or `dev`). Then those threshold values are used to compute the system error rates on a separate set (evaluation set or `eval`).
+
+To retrieve the most common metrics values for a spoofing scenario experiment, run the following command:
+
+.. code-block:: none
+
+   $ bob pad metrics -e scores-{dev,eval} --legends ExpA
+
+   Threshold of 11.639561 selected with the bpcer20 criteria
+   ======  ========================  ===================
+   ExpA    Development scores-dev    Eval. scores-eval
+   ======  ========================  ===================
+   APCER   5.0%                      5.0%
+   BPCER   100.0%                    100.0%
+   ACER    52.5%                     52.5%
+   ======  ========================  ===================
+
+   Threshold of 3.969103 selected with the eer criteria
+   ======  ========================  ===================
+   ExpA    Development scores-dev    Eval. scores-eval
+   ======  ========================  ===================
+   APCER   100.0%                    100.0%
+   BPCER   100.0%                    100.0%
+   ACER    100.0%                    100.0%
+   ======  ========================  ===================
+
+   Threshold of -0.870550 selected with the min-hter criteria
+   ======  ========================  ===================
+   ExpA    Development scores-dev    Eval. scores-eval
+   ======  ========================  ===================
+   APCER   100.0%                    100.0%
+   BPCER   19.5%                     19.5%
+   ACER    59.7%                     59.7%
+   ======  ========================  ===================
+
+.. note::
+    When evaluation scores are provided, the ``-e`` option (``--eval``) must be passed.
+    See metrics --help for further options.
+
+
+Plots
+-----
+
+Customizable plotting commands are available in the :py:mod:`bob.pad.base` module.
+They take a list of development and/or evaluation files and generate a single PDF
+file containing the plots.
+
+Available plots for a spoofing scenario are:
+
+*  ``hist`` (Bona fida and PA histograms along with threshold criterion)
+
+*  ``epc`` (expected performance curve)
+
+*  ``gen`` (Generate random scores)
+
+*  ``roc`` (receiver operating characteristic)
+
+*  ``det`` (detection error trade-off)
+
+*  ``evaluate`` (Summarize all the above commands in one call)
+
+Available plots for vulnerability analysis are:
+
+*  ``hist`` (Vulnerability analysis distributions)
+
+*  ``epc`` (expected performance curve)
+
+*  ``gen`` (Generate random scores)
+
+*  ``roc`` (receiver operating characteristic)
+
+*  ``det`` (detection error trade-off)
+
+*  ``epsc`` (expected performance spoofing curve)
+
+*  ``fmr_iapmr``  (Plot FMR vs IAPMR)
+
+*  ``evaluate`` (Summarize all the above commands in one call)
+
+
+Use the ``--help`` option on the above-cited commands to find-out about more
+options.
+
+
+For example, to generate a EPC curve from development and evaluation datasets:
+
+.. code-block:: sh
+
+    $ bob pad epc -e -o 'my_epc.pdf' scores-{dev,eval}
+
+where `my_epc.pdf` will contain EPC curves for all the experiments.
+
+Vulnerability commands require licit and spoof development and evaluation
+datasets. Far example, to generate EPSC curve:
+
+.. code-block:: sh
+
+    $ bob vuln epsc -e .../{licit,spoof}/scores-{dev,eval}
+
+
+.. note::
+    IAPMR curve can be plotted along with EPC and EPSC using option
+    ``--iapmr``. 3D EPSC can be generated using the ``--three-d``. See metrics
+    --help for further options.
