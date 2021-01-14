@@ -50,7 +50,6 @@ Users Guide
     pad_intro
     vanilla_pad_intro
     vanilla_pad_features
-    legacy
 
 
 Reference Manual
