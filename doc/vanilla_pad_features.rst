@@ -100,10 +100,3 @@ Basic Idiap SGE configurations are defined by bob.pipelines: ``sge`` and ``sge-g
 
 $ bob pad vanilla-pad replay-attack svm-frames -o output_dir -l sge -c
 
-
-Video to Frames Transformer
-===========================
-
-.. todo::
-
-   why video to frames, and where it is?
