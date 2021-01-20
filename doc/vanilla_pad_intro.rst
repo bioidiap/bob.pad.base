@@ -10,13 +10,8 @@
 
 .. todo::
 
-   Introduce vanilla-pad:
+   - more pictures
 
-      - What it is
-      - How it works
-
-   Look at bob.bio.base vanilla-biometrics
-   Import from experiments.rst
 
 
 To easily run experiments in PAD, we offer a generic command called ``bob pad pipelines``.
@@ -32,7 +27,7 @@ A PAD experiment consists of taking a set of biometric `bonafide` and `impostor`
 
 Similarly to ``vanilla-biometrics``, the ``vanilla-pad`` command needs a pipeline argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
 
-$ bob pad vanilla-pad [OPTIONS] -p <pipeline> -a <database>
+$ bob pad vanilla-pad [OPTIONS] -p <pipeline> -d <database>
 
 The different available options can be listed by passing the ``--help`` option to the command::
 
@@ -64,13 +59,9 @@ Building your own Vanilla PAD pipeline
 
 The Vanilla PAD pipeline is the backbone of any experiment in this library. It is composed of:
 
-   - Transformers: One or multiple instances in series of :py:class:`sklearn.base.BaseEstimator` and :py:class:`sklearn.base.TransformerMixin`. A transformer takes a sample as input applies a modification on it and outputs the resulting sample. A transformer can be trained before being used.
+   - Transformers: One or multiple instances in series of :py:class:`sklearn.base.BaseEstimator` and :py:class:`sklearn.base.TransformerMixin`. A Transformer takes a sample as input applies a modification on it and outputs the resulting sample. A transformer can be trained before being used.
 
-   - A classifier: Instance of 
-
-.. todo::
-
-   Add the Instance of the classifier
+   - A classifier: A class implementing the :py:meth:`fit` and :py:meth:`predict` methods. A Classifier takes a sample as input and returns a score. It is possible to train it beforehand with the :py:meth:`fit` method.
 
 
 Transformers
@@ -79,19 +70,46 @@ Transformers
 A Transformer is an class that implements the fit and transform methods, which allow the application of an operation on a sample of data.
 For more details, see :ref:`bob.bio.base.transformer`.
 
-.. todo::
+Here is a basic stateless Transformer class:
 
-   Explain where they are / how to build one
+.. code-block:: python
+
+   from sklearn.base import TransformerMixin, BaseEstimator
+
+   class MyTransformer(TransformerMixin, BaseEstimator):
+
+      def fit(self, X, y):
+         return self
+
+      def transform(self, X):
+         return modify_sample(X)
 
 
 Classifier
 ----------
 
-A Classifier is the final process of a Vanilla PAD pipeline. Its goal is to decide if a transformed sample given as input is originating from a genuine sample or if an impostor is trying to be recognized as someone else.
+A Classifier is the final process of a Vanilla PAD pipeline.
+Its goal is to decide if a transformed sample given as input is originating from a genuine sample or if an impostor is trying to be recognized as someone else.
+The output is a score for each input sample.
 
-.. todo::
+Here is the minimal structure of a classifier:
 
-   Explain where they are / how to build one
+.. code-block:: python
+
+   class MyClassifier():
+      def __init__(self):
+         self.state = 0
+
+      def fit(self, X, y):
+         self.state = update_state(self.state, X, y)
+
+      def predict(self, X):
+         return do_prediction(self.state, X)
+
+.. note::
+
+   The easiest method is to use a scikit-learn classifier, like :py:class:`sklearn.svm.SVC`.
+   They are compatible with our pipelines, on the condition to wrap them correctly (see :ref:`below <bob.pad.base.using_sklearn_classifiers>`).
 
 
 Running an experiment
@@ -102,16 +120,70 @@ Two part of an experiment have to be executed:
 - **Fit**: labeled data is fed to the system to train the algorithm to recognize attacks and licit proprieties.
 - **Predict**: assessing a series of test samples for authenticity, generating a score for each one.
 
+These steps are chained together in a pipeline object used by the ``vanilla-pad`` command.
+To build such a pipeline, the following configuration file can be created:
+
+.. code-block:: python
+
+   from sklearn.pipeline import Pipeline
+
+   my_transformer = MyTransformer()
+
+   my_classifier = MyClassifier()
+
+   pipeline = Pipeline(
+      [
+         ("my_transformer", my_transformer),
+         ("classifier", my_classifier),
+      ]
+   )
+
+The pipeline can then be executed with the command::
+
+$ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -o output_dir
+
+When executed with vanilla-pad, every training sample will pass through the pipeline, executing the ``fit`` methods.
+Then, every samples of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the `predict` method of ``my_classifier``.
+The output of the classifier (scores) is written to a file.
 
 .. todo::
 
-   Examples
+   figure: schema
+
+
+.. _bob.pad.base.using_sklearn_classifiers:
+
+Using scikit-learn classifiers
+------------------------------
+
+To use an existing scikit-learn Transformer or Classifier, they need to be wrapped with a `SampleWrapper` (using :py:meth:`bob.pipelines.wrap`) to handle our :py:class:`~bob.pipelines.Sample` objects:
+
+.. code-block:: python
+
+   import bob.pipelines
+   from sklearn.pipeline import Pipeline
+   from sklearn.svm import SVC
+
+   my_transformer = MyTransformer()
+
+
+   sklearn_classifier = SVC()
+   wrapped_classifier = bob.pipelines.wrap(
+      ["sample"], sklearn_classifier, fit_extra_arguments=[("y", "is_bonafide")],
+   )
+
+   pipeline = Pipeline(
+      [
+         ("my_transformer", my_transformer),
+         ("classifier", wrapped_classifier),
+      ]
+   )
 
 
 Evaluation
 ----------
 
-Once the scores are generated for each classes and groups, the evaluation tools can be used to assess the performance of the system, by either drawing plots or computing metrics values at specific operation points.
+Once the scores are generated for each class and group, the evaluation tools can be used to assess the performance of the system, by either drawing plots or computing metrics values at specific operation points.
 
 Generally, the operation thresholds are computed on a specific set (development set or `dev`). Then those threshold values are used to compute the system error rates on a separate set (evaluation set or `eval`).
 
