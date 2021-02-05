@@ -93,7 +93,7 @@ Metadata can be shipped within the Samples (e.g gender, age, annotations, ...) b
 Checkpoints and Dask
 ====================
 
-In the same way as in bob.bio.base, it is possible to activate the checkpointing of experiments by passing the ``-c`` (``--checkpoint``) option in the command line.
+In the same way as in :ref:`bob.bio.base <bob.bio.base.vanilla_biometrics_advanced_features>`, it is possible to activate the checkpointing of experiments by passing the ``-c`` (``--checkpoint``) option in the command line.
 
 The Dask integration can also be used by giving a client configuration to the ``-l`` (``--dask-client``) argument.
 Basic Idiap SGE configurations are defined by bob.pipelines: ``sge`` and ``sge-gpu``::

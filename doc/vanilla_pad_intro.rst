@@ -8,11 +8,6 @@
  Vanilla PAD: Introduction to presentation attack detection in practice
 ========================================================================
 
-.. todo::
-
-   - more pictures
-
-
 
 To easily run experiments in PAD, we offer a generic command called ``bob pad pipelines``.
 Such CLI command is an entry point to several pipelines, and this documentation will focus on the one called **vanilla-pad**.
@@ -24,6 +19,13 @@ Running a biometric experiment with vanilla-pad
 ===============================================
 
 A PAD experiment consists of taking a set of biometric `bonafide` and `impostor` samples, feeding them to a pipeline, to finally gather the corresponding set of scores for analysis.
+
+.. figure:: img/vanilla_pad_pipeline.png
+   :figwidth: 75%
+   :align: center
+   :alt: Data is fed to the pipeline either for training (to fit) or for evaluation (to transform and predict).
+
+   The pipeline of transformer(s) and classifier can be trained (fit) or used to generate a score for each input sample.
 
 Similarly to ``vanilla-biometrics``, the ``vanilla-pad`` command needs a pipeline argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
 
@@ -180,6 +182,27 @@ To use an existing scikit-learn Transformer or Classifier, they need to be wrapp
    )
 
 
+Scores
+------
+
+Executing the vanilla-pad pipeline results in a list of scores, one for each
+input sample compared against each registered model.
+Depending on the chosen ScoreWriter, these scores can be in csv, 4 columns, or
+5 columns format, or in a custom user-defined format.
+By default the scores are written in the specified output directory (pointed to
+vanilla-pad with the ``-o`` option), and in the 4 columns format.
+
+The scores represent the performance of a system on that data, but are not
+easily interpreted as is so evaluation scripts are available to analyze and show
+different aspects of the system performance.
+
+.. figure:: img/vanilla_pad_pipeline_with_eval.png
+   :figwidth: 75%
+   :align: center
+   :alt: The data is fed to the vanilla-pad pipeline, which produces scores files. Scripts allow the evaluation with metrics and plots.
+
+   The vanilla-pad pipeline generates score files that can be used with various scripts to evaluate the system performance by computing metrics or drawing plots.
+
 Evaluation
 ----------
 
@@ -232,9 +255,9 @@ Customizable plotting commands are available in the :py:mod:`bob.pad.base` modul
 They take a list of development and/or evaluation files and generate a single PDF
 file containing the plots.
 
-Available plots for a spoofing scenario are:
+Available plots for a spoofing scenario (command ``bob pad``) are:
 
-*  ``hist`` (Bona fida and PA histograms along with threshold criterion)
+*  ``hist`` (Bona fide and PA histograms along with threshold criterion)
 
 *  ``epc`` (expected performance curve)
 
@@ -246,7 +269,8 @@ Available plots for a spoofing scenario are:
 
 *  ``evaluate`` (Summarize all the above commands in one call)
 
-Available plots for vulnerability analysis are:
+
+Available plots for vulnerability analysis (command ``bob vuln``) are:
 
 *  ``hist`` (Vulnerability analysis distributions)
 
@@ -278,7 +302,7 @@ For example, to generate a EPC curve from development and evaluation datasets:
 where `my_epc.pdf` will contain EPC curves for all the experiments.
 
 Vulnerability commands require licit and spoof development and evaluation
-datasets. Far example, to generate EPSC curve:
+datasets. For example, to generate EPSC curve:
 
 .. code-block:: sh
 
