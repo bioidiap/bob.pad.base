@@ -19,14 +19,14 @@ The database interface definition follows closely the one in :ref:`bob.bio.base.
 - :py:meth:`database.fit_samples` returns the samples (or delayed samples) used to train the classifier;
 - :py:meth:`database.predict_samples` returns the samples that will be used for evaluating the system. This is where the group (`dev` or `eval`) is specified.
 
-A difference with the bob.bio.base database interface is the presence of an ``attack_type`` annotation. It stores the type of PAI to allow the scoring each different types of attack separately.
+A difference with the bob.bio.base database interface is the presence of an ``attack_type`` annotation. It stores the type of PAI to allow the scoring of each different type of attack separately.
 
 
 File list interface
 -------------------
 
 A class with those methods returning the corresponding data can be implemented for each dataset, but an easier way to do it is with the `file list` interface.
-This allows the creation of multiple protocols and various groups by editing some csv files.
+This allows the creation of multiple protocols and various groups by editing some CSV files.
 
 The dataset configuration file will then be as simple as:
 
@@ -64,11 +64,11 @@ The files must follow the following structure and naming:
           +-- for_real.csv
           +-- for_attack.csv
 
-The content of the files in the ``train`` folder are used when a protocol contains data for training the classifier.
+The content of the files in the ``train`` folder is used when a protocol contains data for training the classifier.
 The files in the ``eval`` folder are optional and are used in case a protocol contains data for evaluation.
 
-These csv files should contain at least the path to raw data and an identifier to the subject in the image (subject).
-The structure of each csv file should be as below:
+These CSV files should contain at least the path to raw data and an identifier to the identity of the subject in the image (subject field).
+The structure of each CSV file should be as below:
 
 .. code-block:: text
 
@@ -79,7 +79,7 @@ The structure of each csv file should be as below:
    ...
 
 
-Metadata can be shipped within the Samples (e.g gender, age, annotations, ...) by adding a column in the csv file for each metadata:
+Metadata can be shipped within the Samples (e.g gender, age, annotations, ...) by adding a column in the CSV file for each metadata:
 
 .. code-block:: text
 

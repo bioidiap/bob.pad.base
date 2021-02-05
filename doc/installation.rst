@@ -16,10 +16,10 @@
 ===========================
 
 As noted before, this package is part of the ``bob.pad`` packages, which in
-turn are part of the signal-processing and machine learning toolbox Bob_. To
+turn are part of the signal processing and machine learning toolbox Bob_. To
 install Bob_, please read the `Installation Instructions <bobinstall_>`_.
 
-Then, to install the ``bob.pad`` packages and in turn maybe the database
+Then, to install the ``bob.pad`` packages and in turn, maybe the database
 packages that you want to use, use conda_ to install them:
 
 .. code-block:: sh
@@ -61,7 +61,7 @@ Databases
 
 With ``bob.pad`` you will run biometric recognition experiments using databases that contain presentation attacks.
 Though the PAD protocols are implemented in ``bob.pad``, the original data are **not included**.
-To download the original data of the databases, please refer to the according Web-pages.
+To download the original data of the databases, please refer to the corresponding Web-pages.
 For a list of supported databases including their download URLs,
 please refer to the `spoofing_databases <https://gitlab.idiap.ch/bob/bob/wikis/Packages>`_.
 

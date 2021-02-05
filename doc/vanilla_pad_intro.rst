@@ -12,7 +12,7 @@
 To easily run experiments in PAD, we offer a generic command called ``bob pad pipelines``.
 Such CLI command is an entry point to several pipelines, and this documentation will focus on the one called **vanilla-pad**.
 
-The following will introduce how a simple experiment can be run with this tool, from the samples data to a set of metrics and plots, as defined in :ref:`bob.pad.base.pad_intro`.
+The following will introduce how a simple experiment can be run with this tool, from the sample data to a set of metrics and plots, as defined in :ref:`bob.pad.base.pad_intro`.
 
 
 Running a biometric experiment with vanilla-pad
@@ -25,13 +25,13 @@ A PAD experiment consists of taking a set of biometric `bonafide` and `impostor`
    :align: center
    :alt: Data is fed to the pipeline either for training (to fit) or for evaluation (to transform and predict).
 
-   The pipeline of transformer(s) and classifier can be trained (fit) or used to generate a score for each input sample.
+   The pipeline of Transformer(s) and Classifier can be trained (fit) or used to generate a score for each input sample.
 
-Similarly to ``vanilla-biometrics``, the ``vanilla-pad`` command needs a pipeline argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
+Similarly to ``vanilla-biometrics``, the ``vanilla-pad`` command needs a pipeline configuration argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
 
 $ bob pad vanilla-pad [OPTIONS] -p <pipeline> -d <database>
 
-The different available options can be listed by passing the ``--help`` option to the command::
+The different available options can be listed by giving the ``--help`` flag to the command::
 
 $ bob pad vanilla-pad --help
 
@@ -69,7 +69,7 @@ The Vanilla PAD pipeline is the backbone of any experiment in this library. It i
 Transformers
 ------------
 
-A Transformer is an class that implements the fit and transform methods, which allow the application of an operation on a sample of data.
+A Transformer is a class that implements the fit and transform methods, which allow the application of an operation on a sample of data.
 For more details, see :ref:`bob.bio.base.transformer`.
 
 Here is a basic stateless Transformer class:
@@ -117,7 +117,7 @@ Here is the minimal structure of a classifier:
 Running an experiment
 =====================
 
-Two part of an experiment have to be executed:
+Two parts of an experiment have to be executed:
 
 - **Fit**: labeled data is fed to the system to train the algorithm to recognize attacks and licit proprieties.
 - **Predict**: assessing a series of test samples for authenticity, generating a score for each one.
@@ -145,7 +145,7 @@ The pipeline can then be executed with the command::
 $ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -o output_dir
 
 When executed with vanilla-pad, every training sample will pass through the pipeline, executing the ``fit`` methods.
-Then, every samples of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the `predict` method of ``my_classifier``.
+Then, every sample of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the `predict` method of ``my_classifier``.
 The output of the classifier (scores) is written to a file.
 
 .. todo::
@@ -187,9 +187,9 @@ Scores
 
 Executing the vanilla-pad pipeline results in a list of scores, one for each
 input sample compared against each registered model.
-Depending on the chosen ScoreWriter, these scores can be in csv, 4 columns, or
+Depending on the chosen ScoreWriter, these scores can be in CSV, 4 columns, or
 5 columns format, or in a custom user-defined format.
-By default the scores are written in the specified output directory (pointed to
+By default, the scores are written in the specified output directory (pointed to
 vanilla-pad with the ``-o`` option), and in the 4 columns format.
 
 The scores represent the performance of a system on that data, but are not
@@ -257,7 +257,7 @@ file containing the plots.
 
 Available plots for a spoofing scenario (command ``bob pad``) are:
 
-*  ``hist`` (Bona fide and PA histograms along with threshold criterion)
+*  ``hist`` (Bonafide and PA histograms along with threshold criterion)
 
 *  ``epc`` (expected performance curve)
 
@@ -293,7 +293,7 @@ Use the ``--help`` option on the above-cited commands to find-out about more
 options.
 
 
-For example, to generate a EPC curve from development and evaluation datasets:
+For example, to generate an EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
@@ -310,6 +310,6 @@ datasets. For example, to generate EPSC curve:
 
 
 .. note::
-    IAPMR curve can be plotted along with EPC and EPSC using option
-    ``--iapmr``. 3D EPSC can be generated using the ``--three-d``. See metrics
-    --help for further options.
+    IAPMR curve can be plotted along with EPC and EPSC using the ``--iapmr``
+    option. 3D EPSC can be generated using the ``--three-d``. See ``metrics
+    --help`` for further options.
