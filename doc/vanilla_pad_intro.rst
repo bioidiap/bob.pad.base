@@ -148,10 +148,6 @@ When executed with vanilla-pad, every training sample will pass through the pipe
 Then, every sample of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the `predict` method of ``my_classifier``.
 The output of the classifier (scores) is written to a file.
 
-.. todo::
-
-   figure: schema
-
 
 .. _bob.pad.base.using_sklearn_classifiers:
 
@@ -202,6 +198,7 @@ different aspects of the system performance.
    :alt: The data is fed to the vanilla-pad pipeline, which produces scores files. Scripts allow the evaluation with metrics and plots.
 
    The vanilla-pad pipeline generates score files that can be used with various scripts to evaluate the system performance by computing metrics or drawing plots.
+
 
 Evaluation
 ----------
