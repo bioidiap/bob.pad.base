@@ -6,11 +6,6 @@
 .. _bob.pad.base.installation:
 
 
-.. todo::
-
-   update and link to general bob install instructions.
-
-
 ===========================
  Installation Instructions
 ===========================
@@ -66,18 +61,14 @@ For a list of supported databases including their download URLs,
 please refer to the `spoofing_databases <https://gitlab.idiap.ch/bob/bob/wikis/Packages>`_.
 
 After downloading the original data for the databases, you will need to tell ``bob.pad``, where these databases can be found.
-For this purpose, we have decided to implement a special file, where you can set your directories.
-Similar to ``bob.bio.base``, by default, this file is located in ``~/.bob_bio_databases.txt``, and it contains several lines, each line looking somewhat like:
+For this purpose, a command exist to define your directories:
 
-.. code-block:: text
+.. code-block:: sh
 
-   [DEFAULT_DATABASE_DIRECTORY] = /path/to/your/directory
-
-.. note::
-   If this file does not exist, feel free to create and populate it yourself.
+   $ bob config set bob.db.<dbname> /path/to/the/db/data/folder
 
 
-Please use ``./bin/databases.py`` for a list of known databases, where you can see the raw ``[YOUR_DATABASE_PATH]`` entries for all databases that you haven't updated, and the corrected paths for those you have.
+Please use ``resources.py -t database`` for a list of known databases, where you can see the default entries for all databases that you haven't updated, and the corrected paths for those you have.
 
 
 .. note::
