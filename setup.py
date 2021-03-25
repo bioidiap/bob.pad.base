@@ -105,12 +105,6 @@ setup(
             'spoof.py         = bob.pad.base.script.spoof:main',
         ],
 
-        # bob database declaration
-        'bob.db': [
-            'dummy = bob.pad.base.test.dummy.database:Interface', # driver for bobdb_manage
-            'pad_filelist = bob.pad.base.database.filelist.driver:Interface',
-        ],
-
         'bob.pad.database': [
             'dummy             = bob.pad.base.test.dummy.database:database',  # for test purposes only
             'dummysql             = bob.pad.base.test.dummy.database_sql:database',  # for test purposes only
