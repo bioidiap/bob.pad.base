@@ -113,7 +113,6 @@ setup(
         # main entry for bob pad cli
         'bob.cli': [
             'pad               = bob.pad.base.script.pad:pad',
-            'vulnerability     = bob.pad.base.script.vulnerability:vulnerability',
         ],
 
         # bob pad scripts
@@ -129,17 +128,6 @@ setup(
             'cross            = bob.pad.base.script.cross:cross',
             'finalize-scores  = bob.pad.base.script.finalize_scores:finalize_scores',
             'vanilla-pad      = bob.pad.base.script.vanilla_pad:vanilla_pad',
-        ],
-
-        # bob vuln scripts
-        'bob.vuln.cli': [
-            'hist             = bob.pad.base.script.vuln_commands:hist',
-            'det              = bob.pad.base.script.vuln_commands:det',
-            'roc              = bob.pad.base.script.vuln_commands:roc',
-            'epc              = bob.pad.base.script.vuln_commands:epc',
-            'epsc             = bob.pad.base.script.vuln_commands:epsc',
-            'gen              = bob.pad.base.script.vuln_commands:gen',
-            'fmr_iapmr        = bob.pad.base.script.vuln_commands:fmr_iapmr',
         ],
 
     },
