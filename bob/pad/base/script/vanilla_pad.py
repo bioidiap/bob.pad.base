@@ -29,6 +29,13 @@ from bob.pipelines.distributed import dask_get_partition_size
     cls=ResourceOption,
 )
 @click.option(
+    "--decision_function",
+    "-f",
+    show_default=True,
+    default="decision_function",
+    help="Name of the Pipeline step to call for results, eg 'score' or 'predict'"
+)
+@click.option(
     "--database",
     "-d",
     required=True,
@@ -93,6 +100,7 @@ from bob.pipelines.distributed import dask_get_partition_size
 def vanilla_pad(
     ctx,
     pipeline,
+    decision_function,
     database,
     dask_client,
     groups,
@@ -169,7 +177,7 @@ def vanilla_pad(
     for group in groups:
 
         logger.info(f"Running vanilla biometrics for group {group}")
-        result = pipeline.decision_function(predict_samples[group])
+        result = getattr(pipeline, decision_function)(predict_samples[group])
 
         scores_path = os.path.join(output, f"scores-{group}")
 
