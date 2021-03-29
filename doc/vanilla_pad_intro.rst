@@ -142,11 +142,15 @@ To build such a pipeline, the following configuration file can be created:
 
 The pipeline can then be executed with the command::
 
-$ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -o output_dir
+$ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -f predict -o output_dir
 
 When executed with vanilla-pad, every training sample will pass through the pipeline, executing the ``fit`` methods.
 Then, every sample of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the `predict` method of ``my_classifier``.
 The output of the classifier (scores) is written to a file.
+
+.. note::
+
+   By default, vanilla-pad expects the classifier to have a `decision_function` method to call for the prediction step. It can be changed with the '-f' switch to the prediction method of your classifier, in our case the `predict` method.
 
 
 .. _bob.pad.base.using_sklearn_classifiers:
