@@ -33,15 +33,16 @@ from bob.pipelines.distributed import dask_get_partition_size
     "-f",
     show_default=True,
     default="decision_function",
-    help="Name of the Pipeline step to call for results, eg 'score' or 'predict'"
+    help="Name of the Pipeline step to call for results, eg 'score' or 'predict'",
+    cls=ResourceOption,
 )
 @click.option(
     "--database",
     "-d",
     required=True,
-    cls=ResourceOption,
     entry_point_group="bob.pad.database",
     help="PAD Database connector (class that implements the methods: `fit_samples`, `predict_samples`)",
+    cls=ResourceOption,
 )
 @click.option(
     "--dask-client",
@@ -60,6 +61,7 @@ from bob.pipelines.distributed import dask_get_partition_size
     multiple=True,
     default=("dev", "eval"),
     help="If given, this value will limit the experiments belonging to a particular group",
+    cls=ResourceOption,
 )
 @click.option(
     "-o",
@@ -67,6 +69,7 @@ from bob.pipelines.distributed import dask_get_partition_size
     show_default=True,
     default="results",
     help="Saves scores (and checkpoints) in this folder.",
+    cls=ResourceOption,
 )
 @click.option(
     "--checkpoint",
