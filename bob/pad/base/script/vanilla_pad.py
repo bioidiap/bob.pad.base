@@ -57,7 +57,7 @@ from bob.pipelines.distributed import dask_get_partition_size
     "--group",
     "-g",
     "groups",
-    type=click.Choice(["dev", "eval"]),
+    type=click.Choice(["train", "dev", "eval"]),
     multiple=True,
     default=("dev", "eval"),
     help="If given, this value will limit the experiments belonging to a particular group",
