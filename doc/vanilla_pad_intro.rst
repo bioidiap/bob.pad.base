@@ -108,8 +108,8 @@ Here is the minimal structure of a classifier:
       def predict(self, X):
          return do_prediction(self.state, X)
       
-      def score(self, X):
-         return score(self.state, X)
+      def decision_function(self, X):
+         return do_decision(X)
 
 .. note::
 
@@ -145,7 +145,7 @@ To build such a pipeline, the following configuration file can be created:
 
 The pipeline can then be executed with the command::
 
-$ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -f score -o output_dir
+$ bob pad vanilla-pad -d my_database_config.py -p my_pipeline_config.py -o output_dir
 
 When executed with vanilla-pad, every training sample will pass through the pipeline, executing the ``fit`` methods.
 Then, every sample of the `dev` set (and/or the `eval` set) will be given to the `transform` method of ``my_transformer`` and the result is passed to the ``decision_function`` method of ``my_classifier``.
@@ -153,7 +153,7 @@ The output of the classifier (scores) is written to a file.
 
 .. note::
 
-   By default, vanilla-pad expects the classifier to have a `decision_function` method to call for the prediction step. It can be changed with the '-f' switch to the prediction method of your classifier, in our case the `score` method. 
+   By default, vanilla-pad expects the classifier to have a `decision_function` method to call for the prediction step. It can be changed with the '-f' switch to the prediction method of your classifier, for instance `-f predict_proba` to use this method of your scikit-learn classifiers.
    The usual `decision_function` of scikit-learn is their `predict_proba` method.
 
 
