@@ -29,12 +29,20 @@ from bob.pipelines.distributed import dask_get_partition_size
     cls=ResourceOption,
 )
 @click.option(
+    "--decision_function",
+    "-f",
+    show_default=True,
+    default="decision_function",
+    help="Name of the Pipeline step to call for results, eg 'score' or 'predict'",
+    cls=ResourceOption,
+)
+@click.option(
     "--database",
     "-d",
     required=True,
-    cls=ResourceOption,
     entry_point_group="bob.pad.database",
     help="PAD Database connector (class that implements the methods: `fit_samples`, `predict_samples`)",
+    cls=ResourceOption,
 )
 @click.option(
     "--dask-client",
@@ -49,10 +57,11 @@ from bob.pipelines.distributed import dask_get_partition_size
     "--group",
     "-g",
     "groups",
-    type=click.Choice(["dev", "eval"]),
+    type=click.Choice(["train", "dev", "eval"]),
     multiple=True,
     default=("dev", "eval"),
     help="If given, this value will limit the experiments belonging to a particular group",
+    cls=ResourceOption,
 )
 @click.option(
     "-o",
@@ -60,6 +69,7 @@ from bob.pipelines.distributed import dask_get_partition_size
     show_default=True,
     default="results",
     help="Saves scores (and checkpoints) in this folder.",
+    cls=ResourceOption,
 )
 @click.option(
     "--checkpoint",
@@ -93,6 +103,7 @@ from bob.pipelines.distributed import dask_get_partition_size
 def vanilla_pad(
     ctx,
     pipeline,
+    decision_function,
     database,
     dask_client,
     groups,
@@ -169,7 +180,7 @@ def vanilla_pad(
     for group in groups:
 
         logger.info(f"Running vanilla biometrics for group {group}")
-        result = pipeline.decision_function(predict_samples[group])
+        result = getattr(pipeline, decision_function)(predict_samples[group])
 
         scores_path = os.path.join(output, f"scores-{group}")
 
