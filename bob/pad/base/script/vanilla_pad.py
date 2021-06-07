@@ -224,5 +224,8 @@ def pad_predicted_sample_to_score_line(sample, endl=""):
 
     real_id = claimed_id if sample.is_bonafide else sample.attack_type
 
+    if score is None:
+        score = "nan"
+
     return f"{claimed_id} {real_id} {test_label} {score}{endl}"
     # return f"{claimed_id} {model_label} {real_id} {test_label} {score}{endl}"
