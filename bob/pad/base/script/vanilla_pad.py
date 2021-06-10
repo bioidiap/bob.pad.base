@@ -72,6 +72,13 @@ from bob.pipelines.distributed import dask_get_partition_size
     cls=ResourceOption,
 )
 @click.option(
+    "--write-metadata-scores",
+    "-m",
+    is_flag=True,
+    help="Sets the score file format as CSV with additional metadata instead of 4 columns.",
+    cls=ResourceOption,
+)
+@click.option(
     "--checkpoint",
     "-c",
     is_flag=True,
@@ -108,6 +115,7 @@ def vanilla_pad(
     dask_client,
     groups,
     output,
+    write_metadata_scores,
     checkpoint,
     dask_partition_size,
     dask_n_workers,
