@@ -226,7 +226,7 @@ def split_csv_pad(filename):
     logger.debug(f"Loading CSV score file: '{filename}'")
     split_scores = defaultdict(list)
     for row in _iterate_csv_score_file(filename):
-        if row["is_bonafide"] == "True":
+        if row["is_bonafide"].lower() == "true":
             split_scores["bonafide"].append(row["score"])
         else:
             split_scores["attack"].append(row["score"])
