@@ -126,7 +126,7 @@ def apcer_bpcer(threshold, pos, *negs):
     return apcers, max(apcers), bpcer
 
 
-def negatives_per_pai_and_positives(filename, regexps=[], regexp_column="attack_type"):
+def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
     """Returns scores for Bona-Fide samples and scores for each PAI.
     By default, the real_id column (second column) is used as indication for each
     Presentation Attack Instrument (PAI).

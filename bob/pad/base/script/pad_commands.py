@@ -6,7 +6,7 @@ from bob.extension.scripts.click_helper import verbosity_option
 import bob.bio.base.script.gen as bio_gen
 import bob.measure.script.figure as measure_figure
 from . import pad_figure as figure
-from .error_utils import split_csv_pad
+from .error_utils import split_csv_pad, split_csv_pad_per_pai
 from functools import partial
 
 SCORE_FORMAT = "Files must be in CSV format."
@@ -168,7 +168,9 @@ See also ``bob pad multi-metrics``.
 @regexp_column_option()
 @metrics_option()
 def metrics(ctx, scores, evaluation, regexps, regexp_column, metrics, **kwargs):
-    load_fn = partial(split_csv_pad, regexps=regexps, regexp_column=regexp_column)
+    load_fn = partial(
+        split_csv_pad_per_pai, regexps=regexps, regexp_column=regexp_column
+    )
     process = figure.Metrics(ctx, scores, evaluation, load_fn, metrics)
     process.run()
 
@@ -242,6 +244,8 @@ def multi_metrics(
     ctx, scores, evaluation, protocols_number, regexps, regexp_column, metrics, **kwargs
 ):
     ctx.meta["min_arg"] = protocols_number * (2 if evaluation else 1)
-    load_fn = partial(split_csv_pad, regexps=regexps, regexp_column=regexp_column)
+    load_fn = partial(
+        split_csv_pad_per_pai, regexps=regexps, regexp_column=regexp_column
+    )
     process = figure.MultiMetrics(ctx, scores, evaluation, load_fn, metrics)
     process.run()
