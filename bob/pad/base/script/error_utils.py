@@ -3,10 +3,20 @@
 # Fri Dec  7 12:33:37 CET 2012
 """Utility functions for computation of EPSC curve and related measurement"""
 
-from bob.measure import far_threshold, eer_threshold, min_hter_threshold, farfrr, frr_threshold
-from bob.bio.base.score.load import four_column
+from bob.measure import (
+    far_threshold,
+    eer_threshold,
+    min_hter_threshold,
+    farfrr,
+    frr_threshold,
+)
+from bob.bio.base.score.load import _iterate_csv_score_file
 from collections import defaultdict
 import re
+import numpy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def calc_threshold(method, pos, negs, all_negs, far_value=None, is_sorted=False):
@@ -116,49 +126,51 @@ def apcer_bpcer(threshold, pos, *negs):
     return apcers, max(apcers), bpcer
 
 
-def negatives_per_pai_and_positives(filename, regexps=None, regexp_column="real_id"):
+def negatives_per_pai_and_positives(filename, regexps=[], regexp_column="attack_type"):
     """Returns scores for Bona-Fide samples and scores for each PAI.
     By default, the real_id column (second column) is used as indication for each
     Presentation Attack Instrument (PAI).
 
-    For example, if you have scores like:
-        001 001    bona_fide_sample_1_path 0.9
-        001 print  print_sample_1_path     0.6
-        001 print  print_sample_2_path     0.6
-        001 replay replay_sample_1_path    0.2
-        001 replay replay_sample_2_path    0.2
-        001 mask   mask_sample_1_path      0.5
-        001 mask   mask_sample_2_path      0.5
-    this function will return 3 sets of negative scores (for each print, replay, and
-    mask PAIs).
+    For example, with default regexps and regexp_column, if you have scores like:
+        claimed_id, test_label,              is_bonafide, attack_type, score
+        001,        bona_fide_sample_1_path, True,        ,            0.9
+        001,        print_sample_1_path,     False,       print,       0.6
+        001,        print_sample_2_path,     False,       print,       0.6
+        001,        replay_sample_1_path,    False,       replay,      0.2
+        001,        replay_sample_2_path,    False,       replay,      0.2
+        001,        mask_sample_1_path,      False,       mask,        0.5
+        001,        mask_sample_2_path,      False,       mask,        0.5
+    this function will return 1 set of positive scores, and 3 sets of negative scores
+    (for each print, replay, and mask PAIs).
 
     Otherwise, you can provide a list regular expressions that match each PAI.
-    For example, if you have scores like:
-        001 001      bona_fide_sample_1_path 0.9
-        001 print/1  print_sample_1_path     0.6
-        001 print/2  print_sample_2_path     0.6
-        001 replay/1 replay_sample_1_path    0.2
-        001 replay/2 replay_sample_2_path    0.2
-        001 mask/1   mask_sample_1_path      0.5
-        001 mask/2   mask_sample_2_path      0.5
-    and give a list of regexps as ('print', 'replay', 'mask') the function will return 3
-    sets of negative scores (for each print, replay, and mask PAIs).
+    For example, with regexps as ['print', 'replay', 'mask'], if you have scores like:
+        claimed_id, test_label,              is_bonafide, attack_type, score
+        001,        bona_fide_sample_1_path, True,        ,            0.9
+        001,        print_sample_1_path,     False,       print/1,     0.6
+        001,        print_sample_2_path,     False,       print/2,     0.6
+        001,        replay_sample_1_path,    False,       replay/1,    0.2
+        001,        replay_sample_2_path,    False,       replay/2,    0.2
+        001,        mask_sample_1_path,      False,       mask/1,      0.5
+        001,        mask_sample_2_path,      False,       mask/2,      0.5
+    the function will return 3 sets of negative scores (for print, replay, and mask
+    PAIs, given in regexp).
 
 
     Parameters
     ----------
     filename : str
         Path to the score file.
-    regexps : None, optional
+    regexps : List of str, optional
         A list of regular expressions that match each PAI. If not given, the values in
-        the real_id column are used to find scores for different PAIs.
+        the column pointed by regexp_column are used to find scores for different PAIs.
     regexp_column : str, optional
         If a list of regular expressions are given, those patterns will be matched
-        against the values in this column.
+        against the values in this column. default: ``attack_type``
 
     Returns
     -------
-    tuple
+    tuple (positives, {'pai_name': negatives})
         A tuple containing pos scores and a dict of negative scores mapping PAIs to
         their scores.
 
@@ -166,33 +178,63 @@ def negatives_per_pai_and_positives(filename, regexps=None, regexp_column="real_
     ------
     ValueError
         If none of the given regular expressions match the values in regexp_column.
+    KeyError
+        If regexp_column is not a column of the CSV file.
     """
     pos = []
     negs = defaultdict(list)
     if regexps:
         regexps = [re.compile(pattern) for pattern in regexps]
-        assert regexp_column in ("claimed_id", "real_id", "test_label"), regexp_column
 
-    for claimed_id, real_id, test_label, score in four_column(filename):
+    for row in _iterate_csv_score_file(filename):
         # if it is a Bona-Fide score
-        if claimed_id == real_id:
-            pos.append(score)
+        if row["is_bonafide"].lower() == "true":
+            pos.append(row["score"])
             continue
         if not regexps:
-            negs[real_id].append(score)
+            negs[row[regexp_column]].append(row["score"])
             continue
         # if regexps is not None or empty and is not a Bona-Fide score
-        string = {
-            "claimed_id": claimed_id,
-            "real_id": real_id,
-            "test_label": test_label,
-        }[regexp_column]
         for pattern in regexps:
-            if pattern.match(string):
-                negs[pattern.pattern].append(score)
+            if pattern.match(row[regexp_column]):
+                negs[pattern.pattern].append(row["score"])
                 break
         else:  # this else is for the for loop: ``for pattern in regexps:``
             raise ValueError(
-                f"No regexps: {regexps} match `{string}' from `{regexp_column}' column"
+                f"No regexps: {regexps} match `{row[regexp_column]}' "
+                f"from `{regexp_column}' column."
             )
     return pos, negs
+
+
+def split_csv_pad(filename):
+    """Loads PAD scores from a CSV score file, splits them by attack vs bonafide.
+
+    The CSV must contain a ``is_bonafide`` column with each field either
+    ``True`` or ``False`` (case insensitive).
+
+    Parameters
+    ----------
+    filename: str
+        The path to a CSV file containing all the scores.
+
+    Returns
+    -------
+    (attack, bonafide): Tuple of 1D-arrays
+        The negative (attacks) and positives (bonafide) scores.
+    """
+    logger.debug(f"Loading CSV score file: '{filename}'")
+    split_scores = defaultdict(list)
+    for row in _iterate_csv_score_file(filename):
+        if row["is_bonafide"] == "True":
+            split_scores["bonafide"].append(row["score"])
+        else:
+            split_scores["attack"].append(row["score"])
+    logger.debug(
+        f"Found {len(split_scores['attack'])} negative (attack), and"
+        f"{len(split_scores['bonafide'])} positive (bonafide) scores."
+    )
+    # Cast the scores to numpy float
+    for key, scores in split_scores.items():
+        split_scores[key] = numpy.array(scores, dtype=numpy.float64)
+    return split_scores["attack"], split_scores["bonafide"]

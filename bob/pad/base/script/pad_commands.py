@@ -5,16 +5,11 @@ from bob.measure.script import common_options
 from bob.extension.scripts.click_helper import verbosity_option
 import bob.bio.base.script.gen as bio_gen
 import bob.measure.script.figure as measure_figure
-from bob.bio.base.score import load
 from . import pad_figure as figure
-from .error_utils import negatives_per_pai_and_positives
+from .error_utils import split_csv_pad
 from functools import partial
 
-SCORE_FORMAT = (
-    "Files must be 4-col or 5-col format, see "
-    ":py:func:`bob.bio.base_legacy.score.load.four_column` and"
-    ":py:func:`bob.bio.base_legacy.score.load.five_column`."
-)
+SCORE_FORMAT = "Files must be in CSV format."
 CRITERIA = (
     "eer",
     "min-hter",
@@ -173,9 +168,7 @@ See also ``bob pad multi-metrics``.
 @regexp_column_option()
 @metrics_option()
 def metrics(ctx, scores, evaluation, regexps, regexp_column, metrics, **kwargs):
-    load_fn = partial(
-        negatives_per_pai_and_positives, regexps=regexps, regexp_column=regexp_column
-    )
+    load_fn = partial(split_csv_pad, regexps=regexps, regexp_column=regexp_column)
     process = figure.Metrics(ctx, scores, evaluation, load_fn, metrics)
     process.run()
 
@@ -184,7 +177,7 @@ def metrics(ctx, scores, evaluation, regexps, regexp_column, metrics, **kwargs):
     common_options.ROC_HELP.format(score_format=SCORE_FORMAT, command="bob pad roc")
 )
 def roc(ctx, scores, evaluation, **kwargs):
-    process = figure.Roc(ctx, scores, evaluation, load.split)
+    process = figure.Roc(ctx, scores, evaluation, split_csv_pad)
     process.run()
 
 
@@ -192,7 +185,7 @@ def roc(ctx, scores, evaluation, **kwargs):
     common_options.DET_HELP.format(score_format=SCORE_FORMAT, command="bob pad det")
 )
 def det(ctx, scores, evaluation, **kwargs):
-    process = figure.Det(ctx, scores, evaluation, load.split)
+    process = figure.Det(ctx, scores, evaluation, split_csv_pad)
     process.run()
 
 
@@ -200,7 +193,7 @@ def det(ctx, scores, evaluation, **kwargs):
     common_options.EPC_HELP.format(score_format=SCORE_FORMAT, command="bob pad epc")
 )
 def epc(ctx, scores, **kwargs):
-    process = measure_figure.Epc(ctx, scores, True, load.split, hter="ACER")
+    process = measure_figure.Epc(ctx, scores, True, split_csv_pad, hter="ACER")
     process.run()
 
 
@@ -208,7 +201,7 @@ def epc(ctx, scores, **kwargs):
     common_options.HIST_HELP.format(score_format=SCORE_FORMAT, command="bob pad hist")
 )
 def hist(ctx, scores, evaluation, **kwargs):
-    process = figure.Hist(ctx, scores, evaluation, load.split)
+    process = figure.Hist(ctx, scores, evaluation, split_csv_pad)
     process.run()
 
 
@@ -249,8 +242,6 @@ def multi_metrics(
     ctx, scores, evaluation, protocols_number, regexps, regexp_column, metrics, **kwargs
 ):
     ctx.meta["min_arg"] = protocols_number * (2 if evaluation else 1)
-    load_fn = partial(
-        negatives_per_pai_and_positives, regexps=regexps, regexp_column=regexp_column
-    )
+    load_fn = partial(split_csv_pad, regexps=regexps, regexp_column=regexp_column)
     process = figure.MultiMetrics(ctx, scores, evaluation, load_fn, metrics)
     process.run()
