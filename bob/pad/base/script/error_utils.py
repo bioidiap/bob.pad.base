@@ -170,9 +170,9 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
 
     Returns
     -------
-    tuple (positives, {'pai_name': negatives})
-        A tuple containing pos scores and a dict of negative scores mapping PAIs to
-        their scores.
+    tuple ([positives], {'pai_name': [negatives]})
+        A tuple containing positive scores and a dict of negative scores mapping PAIs
+        names to their respective scores.
 
     Raises
     ------

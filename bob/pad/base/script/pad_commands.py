@@ -178,7 +178,7 @@ def gen_pad_csv_scores(
     multiple=True,
 )
 @click.option("-c", "--n-clients", default=10, type=click.INT, show_default=True)
-@click.option("-n", "--n-samples", default=2, type=click.INT, show_default=True)
+@click.option("-s", "--n-samples", default=2, type=click.INT, show_default=True)
 @click.option("-a", "--n-attacks", default=2, type=click.INT, show_default=True)
 @verbosity_option()
 @click.pass_context
@@ -195,7 +195,7 @@ def gen(
 
     Example:
 
-    bob pad gen results/generated/scores-dev.csv
+    bob pad gen results/generated/scores-dev.csv -a 3 -ma 2 -ma 5 -ma 7 -mm 8
     """
     numpy.random.seed(0)
     gen_pad_csv_scores(
