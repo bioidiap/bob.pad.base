@@ -197,7 +197,7 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
             continue
         # if regexps is not None or empty and is not a Bona-Fide score
         for pattern in regexps:
-            if pattern.match(row[regexp_column]):
+            if pattern.search(row[regexp_column]):
                 negs[pattern.pattern].append(row["score"])
                 break
         else:  # this else is for the for loop: ``for pattern in regexps:``
