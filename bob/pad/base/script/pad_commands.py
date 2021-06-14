@@ -8,6 +8,9 @@ import bob.measure.script.figure as measure_figure
 from . import pad_figure as figure
 from .error_utils import split_csv_pad, split_csv_pad_per_pai
 from functools import partial
+from csv import DictWriter
+import numpy
+import os
 
 SCORE_FORMAT = "Files must be in CSV format."
 CRITERIA = (
@@ -48,7 +51,7 @@ def metrics_option(
     help="List of metrics to print. Provide a string with comma separated metric "
     "names. For possible values see the default value.",
     default="apcer_pais,apcer_ap,bpcer,acer,fta,fpr,fnr,hter,far,frr,precision,recall,f1_score,auc,auc-log-scale",
-    **kwargs
+    **kwargs,
 ):
     """The metrics option"""
 
@@ -66,7 +69,7 @@ def metrics_option(
             help=help,
             show_default=True,
             callback=callback,
-            **kwargs
+            **kwargs,
         )(func)
 
     return custom_metrics_option
@@ -75,7 +78,7 @@ def metrics_option(
 def regexps_option(
     help="A list of regular expressions (by repeating this option) to be used to "
     "categorize PAIs. Each regexp must match one type of PAI.",
-    **kwargs
+    **kwargs,
 ):
     def custom_regexps_option(func):
         def callback(ctx, param, value):
@@ -89,7 +92,7 @@ def regexps_option(
             multiple=True,
             help=help,
             callback=callback,
-            **kwargs
+            **kwargs,
         )(func)
 
     return custom_regexps_option
@@ -97,7 +100,7 @@ def regexps_option(
 
 def regexp_column_option(
     help="The column in the score files to match the regular expressions against.",
-    **kwargs
+    **kwargs,
 ):
     def custom_regexp_column_option(func):
         def callback(ctx, param, value):
@@ -107,35 +110,98 @@ def regexp_column_option(
         return click.option(
             "-rc",
             "--regexp-column",
-            default="real_id",
-            type=click.Choice(("claimed_id", "real_id", "test_label")),
+            default="attack_type",
             help=help,
             show_default=True,
             callback=callback,
-            **kwargs
+            **kwargs,
         )(func)
 
     return custom_regexp_column_option
 
 
+def gen_pad_csv_scores(
+    filename, mean_match, mean_attacks, n_attack_types, n_clients, n_samples
+):
+    """Generates a CSV file containing random scores for PAD."""
+    columns = [
+        "claimed_id",
+        "test_label",
+        "is_bonafide",
+        "attack_type",
+        "sample_n",
+        "score",
+    ]
+    with open(filename, "w") as f:
+        writer = DictWriter(f, fieldnames=columns)
+        writer.writeheader()
+        # Bonafide rows
+        for client_id in range(n_clients):
+            for sample in range(n_samples):
+                writer.writerow(
+                    {
+                        "claimed_id": client_id,
+                        "test_label": f"client/real/{client_id:03d}",
+                        "is_bonafide": "True",
+                        "attack_type": None,
+                        "sample_n": sample,
+                        "score": numpy.random.normal(loc=mean_match),
+                    }
+                )
+        # Attacks rows
+        for attack_type in range(n_attack_types):
+            for client_id in range(n_clients):
+                for sample in range(n_samples):
+                    writer.writerow(
+                        {
+                            "claimed_id": client_id,
+                            "test_label": f"client/attack/{client_id:03d}",
+                            "is_bonafide": "False",
+                            "attack_type": f"type_{attack_type}",
+                            "sample_n": sample,
+                            "score": numpy.random.normal(
+                                loc=mean_attacks[attack_type % len(mean_attacks)]
+                            ),
+                        }
+                    )
+
+
 @click.command()
-@click.argument("outdir")
+@click.argument("outfile")
 @click.option("-mm", "--mean-match", default=10, type=click.FLOAT, show_default=True)
 @click.option(
-    "-mnm", "--mean-non-match", default=-10, type=click.FLOAT, show_default=True
+    "-ma",
+    "--mean-attacks",
+    default=[-10, -6],
+    type=click.FLOAT,
+    show_default=True,
+    multiple=True,
 )
-@click.option("-n", "--n-sys", default=1, type=click.INT, show_default=True)
+@click.option("-c", "--n-clients", default=10, type=click.INT, show_default=True)
+@click.option("-n", "--n-samples", default=2, type=click.INT, show_default=True)
+@click.option("-a", "--n-attacks", default=2, type=click.INT, show_default=True)
 @verbosity_option()
 @click.pass_context
-def gen(ctx, outdir, mean_match, mean_non_match, n_sys, **kwargs):
+def gen(
+    ctx, outfile, mean_match, mean_attacks, n_clients, n_samples, n_attacks, **kwargs
+):
     """Generate random scores.
-    Generates random scores in 4col or 5col format. The scores are generated
+    Generates random scores in CSV format. The scores are generated
     using Gaussian distribution whose mean is an input
     parameter. The generated scores can be used as hypothetical datasets.
-    Invokes :py:func:`bob.bio.base.script.commands.gen`.
+    n-attacks defines the number of different type of attacks generated (like print and
+    mask). When multiples attacks are present, the mean-attacks option can be set
+    multiple times, specifying the mean of each attack scores distribution.
+
+    Example:
+
+    bob pad gen results/generated/scores-dev.csv
     """
-    ctx.meta["five_col"] = False
-    ctx.forward(bio_gen.gen)
+    numpy.random.seed(0)
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+    gen_pad_csv_scores(
+        outfile, mean_match, mean_attacks, n_attacks, n_clients, n_samples
+    )
 
 
 @common_options.metrics_command(

@@ -183,6 +183,7 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
     """
     pos = []
     negs = defaultdict(list)
+    logger.debug(f"Loading CSV score file: '{filename}'")
     if regexps:
         regexps = [re.compile(pattern) for pattern in regexps]
 
@@ -204,6 +205,7 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
                 f"No regexps: {regexps} match `{row[regexp_column]}' "
                 f"from `{regexp_column}' column."
             )
+    logger.debug(f"Found {len(negs)} different PAIs names: {list(negs.keys())}")
     return pos, negs
 
 
