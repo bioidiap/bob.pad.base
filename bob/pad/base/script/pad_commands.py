@@ -167,7 +167,7 @@ def gen_pad_csv_scores(
 
 
 @click.command()
-@click.argument("outfile")
+@click.argument("outdir")
 @click.option("-mm", "--mean-match", default=10, type=click.FLOAT, show_default=True)
 @click.option(
     "-ma",
@@ -183,7 +183,7 @@ def gen_pad_csv_scores(
 @verbosity_option()
 @click.pass_context
 def gen(
-    ctx, outfile, mean_match, mean_attacks, n_clients, n_samples, n_attacks, **kwargs
+    ctx, outdir, mean_match, mean_attacks, n_clients, n_samples, n_attacks, **kwargs
 ):
     """Generate random scores.
     Generates random scores in CSV format. The scores are generated
@@ -198,9 +198,21 @@ def gen(
     bob pad gen results/generated/scores-dev.csv
     """
     numpy.random.seed(0)
-    os.makedirs(os.path.dirname(outfile), exist_ok=True)
     gen_pad_csv_scores(
-        outfile, mean_match, mean_attacks, n_attacks, n_clients, n_samples
+        os.path.join(outdir, "scores-dev.csv"),
+        mean_match,
+        mean_attacks,
+        n_attacks,
+        n_clients,
+        n_samples,
+    )
+    gen_pad_csv_scores(
+        os.path.join(outdir, "scores-eval.csv"),
+        mean_match,
+        mean_attacks,
+        n_attacks,
+        n_clients,
+        n_samples,
     )
 
 
