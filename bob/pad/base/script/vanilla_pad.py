@@ -74,10 +74,11 @@ import csv
     cls=ResourceOption,
 )
 @click.option(
-    "--write-metadata-scores",
-    "-m",
-    is_flag=True,
-    help="Sets the score file format as CSV with additional metadata instead of 4 columns.",
+    "--csv-scores/--lst-scores",
+    "write_metadata_scores",
+    default=True,
+    help="Choose the score file format as 'csv' with additional metadata or 'lst' 4 "
+        "columns. Default: --csv-scores",
     cls=ResourceOption,
 )
 @click.option(
