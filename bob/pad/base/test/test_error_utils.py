@@ -1,16 +1,17 @@
 from bob.io.base.test_utils import datafile
 from bob.io.base import HDF5File
 from bob.pad.base.script.error_utils import (
-    negatives_per_pai_and_positives,
+    split_csv_pad_per_pai,
     apcer_bpcer,
     calc_threshold,
+    split_csv_pad,
 )
 import nose
 import numpy as np
 
 GENERATE_REFERENCES = False
 
-scores_dev = datafile("per_pai_scores/scores-dev", module=__name__)
+scores_dev = datafile("per_pai_scores/scores-dev.csv", module=__name__)
 scores_dev_reference_mask = datafile(
     "per_pai_scores/scores-dev-{i}.hdf5", module=__name__
 )
@@ -37,7 +38,7 @@ def _read_dict(f, name):
 def test_per_pai_apcer():
     for i, regexps in enumerate((None, ["x[0-2]", "x[3-4]"], ["x[1-2]", "x[3-4]"])):
         try:
-            pos, negs = negatives_per_pai_and_positives(scores_dev, regexps)
+            pos, negs = split_csv_pad_per_pai(scores_dev, regexps)
         except ValueError:
             if i == 2:
                 continue
@@ -73,3 +74,10 @@ def test_per_pai_apcer():
         nose.tools.assert_dict_equal(negs, ref_negs)
         nose.tools.assert_dict_equal(thresholds, ref_thresholds)
         nose.tools.assert_dict_equal(metrics, ref_metrics)
+
+def test_csv_split():
+    neg, pos = split_csv_pad(scores_dev)
+    assert len(neg) == 5000, len(neg)
+    assert len(pos) == 5000, len(pos)
+    assert np.isclose(np.mean(neg), -10, atol=0.1), np.mean(neg)
+    assert np.isclose(np.mean(pos), 10, atol=0.1), np.mean(pos)
