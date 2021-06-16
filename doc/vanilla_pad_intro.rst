@@ -107,7 +107,7 @@ Here is the minimal structure of a classifier:
 
       def predict(self, X):
          return do_prediction(self.state, X)
-      
+
       def decision_function(self, X):
          return do_decision(X)
 
@@ -191,13 +191,14 @@ Scores
 
 Executing the vanilla-pad pipeline results in a list of scores, one for each
 input sample compared against each registered model.
-Depending on the chosen ScoreWriter, these scores can be in CSV, 4 columns, or
-5 columns format, or in a custom user-defined format.
+Depending on the chosen ScoreWriter, these scores can be in CSV (default), or 4 columns
+lst file format (using the ``--csv-scores`` or ``--lst-scores`` options).
 By default, the scores are written in the specified output directory (pointed to
-vanilla-pad with the ``-o`` option), and in the 4 columns format.
+vanilla-pad with the ``-o`` option), and in the CSV format, containing metadata in
+additional columns (as opposed to the 4 columns format having no metadata).
 
-The scores represent the performance of a system on that data, but are not
-easily interpreted as is so evaluation scripts are available to analyze and show
+The scores represent the performance of a system on that data, but are not easily
+interpreted "as is", so evaluation scripts are available to analyze them and show
 different aspects of the system performance.
 
 .. figure:: img/vanilla_pad_pipeline_with_eval.png
@@ -274,26 +275,6 @@ Available plots for a spoofing scenario (command ``bob pad``) are:
 
 *  ``evaluate`` (Summarize all the above commands in one call)
 
-
-Available plots for vulnerability analysis (command ``bob vuln``) are:
-
-*  ``hist`` (Vulnerability analysis distributions)
-
-*  ``epc`` (expected performance curve)
-
-*  ``gen`` (Generate random scores)
-
-*  ``roc`` (receiver operating characteristic)
-
-*  ``det`` (detection error trade-off)
-
-*  ``epsc`` (expected performance spoofing curve)
-
-*  ``fmr_iapmr``  (Plot FMR vs IAPMR)
-
-*  ``evaluate`` (Summarize all the above commands in one call)
-
-
 Use the ``--help`` option on the above-cited commands to find-out about more
 options.
 
@@ -302,19 +283,6 @@ For example, to generate an EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
-    $ bob pad epc -e -o 'my_epc.pdf' scores-{dev,eval}
+    $ bob pad epc -e -o 'my_epc.pdf' scores-{dev,eval}.csv
 
 where `my_epc.pdf` will contain EPC curves for all the experiments.
-
-Vulnerability commands require licit and spoof development and evaluation
-datasets. For example, to generate EPSC curve:
-
-.. code-block:: sh
-
-    $ bob vuln epsc -e .../{licit,spoof}/scores-{dev,eval}
-
-
-.. note::
-    IAPMR curve can be plotted along with EPC and EPSC using the ``--iapmr``
-    option. 3D EPSC can be generated using the ``--three-d``. See ``metrics
-    --help`` for further options.
