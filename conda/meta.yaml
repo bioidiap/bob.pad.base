@@ -24,8 +24,6 @@ requirements:
     - setuptools {{ setuptools }}
     - pip {{ pip }}
     - bob.extension
-    - bob.db.base
-    - bob.db.atnt
     - bob.io.base
     - bob.pipelines
     - bob.measure

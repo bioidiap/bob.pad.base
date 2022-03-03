@@ -1,7 +1,4 @@
-from .file import PadFile
-from .database import PadDatabase
 from .csv_dataset import FileListPadDatabase
-from .PadBioFileDB import HighBioDatabase, HighPadDatabase
 
 # gets sphinx autodoc done right - don't remove it
 def __appropriate__(*args):
@@ -20,10 +17,6 @@ def __appropriate__(*args):
 
 
 __appropriate__(
-    PadFile,
-    PadDatabase,
     FileListPadDatabase,
-    HighBioDatabase,
-    HighPadDatabase,
 )
 __all__ = [_ for _ in dir() if not _.startswith("_")]
