@@ -37,7 +37,7 @@ the :py:class:`bob.bio.spear.preprocessor.Energy_2Gauss` and the
 :ref:`bob.bio.spear <bob.bio.spear>`, and the
 :py:class:`bob.pad.base.algorithm.OneClassGMM` algorithm defined in
 :ref:`bob.pad.base <bob.pad.base>`, using voicePA database (contains speech presentation attacks)
-interface defined in :ref:`bob.pad.voice <bob.pad.voice>`. Running the
+interface defined in ``bob.pad.voice``. Running the
 command line below will install all the required packages:
 
 .. code-block:: sh
