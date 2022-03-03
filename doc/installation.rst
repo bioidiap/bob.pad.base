@@ -20,11 +20,10 @@ packages that you want to use, use conda_ to install them:
 .. code-block:: sh
 
     $ conda search bob.pad # searching
-    $ conda search bob.db  # searching
-    $ conda install bob.pad.base bob.pad.<padname> bob.db.<dbname>
+    $ conda install bob.pad.base bob.pad.<padname>
 
-where you would replace ``<padname>`` and ``<dbname>`` with the name of
-packages that you want to use.
+where you would replace ``<padname>`` with the name of packages that you want to
+use.
 
 An example installation
 -----------------------
@@ -38,7 +37,7 @@ the :py:class:`bob.bio.spear.preprocessor.Energy_2Gauss` and the
 :ref:`bob.bio.spear <bob.bio.spear>`, and the
 :py:class:`bob.pad.base.algorithm.OneClassGMM` algorithm defined in
 :ref:`bob.pad.base <bob.pad.base>`, using voicePA database (contains speech presentation attacks)
-interface defined in :ref:`bob.db.voicepa <bob.db.voicepa>`. Running the
+interface defined in ``bob.pad.voice``. Running the
 command line below will install all the required packages:
 
 .. code-block:: sh
@@ -48,7 +47,6 @@ command line below will install all the required packages:
                     bob.bio.spear \
                     bob.pad.base \
                     bob.pad.voice \
-                    bob.db.voicepa \
                     gridtk
 
 Databases
@@ -66,9 +64,6 @@ For this purpose, a command exist to define your directories:
 .. code-block:: sh
 
    $ bob config set bob.db.<dbname> /path/to/the/db/data/folder
-
-
-Please use ``resources.py -t database`` for a list of known databases, where you can see the default entries for all databases that you haven't updated, and the corrected paths for those you have.
 
 
 .. note::
