@@ -1,14 +1,19 @@
 """Executes PAD pipeline"""
 
 
-from bob.pipelines.distributed import VALID_DASK_CLIENT_STRINGS
-import click
-from bob.extension.scripts.click_helper import ConfigCommand
-from bob.extension.scripts.click_helper import ResourceOption
-from bob.extension.scripts.click_helper import verbosity_option
-from bob.pipelines.distributed import dask_get_partition_size
-from io import StringIO
 import csv
+import logging
+from io import StringIO
+
+import click
+from bob.extension.scripts.click_helper import (
+    ConfigCommand,
+    ResourceOption,
+    verbosity_option,
+)
+from bob.pipelines.distributed import VALID_DASK_CLIENT_STRINGS, dask_get_partition_size
+
+logger = logging.getLogger(__name__)
 
 
 @click.command(
@@ -78,7 +83,7 @@ import csv
     "write_metadata_scores",
     default=True,
     help="Choose the score file format as 'csv' with additional metadata or 'lst' 4 "
-        "columns. Default: --csv-scores",
+    "columns. Default: --csv-scores",
     cls=ResourceOption,
 )
 @click.option(
@@ -126,21 +131,42 @@ def vanilla_pad(
 ):
     """Runs the simplest PAD pipeline."""
 
-    import gzip
-    import logging
+    from bob.extension.scripts.click_helper import log_parameters
+
+    log_parameters(logger)
+
+    compute_vanilla_pad(
+        pipeline=pipeline,
+        database=database,
+        decision_function=decision_function,
+        output=output,
+        groups=groups,
+        write_metadata_scores=write_metadata_scores,
+        checkpoint=checkpoint,
+        dask_client=dask_client,
+        dask_partition_size=dask_partition_size,
+        dask_n_workers=dask_n_workers,
+    )
+
+
+def compute_vanilla_pad(
+    pipeline,
+    database,
+    decision_function="decision_function",
+    output="results",
+    groups=("dev", "eval"),
+    write_metadata_scores=True,
+    checkpoint=False,
+    dask_client="single-threaded",
+    dask_partition_size=None,
+    dask_n_workers=None,
+):
     import os
     import sys
-    from glob import glob
 
     import bob.pipelines as mario
-    import dask.bag
-    from bob.extension.scripts.click_helper import log_parameters
-    from bob.pipelines.distributed.sge import get_resource_requirements
     from bob.pipelines.utils import isinstance_nested
     from bob.pipelines.wrappers import DaskWrapper
-
-    logger = logging.getLogger(__name__)
-    log_parameters(logger)
 
     get_score_row = score_row_csv if write_metadata_scores else score_row_four_columns
     output_file_ext = ".csv" if write_metadata_scores else ""
@@ -164,7 +190,6 @@ def vanilla_pad(
     # Checking if the pipeline is dask-wrapped
     first_step = pipeline[0]
     if not isinstance_nested(first_step, "estimator", DaskWrapper):
-
         # Scaling up if necessary
         if dask_n_workers is not None and not isinstance(dask_client, str):
             dask_client.cluster.scale(dask_n_workers)
@@ -193,65 +218,128 @@ def vanilla_pad(
     pipeline.fit(fit_samples)
 
     for group in groups:
-
         logger.info(f"Running vanilla biometrics for group {group}")
         result = getattr(pipeline, decision_function)(predict_samples[group])
 
         scores_path = os.path.join(output, f"scores-{group}{output_file_ext}")
 
-        if isinstance(result, dask.bag.core.Bag):
+        save_sample_scores(
+            pipeline=pipeline,
+            dask_client=dask_client,
+            output=output,
+            write_metadata_scores=write_metadata_scores,
+            get_score_row=get_score_row,
+            intermediate_file_ext=intermediate_file_ext,
+            group=group,
+            result=result,
+            scores_path=scores_path,
+        )
 
-            # write each partition into a zipped txt file, one line per sample
-            result = result.map(get_score_row)
-            prefix, postfix = f"{output}/scores/scores-{group}-", intermediate_file_ext
-            pattern = f"{prefix}*{postfix}"
-            os.makedirs(os.path.dirname(prefix), exist_ok=True)
-            logger.info("Writing bag results into files ...")
-            resources = get_resource_requirements(pipeline)
-            result.to_textfiles(
-                pattern, last_endline=True, scheduler=dask_client, resources=resources
-            )
 
-            with open(scores_path, "w") as f:
-                csv_writer, header = None, None
-                # concatenate scores into one score file
-                for path in sorted(
-                    glob(pattern),
-                    key=lambda l: int(l.replace(prefix, "").replace(postfix, "")),
-                ):
-                    with gzip.open(path, "rt") as f2:
-                        if write_metadata_scores:
-                            if csv_writer is None:
-                                # Retrieve the header from one of the _header fields
-                                tmp_reader = csv.reader(f2)
-                                # Reconstruct a list from the str representation
-                                header = next(tmp_reader)[-1].strip("][").split(", ")
-                                header = [s.strip("' ") for s in header]
-                                csv_writer = csv.DictWriter(f, fieldnames=header)
-                                csv_writer.writeheader()
-                                f2.seek(0, 0)
-                            # There is no header in the intermediary files, specify it
-                            csv_reader = csv.DictReader(
-                                f2, fieldnames=header + ["_header"]
-                            )
-                            for row in csv_reader:
-                                # Write each element of the row, except `_header`
-                                csv_writer.writerow(
-                                    {k: row[k] for k in row.keys() if k != "_header"}
-                                )
-                        else:
-                            f.write(f2.read())
-                    # delete intermediate score files
-                    os.remove(path)
+def save_sample_scores(
+    pipeline,
+    dask_client,
+    output,
+    write_metadata_scores,
+    get_score_row,
+    intermediate_file_ext,
+    group,
+    result,
+    scores_path,
+):
 
-        else:
-            with open(scores_path, "w") as f:
+    import dask.bag
+    from bob.pipelines.distributed.sge import get_resource_requirements
+
+    if isinstance(result, dask.bag.core.Bag):
+        resources = get_resource_requirements(pipeline)
+        save_dask_sample_scores(
+            result=result,
+            get_score_row=get_score_row,
+            output=output,
+            group=group,
+            intermediate_file_ext=intermediate_file_ext,
+            write_metadata_scores=write_metadata_scores,
+            scores_path=scores_path,
+            dask_client=dask_client,
+            resources=resources,
+        )
+
+    else:
+        save_computed_sample_scores(
+            result=result,
+            get_score_row=get_score_row,
+            write_metadata_scores=write_metadata_scores,
+            scores_path=scores_path,
+        )
+
+
+def save_dask_sample_scores(
+    result,
+    get_score_row,
+    output,
+    group,
+    intermediate_file_ext,
+    write_metadata_scores,
+    scores_path,
+    dask_client,
+    resources,
+):
+    import glob
+    import gzip
+    import os
+
+    # write each partition into a zipped txt file, one line per sample
+    result = result.map(get_score_row)
+    prefix, postfix = f"{output}/scores/scores-{group}-", intermediate_file_ext
+    pattern = f"{prefix}*{postfix}"
+    os.makedirs(os.path.dirname(prefix), exist_ok=True)
+    logger.info("Writing bag results into files ...")
+    result.to_textfiles(
+        pattern, last_endline=True, scheduler=dask_client, resources=resources
+    )
+
+    with open(scores_path, "w") as f:
+        csv_writer, header = None, None
+        # concatenate scores into one score file
+        for path in sorted(
+            glob(pattern),
+            key=lambda l: int(l.replace(prefix, "").replace(postfix, "")),
+        ):
+            with gzip.open(path, "rt") as f2:
                 if write_metadata_scores:
-                    csv.DictWriter(
-                        f, fieldnames=_get_csv_columns(result[0]).keys()
-                    ).writeheader()
-                for sample in result:
-                    f.write(get_score_row(sample, endl="\n"))
+                    if csv_writer is None:
+                        # Retrieve the header from one of the _header fields
+                        tmp_reader = csv.reader(f2)
+                        # Reconstruct a list from the str representation
+                        header = next(tmp_reader)[-1].strip("][").split(", ")
+                        header = [s.strip("' ") for s in header]
+                        csv_writer = csv.DictWriter(f, fieldnames=header)
+                        csv_writer.writeheader()
+                        f2.seek(0, 0)
+                        # There is no header in the intermediary files, specify it
+                    csv_reader = csv.DictReader(f2, fieldnames=header + ["_header"])
+                    for row in csv_reader:
+                        # Write each element of the row, except `_header`
+                        csv_writer.writerow(
+                            {k: row[k] for k in row.keys() if k != "_header"}
+                        )
+                else:
+                    f.write(f2.read())
+                    # delete intermediate score files
+            os.remove(path)
+
+
+def save_computed_sample_scores(
+    result, get_score_row, write_metadata_scores, scores_path
+):
+    with open(scores_path, "w") as f:
+        if write_metadata_scores:
+            csv.DictWriter(
+                f, fieldnames=_get_csv_columns(result[0]).keys()
+            ).writeheader()
+        for sample in result:
+            f.write(get_score_row(sample, endl="\n"))
 
 
 def score_row_four_columns(sample, endl=""):
