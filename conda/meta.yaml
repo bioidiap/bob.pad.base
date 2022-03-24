@@ -28,7 +28,6 @@ requirements:
     - bob.pipelines
     - bob.measure
     - bob.bio.base
-    - gridtk
     - click {{ click }}
     - click-plugins {{ click_plugins }}
     - dask {{ dask }}

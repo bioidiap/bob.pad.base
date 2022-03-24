@@ -1,6 +1,5 @@
 python
 numpy
-gridtk
 bob.io.base
 bob.bio.base
 bob.bio.spear

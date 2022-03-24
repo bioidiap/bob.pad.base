@@ -46,8 +46,7 @@ command line below will install all the required packages:
     $ conda install bob.bio.base \
                     bob.bio.spear \
                     bob.pad.base \
-                    bob.pad.voice \
-                    gridtk
+                    bob.pad.voice
 
 Databases
 ---------

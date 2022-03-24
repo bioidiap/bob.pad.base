@@ -11,7 +11,6 @@
 .. _github bug reporting system: http://github.com/bioidiap/bob.pad.base/issues
 .. _idiap at github: http://www.github.com/bioidiap
 .. _bob's github page: http://idiap.github.com/bob
-.. _gridtk: http://github.com/idiap/gridtk
 .. _buildout: http://www.buildout.org
 .. _setuptools: http://trac.edgewall.org/wiki/setuptools
 .. _nist: http://www.nist.gov/itl/iad/ig/focs.cfm

@@ -1,5 +1,6 @@
 """Prints Cross-db metrics analysis
 """
+import itertools
 import click
 import json
 import jinja2
@@ -16,12 +17,140 @@ from bob.extension.scripts.click_helper import (
 from bob.measure import eer_threshold, farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
-from gridtk.generator import expand
 from tabulate import tabulate
 from .pad_commands import CRITERIA
 from .error_utils import calc_threshold
 
 logger = logging.getLogger(__name__)
+
+
+def _ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=dict):
+    """Loads the contents of the YAML stream into :py:class:`collections.OrderedDict`'s
+
+    See: https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+
+    """
+
+    class OrderedLoader(Loader):
+        pass
+
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
+    )
+
+    return yaml.load(stream, OrderedLoader)
+
+
+def expand(data):
+    """Generates configuration sets based on the YAML input contents
+
+    For an introduction to the YAML mark-up, just search the net. Here is one of
+    its references: https://en.wikipedia.org/wiki/YAML
+
+    A configuration set corresponds to settings for **all** variables in the
+    input template that needs replacing. For example, if your template mentions
+    the variables ``name`` and ``version``, then each configuration set should
+    yield values for both ``name`` and ``version``.
+
+    For example:
+
+    .. code-block:: yaml
+
+       name: [john, lisa]
+       version: [v1, v2]
+
+
+    This should yield to the following configuration sets:
+
+    .. code-block:: python
+
+       [
+         {'name': 'john', 'version': 'v1'},
+         {'name': 'john', 'version': 'v2'},
+         {'name': 'lisa', 'version': 'v1'},
+         {'name': 'lisa', 'version': 'v2'},
+       ]
+
+
+    Each key in the input file should correspond to either an object or a YAML
+    array. If the object is a list, then we'll iterate over it for every possible
+    combination of elements in the lists. If the element in question is not a
+    list, then it is considered unique and repeated for each yielded
+    configuration set. Example
+
+    .. code-block:: yaml
+
+       name: [john, lisa]
+       version: [v1, v2]
+       text: >
+          hello,
+          world!
+
+    Should yield to the following configuration sets:
+
+    .. code-block:: python
+
+       [
+         {'name': 'john', 'version': 'v1', 'text': 'hello, world!'},
+         {'name': 'john', 'version': 'v2', 'text': 'hello, world!'},
+         {'name': 'lisa', 'version': 'v1', 'text': 'hello, world!'},
+         {'name': 'lisa', 'version': 'v2', 'text': 'hello, world!'},
+       ]
+
+    Keys starting with one `_` (underscore) are treated as "unique" objects as
+    well. Example:
+
+    .. code-block:: yaml
+
+       name: [john, lisa]
+       version: [v1, v2]
+       _unique: [i1, i2]
+
+    Should yield to the following configuration sets:
+
+    .. code-block:: python
+
+       [
+         {'name': 'john', 'version': 'v1', '_unique': ['i1', 'i2']},
+         {'name': 'john', 'version': 'v2', '_unique': ['i1', 'i2']},
+         {'name': 'lisa', 'version': 'v1', '_unique': ['i1', 'i2']},
+         {'name': 'lisa', 'version': 'v2', '_unique': ['i1', 'i2']},
+       ]
+
+
+    Parameters:
+
+      data (str): YAML data to be parsed
+
+
+    Yields:
+
+      dict: A dictionary of key-value pairs for building the templates
+
+    """
+
+    data = _ordered_load(data, yaml.SafeLoader)
+
+    # separates "unique" objects from the ones we have to iterate
+    # pre-assemble return dictionary
+    iterables = dict()
+    unique = dict()
+    for key, value in data.items():
+        if isinstance(value, list) and not key.startswith("_"):
+            iterables[key] = value
+        else:
+            unique[key] = value
+
+    # generates all possible combinations of iterables
+    for values in itertools.product(*iterables.values()):
+        retval = dict(unique)
+        keys = list(iterables.keys())
+        retval.update(dict(zip(keys, values)))
+        yield retval
 
 
 @click.command(
@@ -100,7 +229,7 @@ Examples:
 @common_options.far_option()
 @common_options.table_option()
 @common_options.output_log_metric_option()
-@common_options.decimal_option(dflt=2, short='-dec')
+@common_options.decimal_option(dflt=2, short="-dec")
 @verbosity_option()
 @click.pass_context
 def cross(
@@ -116,10 +245,9 @@ def cross(
     sort,
     decimal,
     verbose,
-    **kwargs
+    **kwargs,
 ):
-    """Cross-db analysis metrics
-    """
+    """Cross-db analysis metrics"""
     log_parameters(logger)
 
     names = {} if names is None else json.load(names)
@@ -167,7 +295,9 @@ def cross(
             threshold = metrics[(database, protocol, algorithm, "dev")][1]
         else:
             try:
-                threshold = calc_threshold(ctx.meta["criterion"], pos, [neg], neg, ctx.meta['far_value'])
+                threshold = calc_threshold(
+                    ctx.meta["criterion"], pos, [neg], neg, ctx.meta["far_value"]
+                )
             except RuntimeError:
                 logger.error("Something wrong with {}".format(score_path))
                 raise
