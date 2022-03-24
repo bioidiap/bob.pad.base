@@ -4,7 +4,6 @@ bob.io.base
 bob.pipelines
 bob.measure
 bob.bio.base
-gridtk
 click
 click-plugins
 dask
