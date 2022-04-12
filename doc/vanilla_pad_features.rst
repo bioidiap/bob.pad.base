@@ -8,7 +8,7 @@
  Vanilla PAD features
 ======================
 
-Most of the available features are equivalent to the ones defined in :ref:`bob.bio.base.vanilla_biometrics_advanced_features`.
+Most of the available features are equivalent to the ones defined in :any:`pipeline_simple_features`.
 However, there are some variations, and those are presented below.
 
 Database interface
@@ -93,7 +93,7 @@ Metadata can be shipped within the Samples (e.g gender, age, annotations, ...) b
 Checkpoints and Dask
 ====================
 
-In the same way as in :ref:`bob.bio.base <bob.bio.base.vanilla_biometrics_advanced_features>`, it is possible to activate the checkpointing of experiments by passing the ``-c`` (``--checkpoint``) option in the command line.
+In the same way as in :any:`bob.bio.base <pipeline_simple_features>`, it is possible to activate the checkpointing of experiments by passing the ``-c`` (``--checkpoint``) option in the command line.
 
 The Dask integration can also be used by giving a client configuration to the ``-l`` (``--dask-client``) argument.
 Basic Idiap SGE configurations are defined by bob.pipelines: ``sge`` and ``sge-gpu``::
