@@ -1,5 +1,5 @@
 from bob.io.base.test_utils import datafile
-from bob.io.base import HDF5File
+import h5py
 from bob.pad.base.script.error_utils import (
     split_csv_pad_per_pai,
     apcer_bpcer,
@@ -26,11 +26,15 @@ def _dump_dict(f, d, name):
 
 def _read_dict(f, name):
     ret = dict()
-    for i in range(f[f"{name}_len"]):
-        k = f[f"{name}_key_{i}"]
-        v = f[f"{name}_value_{i}"]
-        if isinstance(v, np.ndarray):
+    for i in range(int(np.array(f[f"{name}_len"]))):
+        k = np.array(f[f"{name}_key_{i}"])[0].decode()
+        v = np.array(f[f"{name}_value_{i}"])
+        if v.size > 1:
             v = v.tolist()
+        else:
+            v = v[0]
+            if isinstance(v, bytes):
+                v = v.decode()
         ret[k] = v
     return ret
 
@@ -58,14 +62,14 @@ def test_per_pai_apcer():
 
         scores_dev_reference = scores_dev_reference_mask.format(i=i)
         if GENERATE_REFERENCES:
-            with HDF5File(scores_dev_reference, "w") as f:
+            with h5py.File(scores_dev_reference, "w") as f:
                 f["pos"] = pos
                 _dump_dict(f, negs, "negs")
                 _dump_dict(f, thresholds, "thresholds")
                 _dump_dict(f, metrics, "metrics")
 
-        with HDF5File(scores_dev_reference, "r") as f:
-            ref_pos = f["pos"].tolist()
+        with h5py.File(scores_dev_reference, "r") as f:
+            ref_pos = np.array(f["pos"]).tolist()
             ref_negs = _read_dict(f, "negs")
             ref_thresholds = _read_dict(f, "thresholds")
             ref_metrics = _read_dict(f, "metrics")
