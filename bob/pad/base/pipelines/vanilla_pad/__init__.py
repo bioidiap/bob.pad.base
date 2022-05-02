@@ -1,5 +1,4 @@
 from .abstract_classes import Database
-from .legacy import DatabaseConnector
 
 
 # gets sphinx autodoc done right - don't remove it
@@ -20,6 +19,5 @@ def __appropriate__(*args):
 
 __appropriate__(
     Database,
-    DatabaseConnector,
 )
 __all__ = [_ for _ in dir() if not _.startswith("_")]
