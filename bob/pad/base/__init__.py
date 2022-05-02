@@ -1,4 +1,4 @@
-from . import database, script, test
+from . import database, script, test  # noqa: F401
 
 
 def get_config():

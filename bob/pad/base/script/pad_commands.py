@@ -8,7 +8,6 @@ from functools import partial
 import click
 import numpy
 
-import bob.bio.base.script.gen as bio_gen
 import bob.measure.script.figure as measure_figure
 
 from bob.extension.scripts.click_helper import verbosity_option

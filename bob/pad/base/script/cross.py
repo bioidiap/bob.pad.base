@@ -18,7 +18,7 @@ from bob.extension.scripts.click_helper import (
     log_parameters,
     verbosity_option,
 )
-from bob.measure import eer_threshold, farfrr
+from bob.measure import farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
 
