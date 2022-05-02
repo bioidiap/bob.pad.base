@@ -99,4 +99,3 @@ The Dask integration can also be used by giving a client configuration to the ``
 Basic Idiap SGE configurations are defined by bob.pipelines: ``sge`` and ``sge-gpu``::
 
 $ bob pad vanilla-pad replay-attack svm-frames -o output_dir -l sge -c
-

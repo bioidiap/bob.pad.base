@@ -1,8 +1,8 @@
 """Finalizes the scores that are produced by spoof.py
 """
 import click
-from bob.extension.scripts.click_helper import log_parameters
-from bob.extension.scripts.click_helper import verbosity_option
+
+from bob.extension.scripts.click_helper import log_parameters, verbosity_option
 
 
 @click.command(
@@ -13,7 +13,9 @@ Examples:
   $ bin/bob pad finalize_scores /path/to/scores-{dev,eval}
 """,
 )
-@click.argument("scores", type=click.Path(exists=True, dir_okay=False), nargs=-1)
+@click.argument(
+    "scores", type=click.Path(exists=True, dir_okay=False), nargs=-1
+)
 @click.option(
     "-m",
     "--method",
@@ -22,7 +24,9 @@ Examples:
     show_default=True,
     help="The method to use when finalizing the scores.",
 )
-@click.option("--backup/--no-backup", default=True, help="Whether to backup scores.")
+@click.option(
+    "--backup/--no-backup", default=True, help="Whether to backup scores."
+)
 @verbosity_option()
 def finalize_scores(scores, method, backup, verbose):
     """Finalizes the scores given by bob pad vanilla-pad
@@ -40,7 +44,9 @@ def finalize_scores(scores, method, backup, verbose):
     logger = logging.getLogger(__name__)
     log_parameters(logger)
 
-    mean = {"mean": numpy.nanmean, "max": numpy.nanmax, "min": numpy.nanmin}[method]
+    mean = {"mean": numpy.nanmean, "max": numpy.nanmax, "min": numpy.nanmin}[
+        method
+    ]
 
     for path in scores:
         new_lines = []

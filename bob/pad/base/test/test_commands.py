@@ -1,8 +1,12 @@
-from click.testing import CliRunner
-import pkg_resources
-from ..script import pad_commands
-from bob.extension.scripts.click_helper import assert_click_runner_result
 import os
+
+import pkg_resources
+
+from click.testing import CliRunner
+
+from bob.extension.scripts.click_helper import assert_click_runner_result
+
+from ..script import pad_commands
 
 
 def test_gen_pad():
@@ -72,7 +76,15 @@ def test_hist_pad():
     with runner.isolated_filesystem():
         result = runner.invoke(
             pad_commands.hist,
-            ["--criterion", "min-hter", "--output", "HISTO.pdf", "-b", "30,20", dev],
+            [
+                "--criterion",
+                "min-hter",
+                "--output",
+                "HISTO.pdf",
+                "-b",
+                "30,20",
+                dev,
+            ],
         )
         assert_click_runner_result(result)
 

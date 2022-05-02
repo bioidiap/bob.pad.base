@@ -3,23 +3,28 @@
 # Fri Dec  7 12:33:37 CET 2012
 """Utility functions for computation of EPSC curve and related measurement"""
 
+import logging
+import re
+
+from collections import defaultdict
+
+import numpy
+
+from bob.bio.base.score.load import _iterate_csv_score_file
 from bob.measure import (
-    far_threshold,
     eer_threshold,
-    min_hter_threshold,
+    far_threshold,
     farfrr,
     frr_threshold,
+    min_hter_threshold,
 )
-from bob.bio.base.score.load import _iterate_csv_score_file
-from collections import defaultdict
-import re
-import numpy
-import logging
 
 logger = logging.getLogger(__name__)
 
 
-def calc_threshold(method, pos, negs, all_negs, far_value=None, is_sorted=False):
+def calc_threshold(
+    method, pos, negs, all_negs, far_value=None, is_sorted=False
+):
     """Calculates the threshold based on the given method.
 
     Parameters
@@ -52,10 +57,14 @@ def calc_threshold(method, pos, negs, all_negs, far_value=None, is_sorted=False)
     method = method.lower()
     if "bpcer" in method:
         desired_apcer = 1 / float(method.replace("bpcer", ""))
-        threshold = apcer_threshold(desired_apcer, pos, *negs, is_sorted=is_sorted)
+        threshold = apcer_threshold(
+            desired_apcer, pos, *negs, is_sorted=is_sorted
+        )
     elif "apcer" in method:
         desired_bpcer = 1 / float(method.replace("apcer", ""))
-        threshold = frr_threshold(all_negs, pos, desired_bpcer, is_sorted=is_sorted)
+        threshold = frr_threshold(
+            all_negs, pos, desired_bpcer, is_sorted=is_sorted
+        )
     elif method == "far":
         threshold = far_threshold(all_negs, pos, far_value, is_sorted=is_sorted)
     elif method == "eer":
@@ -93,7 +102,8 @@ def apcer_threshold(desired_apcer, pos, *negs, is_sorted=False):
         The computed threshold that satisfies the desired APCER.
     """
     threshold = max(
-        far_threshold(neg, pos, desired_apcer, is_sorted=is_sorted) for neg in negs
+        far_threshold(neg, pos, desired_apcer, is_sorted=is_sorted)
+        for neg in negs
     )
     return threshold
 

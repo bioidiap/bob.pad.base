@@ -15,7 +15,7 @@ def _padfile_to_delayed_sample(padfile, database):
         subject=str(padfile.client_id),
         attack_type=padfile.attack_type,
         key=padfile.path,
-        delayed_attributes=dict(annotations=lambda : padfile.annotations),
+        delayed_attributes=dict(annotations=lambda: padfile.annotations),
         is_bonafide=padfile.attack_type is None,
     )
 
@@ -34,7 +34,11 @@ class DatabaseConnector(Database):
     """
 
     def __init__(
-        self, database, annotation_type="eyes-center", fixed_positions=None, **kwargs
+        self,
+        database,
+        annotation_type="eyes-center",
+        fixed_positions=None,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.database = database

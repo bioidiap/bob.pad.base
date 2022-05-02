@@ -1,13 +1,17 @@
 """Runs error analysis on score sets, outputs metrics and plots"""
 
-import bob.measure.script.figure as measure_figure
-from bob.measure.utils import get_fta_list
-from bob.measure import farfrr, precision_recall, f_score, roc_auc_score
-import bob.bio.base.script.figure as bio_figure
-from .error_utils import calc_threshold, apcer_bpcer
 import click
-from tabulate import tabulate
 import numpy as np
+
+from tabulate import tabulate
+
+import bob.bio.base.script.figure as bio_figure
+import bob.measure.script.figure as measure_figure
+
+from bob.measure import f_score, farfrr, precision_recall, roc_auc_score
+from bob.measure.utils import get_fta_list
+
+from .error_utils import apcer_bpcer, calc_threshold
 
 
 def _normalize_input_scores(input_score, input_name):
@@ -47,7 +51,9 @@ class Metrics(bio_figure.Metrics):
 
     def _numbers(self, threshold, pos, negs, all_negs, fta):
         pais = list(negs.keys())
-        apcer_pais, apcer_ap, bpcer = apcer_bpcer(threshold, pos, *[negs[k] for k in pais])
+        apcer_pais, apcer_ap, bpcer = apcer_bpcer(
+            threshold, pos, *[negs[k] for k in pais]
+        )
         apcer_pais = {k: apcer_pais[i] for i, k in enumerate(pais)}
         acer = (apcer_ap + bpcer) / 2.0
         fpr, fnr = farfrr(all_negs, pos, threshold)
@@ -119,16 +125,24 @@ class Metrics(bio_figure.Metrics):
         return metrics
 
     def _get_all_metrics(self, idx, input_scores, input_names):
-        """ Compute all metrics for dev and eval scores"""
+        """Compute all metrics for dev and eval scores"""
         for i, (score, name) in enumerate(zip(input_scores, input_names)):
             input_scores[i] = _normalize_input_scores(score, name)
 
         dev_file, dev_pos, dev_negs, dev_all_negs, dev_fta = input_scores[0]
         if self._eval:
-            eval_file, eval_pos, eval_negs, eval_all_negs, eval_fta = input_scores[1]
+            (
+                eval_file,
+                eval_pos,
+                eval_negs,
+                eval_all_negs,
+                eval_fta,
+            ) = input_scores[1]
 
         threshold = (
-            self.get_thres(self._criterion, dev_pos, dev_negs, dev_all_negs, self._far)
+            self.get_thres(
+                self._criterion, dev_pos, dev_negs, dev_all_negs, self._far
+            )
             if self._thres is None
             else self._thres[idx]
         )
@@ -140,7 +154,12 @@ class Metrics(bio_figure.Metrics):
                 far_str = str(self._far)
             click.echo(
                 "[Min. criterion: %s %s] Threshold on Development set `%s`: %e"
-                % (self._criterion.upper(), far_str, title or dev_file, threshold),
+                % (
+                    self._criterion.upper(),
+                    far_str,
+                    title or dev_file,
+                    threshold,
+                ),
                 file=self.log_file,
             )
         else:
@@ -153,7 +172,9 @@ class Metrics(bio_figure.Metrics):
         res = []
         res.append(
             self._strings(
-                self._numbers(threshold, dev_pos, dev_negs, dev_all_negs, dev_fta)
+                self._numbers(
+                    threshold, dev_pos, dev_negs, dev_all_negs, dev_fta
+                )
             )
         )
 
@@ -172,7 +193,7 @@ class Metrics(bio_figure.Metrics):
         return res
 
     def compute(self, idx, input_scores, input_names):
-        """ Compute metrics for the given criteria"""
+        """Compute metrics for the given criteria"""
         title = self._legends[idx] if self._legends is not None else None
         all_metrics = self._get_all_metrics(idx, input_scores, input_names)
         headers = [" " or title, "Development"]
@@ -243,7 +264,9 @@ class MultiMetrics(Metrics):
         names = list(metrics[0].keys())
         if "apcer_pais" in names:
             idx = names.index("apcer_pais")
-            pais = list(f"APCER ({pai})" for pai in metrics[0]["apcer_pais"].keys())
+            pais = list(
+                f"APCER ({pai})" for pai in metrics[0]["apcer_pais"].keys()
+            )
             names = names[:idx] + pais + names[idx + 1 :]
             self.pais = self.pais or pais
         formats = [float] * len(names)
@@ -275,7 +298,9 @@ class MultiMetrics(Metrics):
                 else self._thres[idx]
             )
             self._thresholds.append(threshold)
-            self._dev_metrics.append(self._numbers(threshold, pos, negs, all_negs, fta))
+            self._dev_metrics.append(
+                self._numbers(threshold, pos, negs, all_negs, fta)
+            )
         self._dev_metrics = self._structured_array(self._dev_metrics)
 
         if self._eval:
@@ -324,7 +349,8 @@ class MultiMetrics(Metrics):
 
     def end_process(self):
         click.echo(
-            tabulate(self.rows, self.headers, self._tablefmt), file=self.log_file
+            tabulate(self.rows, self.headers, self._tablefmt),
+            file=self.log_file,
         )
         super(MultiMetrics, self).end_process()
 
@@ -347,7 +373,7 @@ class Det(bio_figure.Det):
 
 
 class Hist(measure_figure.Hist):
-    """ Histograms for PAD """
+    """Histograms for PAD"""
 
     def _setup_hist(self, neg, pos):
         self._title_base = "PAD"

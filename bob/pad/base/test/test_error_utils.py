@@ -1,13 +1,14 @@
-from bob.io.base.test_utils import datafile
 import h5py
+import nose
+import numpy as np
+
+from bob.io.base.test_utils import datafile
 from bob.pad.base.script.error_utils import (
-    split_csv_pad_per_pai,
     apcer_bpcer,
     calc_threshold,
     split_csv_pad,
+    split_csv_pad_per_pai,
 )
-import nose
-import numpy as np
 
 GENERATE_REFERENCES = False
 
@@ -40,7 +41,9 @@ def _read_dict(f, name):
 
 
 def test_per_pai_apcer():
-    for i, regexps in enumerate((None, ["x[0-2]", "x[3-4]"], ["x[1-2]", "x[3-4]"])):
+    for i, regexps in enumerate(
+        (None, ["x[0-2]", "x[3-4]"], ["x[1-2]", "x[3-4]"])
+    ):
         try:
             pos, negs = split_csv_pad_per_pai(scores_dev, regexps)
         except ValueError:
@@ -78,6 +81,7 @@ def test_per_pai_apcer():
         nose.tools.assert_dict_equal(negs, ref_negs)
         nose.tools.assert_dict_equal(thresholds, ref_thresholds)
         nose.tools.assert_dict_equal(metrics, ref_metrics)
+
 
 def test_csv_split():
     neg, pos = split_csv_pad(scores_dev)
