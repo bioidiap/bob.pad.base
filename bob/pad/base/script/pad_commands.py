@@ -1,16 +1,21 @@
 """The main entry for bob pad commands.
 """
+import os
+
+from csv import DictWriter
+from functools import partial
+
 import click
-from bob.measure.script import common_options
-from bob.extension.scripts.click_helper import verbosity_option
+import numpy
+
 import bob.bio.base.script.gen as bio_gen
 import bob.measure.script.figure as measure_figure
+
+from bob.extension.scripts.click_helper import verbosity_option
+from bob.measure.script import common_options
+
 from . import pad_figure as figure
 from .error_utils import split_csv_pad, split_csv_pad_per_pai
-from functools import partial
-from csv import DictWriter
-import numpy
-import os
 
 SCORE_FORMAT = "Files must be in CSV format."
 CRITERIA = (
@@ -160,7 +165,9 @@ def gen_pad_csv_scores(
                             "attack_type": f"type_{attack_type}",
                             "sample_n": sample,
                             "score": numpy.random.normal(
-                                loc=mean_attacks[attack_type % len(mean_attacks)]
+                                loc=mean_attacks[
+                                    attack_type % len(mean_attacks)
+                                ]
                             ),
                         }
                     )
@@ -168,7 +175,9 @@ def gen_pad_csv_scores(
 
 @click.command()
 @click.argument("outdir")
-@click.option("-mm", "--mean-match", default=10, type=click.FLOAT, show_default=True)
+@click.option(
+    "-mm", "--mean-match", default=10, type=click.FLOAT, show_default=True
+)
 @click.option(
     "-ma",
     "--mean-attacks",
@@ -177,13 +186,22 @@ def gen_pad_csv_scores(
     show_default=True,
     multiple=True,
 )
-@click.option("-c", "--n-clients", default=10, type=click.INT, show_default=True)
+@click.option(
+    "-c", "--n-clients", default=10, type=click.INT, show_default=True
+)
 @click.option("-s", "--n-samples", default=2, type=click.INT, show_default=True)
 @click.option("-a", "--n-attacks", default=2, type=click.INT, show_default=True)
 @verbosity_option()
 @click.pass_context
 def gen(
-    ctx, outdir, mean_match, mean_attacks, n_clients, n_samples, n_attacks, **kwargs
+    ctx,
+    outdir,
+    mean_match,
+    mean_attacks,
+    n_clients,
+    n_samples,
+    n_attacks,
+    **kwargs,
 ):
     """Generate random scores.
     Generates random scores in CSV format. The scores are generated
@@ -254,7 +272,9 @@ def metrics(ctx, scores, evaluation, regexps, regexp_column, metrics, **kwargs):
 
 
 @common_options.roc_command(
-    common_options.ROC_HELP.format(score_format=SCORE_FORMAT, command="bob pad roc")
+    common_options.ROC_HELP.format(
+        score_format=SCORE_FORMAT, command="bob pad roc"
+    )
 )
 def roc(ctx, scores, evaluation, **kwargs):
     process = figure.Roc(ctx, scores, evaluation, split_csv_pad)
@@ -262,7 +282,9 @@ def roc(ctx, scores, evaluation, **kwargs):
 
 
 @common_options.det_command(
-    common_options.DET_HELP.format(score_format=SCORE_FORMAT, command="bob pad det")
+    common_options.DET_HELP.format(
+        score_format=SCORE_FORMAT, command="bob pad det"
+    )
 )
 def det(ctx, scores, evaluation, **kwargs):
     process = figure.Det(ctx, scores, evaluation, split_csv_pad)
@@ -270,7 +292,9 @@ def det(ctx, scores, evaluation, **kwargs):
 
 
 @common_options.epc_command(
-    common_options.EPC_HELP.format(score_format=SCORE_FORMAT, command="bob pad epc")
+    common_options.EPC_HELP.format(
+        score_format=SCORE_FORMAT, command="bob pad epc"
+    )
 )
 def epc(ctx, scores, **kwargs):
     process = measure_figure.Epc(ctx, scores, True, split_csv_pad, hter="ACER")
@@ -278,7 +302,9 @@ def epc(ctx, scores, **kwargs):
 
 
 @common_options.hist_command(
-    common_options.HIST_HELP.format(score_format=SCORE_FORMAT, command="bob pad hist")
+    common_options.HIST_HELP.format(
+        score_format=SCORE_FORMAT, command="bob pad hist"
+    )
 )
 def hist(ctx, scores, evaluation, **kwargs):
     process = figure.Hist(ctx, scores, evaluation, split_csv_pad)
@@ -319,7 +345,14 @@ See also ``bob pad metrics``.
 @regexp_column_option()
 @metrics_option(default="fta,apcer_pais,apcer_ap,bpcer,acer,hter")
 def multi_metrics(
-    ctx, scores, evaluation, protocols_number, regexps, regexp_column, metrics, **kwargs
+    ctx,
+    scores,
+    evaluation,
+    protocols_number,
+    regexps,
+    regexp_column,
+    metrics,
+    **kwargs,
 ):
     ctx.meta["min_arg"] = protocols_number * (2 if evaluation else 1)
     load_fn = partial(

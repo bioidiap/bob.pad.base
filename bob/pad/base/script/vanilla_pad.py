@@ -3,15 +3,20 @@
 
 import csv
 import logging
+
 from io import StringIO
 
 import click
+
 from bob.extension.scripts.click_helper import (
     ConfigCommand,
     ResourceOption,
     verbosity_option,
 )
-from bob.pipelines.distributed import VALID_DASK_CLIENT_STRINGS, dask_get_partition_size
+from bob.pipelines.distributed import (
+    VALID_DASK_CLIENT_STRINGS,
+    dask_get_partition_size,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -165,10 +170,13 @@ def compute_vanilla_pad(
     import sys
 
     import bob.pipelines as mario
+
     from bob.pipelines.utils import isinstance_nested
     from bob.pipelines.wrappers import DaskWrapper
 
-    get_score_row = score_row_csv if write_metadata_scores else score_row_four_columns
+    get_score_row = (
+        score_row_csv if write_metadata_scores else score_row_four_columns
+    )
     output_file_ext = ".csv" if write_metadata_scores else ""
     intermediate_file_ext = ".csv.gz" if write_metadata_scores else ".txt.gz"
 
@@ -249,6 +257,7 @@ def save_sample_scores(
 ):
 
     import dask.bag
+
     from bob.pipelines.distributed.sge import get_resource_requirements
 
     if isinstance(result, dask.bag.core.Bag):
@@ -318,7 +327,9 @@ def save_dask_sample_scores(
                         csv_writer.writeheader()
                         f2.seek(0, 0)
                         # There is no header in the intermediary files, specify it
-                    csv_reader = csv.DictReader(f2, fieldnames=header + ["_header"])
+                    csv_reader = csv.DictReader(
+                        f2, fieldnames=header + ["_header"]
+                    )
                     for row in csv_reader:
                         # Write each element of the row, except `_header`
                         csv_writer.writerow(
@@ -391,7 +402,8 @@ def score_row_csv(sample, endl=""):
     string_stream = StringIO()
     csv_writer = csv.DictWriter(
         string_stream,
-        fieldnames=list(columns_fields.keys()) + (["_header"] if endl == "" else []),
+        fieldnames=list(columns_fields.keys())
+        + (["_header"] if endl == "" else []),
     )
 
     row_values = {

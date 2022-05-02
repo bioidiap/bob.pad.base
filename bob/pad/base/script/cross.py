@@ -1,25 +1,29 @@
 """Prints Cross-db metrics analysis
 """
 import itertools
-import click
 import json
-import jinja2
 import logging
 import math
 import os
+
+import click
+import jinja2
 import yaml
-from bob.bio.base.score.load import load_score, get_negatives_positives
+
+from tabulate import tabulate
+
+from bob.bio.base.score.load import get_negatives_positives, load_score
 from bob.extension.scripts.click_helper import (
-    verbosity_option,
     bool_option,
     log_parameters,
+    verbosity_option,
 )
 from bob.measure import eer_threshold, farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
-from tabulate import tabulate
-from .pad_commands import CRITERIA
+
 from .error_utils import calc_threshold
+from .pad_commands import CRITERIA
 
 logger = logging.getLogger(__name__)
 
@@ -280,11 +284,15 @@ def cross(
 
         # if algorithm name does not have train_database name in it.
         if train_database not in algorithm and database != train_database:
-            score_path = score_path.replace(algorithm, database + "_" + algorithm)
+            score_path = score_path.replace(
+                algorithm, database + "_" + algorithm
+            )
             logger.info("Score path changed to: %s", score_path)
 
         if not os.path.exists(score_path):
-            metrics[(database, protocol, algorithm, group)] = (float("nan"),) * 5
+            metrics[(database, protocol, algorithm, group)] = (
+                float("nan"),
+            ) * 5
             continue
 
         scores = load_score(score_path)
@@ -296,7 +304,11 @@ def cross(
         else:
             try:
                 threshold = calc_threshold(
-                    ctx.meta["criterion"], pos, [neg], neg, ctx.meta["far_value"]
+                    ctx.meta["criterion"],
+                    pos,
+                    [neg],
+                    neg,
+                    ctx.meta["far_value"],
                 )
             except RuntimeError:
                 logger.error("Something wrong with {}".format(score_path))
@@ -355,7 +367,9 @@ def cross(
     title_line = "\n" + "=" * len(title) + "\n"
     # open log file for writing if any
     ctx.meta["log"] = (
-        ctx.meta["log"] if ctx.meta["log"] is None else open(ctx.meta["log"], "w")
+        ctx.meta["log"]
+        if ctx.meta["log"] is None
+        else open(ctx.meta["log"], "w")
     )
     click.echo(title_line + title + title_line, file=ctx.meta["log"])
     click.echo(
