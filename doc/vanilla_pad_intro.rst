@@ -27,7 +27,7 @@ A PAD experiment consists of taking a set of biometric `bonafide` and `impostor`
 
    The pipeline of Transformer(s) and Classifier can be trained (fit) or used to generate a score for each input sample.
 
-Similarly to ``vanilla-biometrics``, the ``vanilla-pad`` command needs a pipeline configuration argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
+Similarly to ``pipeline simple`` in bob.bio packages, the ``vanilla-pad`` command needs a pipeline configuration argument to specify which experiment to run and a database argument to indicate what data will be used. These can be given with the ``-p`` (``--pipeline``) and ``-d`` (``--database``) options, respectively::
 
 $ bob pad vanilla-pad [OPTIONS] -p <pipeline> -d <database>
 

@@ -49,44 +49,39 @@ The files must follow the following structure and naming:
   |
   +-- my_protocol
       |
-      +-- train
-      |   |
-      |   +-- for_real.csv
-      |   +-- for_attack.csv
-      |
-      +-- dev
-      |   |
-      |   +-- for_real.csv
-      |   +-- for_attack.csv
-      |
-      +-- eval
-          |
-          +-- for_real.csv
-          +-- for_attack.csv
+      +-- train.csv
+      +-- dev.csv
+      +-- eval.csv
 
-The content of the files in the ``train`` folder is used when a protocol contains data for training the classifier.
-The files in the ``eval`` folder are optional and are used in case a protocol contains data for evaluation.
+The ``dev.csv`` file is the main file here and is used for scoring samples of the development group.
+The content of the ``train.csv`` file is used when a protocol contains data for training the classifier.
+The ``eval.csv`` file is optional and is used in case a protocol contains data for evaluation.
 
-These CSV files should contain at least the path to raw data and an identifier to the identity of the subject in the image (subject field).
+These CSV files should contain at least the path to raw data and an identifier to the identity of the subject in the image (subject field) and an attack type.
 The structure of each CSV file should be as below:
 
 .. code-block:: text
 
-   PATH,SUBJECT
-   path_1,subject_1
-   path_2,subject_2
-   path_i,subject_j
+   filename,subject,attack_type
+   path_1,subject_1,
+   path_2,subject_2,
+   path_3,subject_1,attack_1
+   path_4,subject_2,attack_1
    ...
 
+The ``attack_type`` field is used to differentiate bonafide presentations from attacks.
+An empty field indicates a genuine sample. Otherwise different attack types can be used
+(e.g. ``print``, ``screen``, etc.), and can be analyzed separately during evaluation.
 
 Metadata can be shipped within the Samples (e.g gender, age, annotations, ...) by adding a column in the CSV file for each metadata:
 
 .. code-block:: text
 
-   PATH,SUBJECT,TYPE_OF_ATTACK,GENDER,AGE
-   path_1,subject_1,A,B,C
-   path_2,subject_2,A,B,1
-   path_i,subject_j,2,3,4
+   filename,subject,attack_type,gender,age
+   path_1,subject_1,,M,25
+   path_2,subject_2,,F,24
+   paht_3,subject_1,attack_1,M,25
+   paht_4,subject_2,attack_1,F,24
    ...
 
 
