@@ -20,7 +20,6 @@ Implementations
 
 .. autosummary::
    bob.pad.base.pipelines.vanilla_pad.Database
-   bob.pad.base.pipelines.vanilla_pad.DatabaseConnector
    bob.pad.base.database.FileListPadDatabase
 
 Preprocessors and Extractors
