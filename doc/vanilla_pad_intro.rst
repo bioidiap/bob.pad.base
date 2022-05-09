@@ -72,7 +72,7 @@ Transformers
 A Transformer is a class that implements the fit and transform methods, which allow the application of an operation on a sample of data.
 For more details, see :ref:`bob.bio.base.transformer`.
 
-Here is a basic stateless Transformer class:
+Here is a basic Transformer class that does not require fit:
 
 .. code-block:: python
 
