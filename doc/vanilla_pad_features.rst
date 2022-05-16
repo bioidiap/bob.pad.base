@@ -32,11 +32,11 @@ The dataset configuration file will then be as simple as:
 
 .. code-block:: python
 
-   from bob.pad.base.database import CSVPADDataset
+   from bob.pad.base.database import FileListPadDatabase
 
-   database = CSVPADDataset("path/to/my_dataset", "my_protocol")
+   database = FileListPadDatabase("path/to/my_dataset", "my_protocol")
 
-And the command to run an experiment with that configuration on the `svm-frames` pipeline::
+And the command to run an experiment with that configuration on the `svm-frames` pipeline (requires bob.pad.face)::
 
 $ bob pad vanilla-pad -d my_db_config_file.py svm-frames -o output_dir
 
