@@ -3,7 +3,7 @@
 
 
 from bob.bio.base.database.legacy import check_parameters_for_validity
-from bob.pad.base.pipelines.vanilla_pad.abstract_classes import Database
+from bob.pad.base.pipelines.abstract_classes import Database
 from bob.pipelines.datasets import CSVToSamples, FileListDatabase
 
 

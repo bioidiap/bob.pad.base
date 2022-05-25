@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
  -----------------------
 
 
- $ bob pad vanilla-pad my_experiment.py -vv
+ $ bob pad run-pipeline my_experiment.py -vv
 """,
 )
 @click.option(
@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
     "-f",
     show_default=True,
     default="decision_function",
-    help="Name of the Pipeline step to call for results, eg 'score' or 'predict'",
+    help="Name of the Pipeline step to call for results, eg. ``predict_proba``",
     cls=ResourceOption,
 )
 @click.option(
@@ -120,7 +120,7 @@ logger = logging.getLogger(__name__)
 )
 @verbosity_option(cls=ResourceOption)
 @click.pass_context
-def vanilla_pad(
+def run_pipeline(
     ctx,
     pipeline,
     decision_function,
@@ -140,7 +140,7 @@ def vanilla_pad(
 
     log_parameters(logger)
 
-    compute_vanilla_pad(
+    execute_pipeline(
         pipeline=pipeline,
         database=database,
         decision_function=decision_function,
@@ -154,7 +154,7 @@ def vanilla_pad(
     )
 
 
-def compute_vanilla_pad(
+def execute_pipeline(
     pipeline,
     database,
     decision_function="decision_function",
@@ -171,7 +171,7 @@ def compute_vanilla_pad(
 
     import bob.pipelines as mario
 
-    from bob.pipelines.utils import isinstance_nested
+    from bob.pipelines import is_instance_nested
     from bob.pipelines.wrappers import DaskWrapper
 
     get_score_row = (
@@ -197,7 +197,7 @@ def compute_vanilla_pad(
 
     # Checking if the pipeline is dask-wrapped
     first_step = pipeline[0]
-    if not isinstance_nested(first_step, "estimator", DaskWrapper):
+    if not is_instance_nested(first_step, "estimator", DaskWrapper):
         # Scaling up if necessary
         if dask_n_workers is not None and not isinstance(dask_client, str):
             dask_client.cluster.scale(dask_n_workers)
@@ -205,7 +205,7 @@ def compute_vanilla_pad(
         # Defining the partition size
         partition_size = None
         if not isinstance(dask_client, str):
-            lower_bound = 25  # lower bound of 25 videos per chunk
+            lower_bound = 1  # lower bound of 1 video per chunk since usually video are already big
             partition_size = dask_get_partition_size(
                 dask_client.cluster, total_samples, lower_bound=lower_bound
             )
@@ -226,7 +226,7 @@ def compute_vanilla_pad(
     pipeline.fit(fit_samples)
 
     for group in groups:
-        logger.info(f"Running vanilla biometrics for group {group}")
+        logger.info(f"Running PAD pipeline for group {group}")
         result = getattr(pipeline, decision_function)(predict_samples[group])
 
         scores_path = os.path.join(output, f"scores-{group}{output_file_ext}")
@@ -312,7 +312,7 @@ def save_dask_sample_scores(
         csv_writer, header = None, None
         # concatenate scores into one score file
         for path in sorted(
-            glob(pattern),
+            glob.glob(pattern),
             key=lambda l: int(l.replace(prefix, "").replace(postfix, "")),
         ):
             with gzip.open(path, "rt") as f2:

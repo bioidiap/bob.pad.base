@@ -20,3 +20,4 @@
 .. _hdf5: http://www.hdfgroup.org/HDF5
 .. _bobinstall: https://www.idiap.ch/software/bob/install
 .. _conda: https://conda.io
+.. _sklearn-dev-docs: https://scikit-learn.org/dev/developers/develop.html#apis-of-scikit-learn-objects

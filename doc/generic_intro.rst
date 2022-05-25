@@ -2,7 +2,7 @@
 .. author: Yannick Dayer <yannick.dayer@idiap.ch>
 .. date: 2020-11-27 15:14:11 +01
 
-.. _bob.pad.base.pad_intro:
+.. _bob.pad.base.intro:
 
 
 =============================================
