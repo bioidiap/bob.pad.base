@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class Database(metaclass=ABCMeta):
-    """Base class for Vanilla PAD pipeline"""
+    """Base class for PAD pipeline"""
 
     @abstractmethod
     def fit_samples(self):

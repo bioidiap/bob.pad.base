@@ -2,10 +2,10 @@
 .. author: Yannick Dayer <yannick.dayer@idiap.ch>
 .. date: 2020-11-27 15:26:09 +01
 
-.. _bob.pad.base.vanilla_pad_features:
+.. _bob.pad.base.features:
 
 ======================
- Vanilla PAD features
+ PAD features
 ======================
 
 Most of the available features are equivalent to the ones defined in :any:`pipeline_simple_features`.
@@ -38,7 +38,7 @@ The dataset configuration file will then be as simple as:
 
 And the command to run an experiment with that configuration on the `svm-frames` pipeline (requires bob.pad.face)::
 
-$ bob pad vanilla-pad -d my_db_config_file.py svm-frames -o output_dir
+$ bob pad run-pipeline my_db_config_file.py svm-frames -o output_dir
 
 
 The files must follow the following structure and naming:
@@ -93,4 +93,4 @@ In the same way as in :any:`bob.bio.base <pipeline_simple_features>`, it is poss
 The Dask integration can also be used by giving a client configuration to the ``-l`` (``--dask-client``) argument.
 Basic Idiap SGE configurations are defined by bob.pipelines: ``sge`` and ``sge-gpu``::
 
-$ bob pad vanilla-pad replay-attack svm-frames -o output_dir -l sge -c
+$ bob pad run-pipeline replay-attack svm-frames -o output_dir -l sge -c

@@ -47,9 +47,9 @@ Users Guide
     :maxdepth: 2
 
     installation
-    pad_intro
-    vanilla_pad_intro
-    vanilla_pad_features
+    generic_intro
+    intro
+    features
 
 
 Reference Manual

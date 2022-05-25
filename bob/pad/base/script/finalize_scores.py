@@ -29,7 +29,7 @@ Examples:
 )
 @verbosity_option()
 def finalize_scores(scores, method, backup, verbose):
-    """Finalizes the scores given by bob pad vanilla-pad
+    """Finalizes the scores given by bob pad run-pipeline
     When using bob.pad.base, Algorithms can produce several score values for
     each unique sample. You can use this script to average (or min/max) these
     scores to have one final score per sample.

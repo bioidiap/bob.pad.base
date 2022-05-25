@@ -115,7 +115,7 @@ setup(
             "evaluate         = bob.pad.base.script.pad_commands:evaluate",
             "cross            = bob.pad.base.script.cross:cross",
             "finalize-scores  = bob.pad.base.script.finalize_scores:finalize_scores",
-            "vanilla-pad      = bob.pad.base.script.vanilla_pad:vanilla_pad",
+            "run-pipeline     = bob.pad.base.script.run_pipeline:run_pipeline",
         ],
     },
     # Classifiers are important if you plan to distribute this package through
