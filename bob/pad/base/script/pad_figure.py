@@ -11,7 +11,7 @@ import bob.measure.script.figure as measure_figure
 from bob.measure import f_score, farfrr, precision_recall, roc_auc_score
 from bob.measure.utils import get_fta_list
 
-from .error_utils import apcer_bpcer, calc_threshold
+from ..error_utils import apcer_bpcer, calc_threshold
 
 
 def _normalize_input_scores(input_score, input_name):

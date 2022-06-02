@@ -13,8 +13,8 @@ import bob.measure.script.figure as measure_figure
 from bob.extension.scripts.click_helper import verbosity_option
 from bob.measure.script import common_options
 
+from ..error_utils import split_csv_pad, split_csv_pad_per_pai
 from . import pad_figure as figure
-from .error_utils import split_csv_pad, split_csv_pad_per_pai
 
 SCORE_FORMAT = "Files must be in CSV format."
 CRITERIA = (

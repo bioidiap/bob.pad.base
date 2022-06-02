@@ -4,12 +4,13 @@
 
 .. _bob.pad.base.pipeline_intro:
 
-=========================================================
-Introduction to presentation attack detection in practice
-=========================================================
+=========================================
+Presentation Attack Detection In Practice
+=========================================
 
-
-To easily run experiments in PAD, we offer a generic command called ``bob pad run-pipeline``.
+In this package, PAD experiments are organized around the same concepts that
+were introduced in :ref:`bob.pipelines.sample`. To easily run experiments in
+PAD, we offer a generic command called: ``bob pad run-pipeline``.
 
 The following will introduce how a simple experiment can be run with this tool,
 from the sample data to a set of metrics and plots, as defined in
@@ -19,21 +20,20 @@ from the sample data to a set of metrics and plots, as defined in
 Running a PAD experiment
 ========================
 
-A PAD experiment consists of taking a set of biometric `bonafide` and `impostor`
-samples, feeding them to a pipeline, to finally gather the corresponding set of
-scores for analysis.
+A PAD experiment consists of taking a set of biometric *bonafide* and
+*presentation attack* samples, feeding them to a pipeline, to finally gather the
+corresponding set of scores for analysis.
 
 .. figure:: img/pipeline.png
    :figwidth: 75%
    :align: center
    :alt: Data is fed to the pipeline either for training (to fit) or for evaluation (to transform and predict).
 
-   The pipeline of Transformer(s) and Classifier can be trained (fit) or used to generate a score for each input sample.
+   The pipeline of Transformer(s) and Classifier can be trained (fit) or used to
+   generate a score for each input sample.
 
-Similarly to ``pipeline simple`` in bob.bio packages, the ``run-pipeline``
-command needs a pipeline configuration argument to specify which experiment to
-run and a database argument to indicate what data will be used. These variables
-can be provided inside configuration files::
+The ``run-pipeline`` command needs a pipeline and a database object to run.
+These variables can be provided inside configuration files::
 
 $ bob pad run-pipeline [OPTIONS] CONFIG-1 CONFIG-2 ...
 
@@ -48,7 +48,8 @@ and an example config file can be generated with::
 .. note::
 
    The list of existing pipelines and databases resources can also be found in
-   ``example_config.py``.
+   the output of both ``bob pad run-pipeine --help`` and ``bob pad run-pipeline
+   --dump-config``.
 
 
 Building your own PAD pipeline
@@ -63,10 +64,10 @@ The PAD pipeline is the backbone of any experiment in this library. It is compos
      transformer can be trained before being used.
 
    - A classifier: An instance of :py:class:`sklearn.base.BaseEstimator` and
-     :py:class:`sklearn.base.ClassifierMixin` implementing the :py:meth:`fit`
-     and :py:meth:`predict_prob` or :py:meth:`decision_function` methods. A
-     classifier takes a sample as input and returns a score. It is possible to
-     train it beforehand with the :py:meth:`fit` method.
+     :py:class:`sklearn.base.ClassifierMixin` implementing the ``fit`` and
+     ``predict_prob`` or ``decision_function`` methods. A classifier takes a
+     sample as input and returns a score. It is possible to train it beforehand
+     with the ``fit`` method.
 
 
 Transformers
@@ -102,15 +103,18 @@ Here are two basic transformers one that does not require fit and one that does:
       def transform(self, X):
          return modify_sample(X)
 
+      def _more_tags(self):
+         return {"bob_fit_extra_input": (("y", "is_bonafide"),)}
+
 
 Classifier
 ----------
 
 A Classifier is the final process of a PAD pipeline. Its goal is to decide if a
-transformed sample given as input is originating from a genuine sample or if an
-impostor is trying to be recognized as someone else. The output is a score for
-each input sample. You need to implement at least one of ``decision_function``
-and ``predict_prob`` to use this classifier.
+transformed sample given as input is originating from a bonafide sample or a
+presentation attack. The output is a score for each input sample. You need to
+implement at least one of ``decision_function`` and ``predict_prob`` to use this
+classifier.
 
 Here is the minimal structure of a classifier:
 
@@ -131,8 +135,16 @@ Here is the minimal structure of a classifier:
          return do_decision(X)
 
       def predict_proba(self, X):
-         # returns probabilities between 0 and 1
+         # returns probabilities of being a bonafide between 0 and 1
          return do_predict_proba(self.state, X)
+
+      def _more_tags(self):
+         return {"bob_fit_extra_input": (("y", "is_bonafide"),)}
+
+.. note::
+
+   See :any:`bob.pipelines.get_bob_tags` to learn about Bob specific tags that
+   can be used to change the default behavior of :ref:`bob.pipelines` wrappers.
 
 .. note::
 
@@ -148,17 +160,19 @@ Running an experiment
 Two parts of an experiment have to be executed:
 
 - **Fit**: labeled data is fed to the system to train the algorithm to recognize
-  attacks and licit proprieties. This is optional, use the ``requires_fit`` tag to skip training.
+  attacks and licit proprieties. This is optional, use the ``requires_fit`` tag
+  to skip training.
 - **Predict**: assessing a series of test samples for authenticity, generating a
   score for each one.
 
-These steps are chained together in a pipeline object used by the
-``bob pad run-pipeline`` command. To build such a pipeline, the following
-configuration file can be created:
+These steps are chained together in a pipeline object used by the ``bob pad
+run-pipeline`` command. To build such a pipeline, the following configuration
+file can be created:
 
 .. code-block:: python
 
    from sklearn.pipeline import Pipeline
+   import bob.pipelines as mario
 
    my_transformer = MyTransformer()
 
@@ -170,10 +184,11 @@ configuration file can be created:
          ("classifier", my_classifier),
       ]
    )
+   pipeline = mario.wrap(["sample"], pipeline)
 
 The pipeline can then be executed with the command::
 
-   $ bob pad run-pipeline my_database_config.py my_pipeline_config.py -o output_dir
+   $ bob pad run-pipeline my_config.py --output output_dir
 
 When executed with ``run-pipeline``, every training sample will pass through the
 pipeline, executing the ``fit`` methods. Then, every sample of the `dev` set
@@ -197,26 +212,26 @@ Using scikit-learn estimators
 -----------------------------
 
 To use an existing scikit-learn Transformer or Classifier, they need to be
-wrapped with a ``SampleWrapper`` (using :any:`bob.pipelines.wrap`) to handle
-our :any:`bob.pipelines.Sample` objects:
+wrapped with a ``SampleWrapper`` (using :any:`bob.pipelines.wrap`) to handle our
+:any:`bob.pipelines.Sample` objects:
 
 .. code-block:: python
 
-   import bob.pipelines
+   import bob.pipelines as mario
    from sklearn.pipeline import Pipeline
    from sklearn.svm import SVC
 
    my_transformer = MyTransformer()
-
+   wrapped_transformer = mario.wrap(["sample"], my_transformer)
 
    sklearn_classifier = SVC()
-   wrapped_classifier = bob.pipelines.wrap(
+   wrapped_classifier = mario.wrap(
       ["sample"], sklearn_classifier, fit_extra_arguments=[("y", "is_bonafide")],
    )
 
    pipeline = Pipeline(
       [
-         ("my_transformer", my_transformer),
+         ("my_transformer", wrapped_transformer),
          ("classifier", wrapped_classifier),
       ]
    )
@@ -226,12 +241,9 @@ Scores
 ------
 
 Executing the pad pipeline results in a list of scores, one for each input
-sample compared against each registered model. Depending on the chosen
-ScoreWriter, these scores can be in CSV (default), or 4 columns lst file format
-(using the ``--csv-scores`` or ``--lst-scores`` options). By default, the scores
-are written in the specified output directory (pointed to ``run-pipeline`` with the
-``-o`` option), and in the CSV format, containing metadata in additional columns
-(as opposed to the 4 columns format having no metadata).
+sample compared against each registered model. The scores are written in CSV
+files in the specified output directory (pointed to ``run-pipeline`` with the
+``--output`` option), containing metadata in additional columns.
 
 The scores represent the performance of a system on that data, but are not
 easily interpreted "as is", so evaluation scripts are available to analyze them
@@ -242,9 +254,8 @@ and show different aspects of the system performance.
    :align: center
    :alt: The data is fed to the PAD pipeline, which produces scores files. Scripts allow the evaluation with metrics and plots.
 
-   The PAD pipeline generates score files that can be used with various
-   scripts to evaluate the system performance by computing metrics or drawing
-   plots.
+   The PAD pipeline generates score files that can be used with various scripts
+   to evaluate the system performance by computing metrics or drawing plots.
 
 
 Evaluation
@@ -263,7 +274,7 @@ run the following command:
 
 .. code-block:: none
 
-   $ bob pad metrics -e scores-{dev,eval}.csv --legends ExpA
+   $ bob pad metrics --eval scores-{dev,eval}.csv --legends ExpA
 
    Threshold of 11.639561 selected with the bpcer20 criteria
    ======  ========================  ===================
@@ -327,7 +338,7 @@ For example, to generate an EPC curve from development and evaluation datasets:
 
 .. code-block:: sh
 
-    $ bob pad epc -e -o my_epc.pdf scores-{dev,eval}.csv
+    $ bob pad epc --output my_epc.pdf scores-{dev,eval}.csv
 
 where ``my_epc.pdf`` will contain EPC curves for all the experiments.
 

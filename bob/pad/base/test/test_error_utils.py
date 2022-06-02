@@ -3,7 +3,7 @@ import nose
 import numpy as np
 
 from bob.io.base.test_utils import datafile
-from bob.pad.base.script.error_utils import (
+from bob.pad.base.error_utils import (
     apcer_bpcer,
     calc_threshold,
     split_csv_pad,

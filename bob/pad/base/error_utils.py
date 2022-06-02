@@ -31,17 +31,17 @@ def calc_threshold(
     ----------
     method : str
         One of ``bpcer20``, ``eer``, ``min-hter``, ``apcer20``.
-    pos : array_like
+    pos : ``array_like``
         The positive scores. They should be sorted!
     negs : list
         A list of array_like negative scores. Each item in the list corresponds to
         scores of one PAI.
-    all_negs : array_like
+    all_negs : ``array_like``
         An array of all negative scores. This can be calculated from negs as well but we
         ask for it since you might have it already calculated.
-    far_value : None, optional
+    far_value : :obj:`float`, optional
         If method is far, far_value and all_negs are used to calculate the threshold.
-    is_sorted : bool, optional
+    is_sorted : :obj:`bool`, optional
         If True, it means all scores are sorted and no sorting will happen.
 
     Returns
@@ -93,7 +93,7 @@ def apcer_threshold(desired_apcer, pos, *negs, is_sorted=False):
     *negs
         A list of negative scores. Each item corresponds to the negative scores of one
         PAI.
-    is_sorted : bool, optional
+    is_sorted : :obj:`bool`, optional
         Set to ``True`` if ALL arrays (pos and negs) are sorted.
 
     Returns
@@ -138,10 +138,12 @@ def apcer_bpcer(threshold, pos, *negs):
 
 def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
     """Returns scores for Bona-Fide samples and scores for each PAI.
-    By default, the real_id column (second column) is used as indication for each
-    Presentation Attack Instrument (PAI).
+    By default, the real_id column (second column) is used as indication for
+    each Presentation Attack Instrument (PAI).
 
-    For example, with default regexps and regexp_column, if you have scores like:
+    For example, with default regexps and regexp_column, if you have scores
+    like::
+
         claimed_id, test_label,              is_bonafide, attack_type, score
         001,        bona_fide_sample_1_path, True,        ,            0.9
         001,        print_sample_1_path,     False,       print,       0.6
@@ -150,11 +152,14 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
         001,        replay_sample_2_path,    False,       replay,      0.2
         001,        mask_sample_1_path,      False,       mask,        0.5
         001,        mask_sample_2_path,      False,       mask,        0.5
-    this function will return 1 set of positive scores, and 3 sets of negative scores
-    (for each print, replay, and mask PAIs).
+
+    this function will return 1 set of positive scores, and 3 sets of negative
+    scores (for each print, replay, and mask PAIs).
 
     Otherwise, you can provide a list regular expressions that match each PAI.
-    For example, with regexps as ['print', 'replay', 'mask'], if you have scores like:
+    For example, with regexps as ['print', 'replay', 'mask'], if you have scores
+    like::
+
         claimed_id, test_label,              is_bonafide, attack_type, score
         001,        bona_fide_sample_1_path, True,        ,            0.9
         001,        print_sample_1_path,     False,       print/1,     0.6
@@ -163,31 +168,35 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
         001,        replay_sample_2_path,    False,       replay/2,    0.2
         001,        mask_sample_1_path,      False,       mask/1,      0.5
         001,        mask_sample_2_path,      False,       mask/2,      0.5
-    the function will return 3 sets of negative scores (for print, replay, and mask
-    PAIs, given in regexp).
+
+    the function will return 3 sets of negative scores (for print, replay, and
+    mask PAIs, given in regexp).
 
 
     Parameters
     ----------
     filename : str
         Path to the score file.
-    regexps : List of str, optional
-        A list of regular expressions that match each PAI. If not given, the values in
-        the column pointed by regexp_column are used to find scores for different PAIs.
-    regexp_column : str, optional
-        If a list of regular expressions are given, those patterns will be matched
-        against the values in this column. default: ``attack_type``
+    regexps : :obj:`list`, optional
+        A list of regular expressions that match each PAI. If not given, the
+        values in the column pointed by regexp_column are used to find scores
+        for different PAIs.
+    regexp_column : :obj:`str`, optional
+        If a list of regular expressions are given, those patterns will be
+        matched against the values in this column. default: ``attack_type``
 
     Returns
     -------
-    tuple ([positives], {'pai_name': [negatives]})
-        A tuple containing positive scores and a dict of negative scores mapping PAIs
-        names to their respective scores.
+    tuple
+        A tuple, ([positives], {'pai_name': [negatives]}), containing positive
+        scores and a dict of negative scores mapping PAIs names to their
+        respective scores.
 
     Raises
     ------
     ValueError
-        If none of the given regular expressions match the values in regexp_column.
+        If none of the given regular expressions match the values in
+        regexp_column.
     KeyError
         If regexp_column is not a column of the CSV file.
     """
@@ -220,7 +229,8 @@ def split_csv_pad_per_pai(filename, regexps=[], regexp_column="attack_type"):
 
 
 def split_csv_pad(filename):
-    """Loads PAD scores from a CSV score file, splits them by attack vs bonafide.
+    """Loads PAD scores from a CSV score file, splits them by attack vs
+    bonafide.
 
     The CSV must contain a ``is_bonafide`` column with each field either
     ``True`` or ``False`` (case insensitive).
@@ -232,8 +242,9 @@ def split_csv_pad(filename):
 
     Returns
     -------
-    (attack, bonafide): Tuple of 1D-arrays
-        The negative (attacks) and positives (bonafide) scores.
+    tuple
+        Tuple of 1D-arrays: (attack, bonafide). The negative (attacks) and
+        positives (bonafide) scores.
     """
     logger.debug(f"Loading CSV score file: '{filename}'")
     split_scores = defaultdict(list)
