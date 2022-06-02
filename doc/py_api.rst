@@ -5,19 +5,35 @@
 Python API for bob.pad.base
 ===========================
 
-Generic functions
------------------
+Summary
+=======
+
+Databases
+---------
+
+.. autosummary::
+
+    bob.pad.base.pipelines.Database
+    bob.pad.base.database.FileListPadDatabase
 
 
-Tools to run PAD experiments
-----------------------------
+Score Functions
+---------------
 
+.. autosummary::
+
+    bob.pad.base.error_utils.split_csv_pad
+    bob.pad.base.error_utils.split_csv_pad_per_pai
+    bob.pad.base.error_utils.calc_threshold
+    bob.pad.base.error_utils.apcer_threshold
+    bob.pad.base.error_utils.apcer_bpcer
 
 Details
 -------
 
 .. automodule:: bob.pad.base
-
-
+.. automodule:: bob.pad.base.pipelines
+.. automodule:: bob.pad.base.database
+.. automodule:: bob.pad.base.error_utils
 
 .. include:: links.rst

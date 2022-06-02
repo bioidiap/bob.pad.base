@@ -21,3 +21,4 @@
 .. _bobinstall: https://www.idiap.ch/software/bob/install
 .. _conda: https://conda.io
 .. _sklearn-dev-docs: https://scikit-learn.org/dev/developers/develop.html#apis-of-scikit-learn-objects
+.. _sklearn: https://scikit-learn.org

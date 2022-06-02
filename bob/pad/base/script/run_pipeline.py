@@ -92,10 +92,10 @@ logger = logging.getLogger(__name__)
     cls=ResourceOption,
 )
 @click.option(
-    "--checkpoint",
-    "-c",
-    is_flag=True,
-    help="If set, it will checkpoint all steps of the pipeline. Checkpoints will be saved in `--output`.",
+    "--checkpoint/--memory",
+    "checkpoint",
+    default=True,
+    help="If --checkpoint (which is the default), all steps of the pipeline will be saved. Checkpoints will be saved in `--output`.",
     cls=ResourceOption,
 )
 @click.option(
@@ -118,10 +118,14 @@ logger = logging.getLogger(__name__)
     type=click.INT,
     cls=ResourceOption,
 )
+@click.option(
+    "--no-dask",
+    is_flag=True,
+    help="If set, it will not use Dask for the execution of the pipeline.",
+    cls=ResourceOption,
+)
 @verbosity_option(cls=ResourceOption)
-@click.pass_context
 def run_pipeline(
-    ctx,
     pipeline,
     decision_function,
     database,
@@ -132,6 +136,7 @@ def run_pipeline(
     checkpoint,
     dask_partition_size,
     dask_n_workers,
+    no_dask,
     **kwargs,
 ):
     """Runs the simplest PAD pipeline."""
@@ -151,6 +156,7 @@ def run_pipeline(
         dask_client=dask_client,
         dask_partition_size=dask_partition_size,
         dask_n_workers=dask_n_workers,
+        no_dask=no_dask,
     )
 
 
@@ -165,14 +171,17 @@ def execute_pipeline(
     dask_client="single-threaded",
     dask_partition_size=None,
     dask_n_workers=None,
+    no_dask=False,
 ):
     import os
     import sys
 
     import bob.pipelines as mario
 
-    from bob.pipelines import is_instance_nested
-    from bob.pipelines.wrappers import DaskWrapper
+    from bob.pipelines import DaskWrapper, is_pipeline_wrapped
+
+    if no_dask:
+        dask_client = None
 
     get_score_row = (
         score_row_csv if write_metadata_scores else score_row_four_columns
@@ -196,8 +205,9 @@ def execute_pipeline(
         total_samples += len(predict_samples[group])
 
     # Checking if the pipeline is dask-wrapped
-    first_step = pipeline[0]
-    if not is_instance_nested(first_step, "estimator", DaskWrapper):
+    if (
+        not any(is_pipeline_wrapped(pipeline, DaskWrapper))
+    ) and dask_client is not None:
         # Scaling up if necessary
         if dask_n_workers is not None and not isinstance(dask_client, str):
             dask_client.cluster.scale(dask_n_workers)

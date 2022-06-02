@@ -22,7 +22,7 @@ from bob.measure import farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
 
-from .error_utils import calc_threshold
+from ..error_utils import calc_threshold
 from .pad_commands import CRITERIA
 
 logger = logging.getLogger(__name__)
