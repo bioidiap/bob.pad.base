@@ -160,7 +160,7 @@ def expand(data):
 @click.command(
     epilog="""\b
 Examples:
-  $ bin/bob pad cross 'results/{{ evaluation.database }}/{{ algorithm }}/{{ evaluation.protocol }}/scores/scores-{{ group }}' \
+  $ bob pad cross 'results/{{ evaluation.database }}/{{ algorithm }}/{{ evaluation.protocol }}/scores/scores-{{ group }}' \
     -td replaymobile \
     -d replaymobile -p grandtest \
     -d oulunpu -p Protocol_1 \

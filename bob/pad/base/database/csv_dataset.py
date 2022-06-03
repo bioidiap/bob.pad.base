@@ -50,6 +50,11 @@ class FileListPadDatabase(Database, FileListDatabase):
             **kwargs,
         )
 
+    def __repr__(self) -> str:
+        return "FileListPadDatabase(dataset_protocols_path='{}', protocol='{}', transformer={})".format(
+            self.dataset_protocols_path, self.protocol, self.transformer
+        )
+
     def purposes(self):
         return ("real", "attack")
 

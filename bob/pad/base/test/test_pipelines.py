@@ -81,6 +81,7 @@ pipeline = dummy_pipeline()
 
 
 def test_run_pipeline():
+
     for options in [
         ["--no-dask", "--memory"],
         ["--no-dask"],

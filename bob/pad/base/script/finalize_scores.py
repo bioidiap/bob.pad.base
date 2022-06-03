@@ -1,4 +1,4 @@
-"""Finalizes the scores that are produced by spoof.py
+"""Finalizes the scores that are produced by bob pad run-pipeline.
 """
 import click
 
@@ -9,8 +9,8 @@ from bob.extension.scripts.click_helper import log_parameters, verbosity_option
     name="finalize-scores",
     epilog="""\b
 Examples:
-  $ bin/bob pad finalize_scores /path/to/scores-dev
-  $ bin/bob pad finalize_scores /path/to/scores-{dev,eval}
+  $ bob pad finalize_scores /path/to/scores-dev.csv
+  $ bob pad finalize_scores /path/to/scores-{dev,eval}.csv
 """,
 )
 @click.argument(
@@ -20,7 +20,7 @@ Examples:
     "-m",
     "--method",
     default="mean",
-    type=click.Choice(["mean", "min", "max"]),
+    type=click.Choice(["mean", "median", "min", "max"]),
     show_default=True,
     help="The method to use when finalizing the scores.",
 )
@@ -38,44 +38,38 @@ def finalize_scores(scores, method, backup, verbose):
     The order of scores will change.
     """
     import logging
+    import shutil
 
     import numpy
+    import pandas as pd
 
     logger = logging.getLogger(__name__)
     log_parameters(logger)
 
-    mean = {"mean": numpy.nanmean, "max": numpy.nanmax, "min": numpy.nanmin}[
-        method
-    ]
+    mean = {
+        "mean": numpy.nanmean,
+        "median": numpy.nanmedian,
+        "max": numpy.nanmax,
+        "min": numpy.nanmin,
+    }[method]
 
     for path in scores:
-        new_lines = []
-        with open(path) as f:
-            old_lines = f.readlines()
+        logger.info("Finalizing scores in %s", path)
 
         if backup:
-            with open(f"{path}.bak", "w") as f:
-                f.writelines(old_lines)
+            logger.info("Backing up %s", path)
+            shutil.copy(path, path + ".bak")
 
-        old_lines.sort()
+        df = pd.read_csv(path)
 
-        for i, line in enumerate(old_lines):
-            uniq, s = line.strip().rsplit(maxsplit=1)
-            s = float(s)
-            if i == 0:
-                last_line = uniq
-                last_scores = []
+        # average the scores of each frame
+        df["score"] = df.groupby("test_label")["score"].transform(mean)
 
-            if uniq == last_line:
-                last_scores.append(s)
-            else:
-                new_lines.append("{} {}\n".format(last_line, mean(last_scores)))
-                last_scores = [s]
+        # remove frame_id column if it exists
+        if "frame_id" in df.columns:
+            df.drop("frame_id", axis=1, inplace=True)
 
-            last_line = uniq
+        # make rows unique based on test_label
+        df.drop_duplicates(subset=["test_label"], inplace=True)
 
-        else:  # this else is for the for loop
-            new_lines.append("{} {}\n".format(last_line, mean(last_scores)))
-
-        with open(path, "w") as f:
-            f.writelines(new_lines)
+        df.to_csv(path, index=False)
