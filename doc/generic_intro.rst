@@ -6,7 +6,7 @@
 
 
 =============================================
-Introduction to presentation attack detection
+Introduction to Presentation Attack Detection
 =============================================
 
 Presentation Attack Detection, or PAD, is a branch of biometrics aiming at
@@ -22,7 +22,7 @@ The following introduction to PAD is inspired by chapters 2.4 and 2.6 of
 [mohammadi2020trustworthy]_, and from [marcel2014handbook]_.
 
 
-Presentation attack
+Presentation Attack
 ===================
 
 Biometric recognition systems contain different points of attack. Attacks on
@@ -43,7 +43,7 @@ countermeasures put in place in the first place, so the field is in constant
 evolution, to adapt to new threats and try to anticipate them.
 
 
-Presentation attack detection
+Presentation Attack Detection
 =============================
 
 A PAD system works much like a biometric recognition system, but with the
@@ -76,7 +76,7 @@ intention of changing their identity (Genuine samples and ZEI samples).
    types of impostors are the negatives.
 
 
-Typical implementations of PAD
+Typical Implementations of PAD
 ------------------------------
 
 PAD for face recognition is the most advanced in this field, face PAD systems
@@ -97,7 +97,7 @@ interaction are the least robust but are more developed, as they can be easily
 integrated with existing biometric systems.
 
 
-Evaluation of PAD systems
+Evaluation of PAD Systems
 =========================
 
 To evaluate a biometric system with PAD, a set of samples is fed to the system.
@@ -105,7 +105,7 @@ Each sample is scored, and a post-processing step is used to analyze those
 scores.
 
 
-Licit scenario
+Licit Scenario
 --------------
 
 When no PA samples are in the input set (only Genuine and ZEI samples), the
@@ -113,7 +113,7 @@ situation is the same as a simple biometric experiment and is called a `licit`
 scenario. See :ref:`biometric introduction <bob.bio.base.biometrics_intro>`.
 
 
-Spoof scenario
+Spoof Scenario
 --------------
 
 If no ZEI samples are present in the set (only Genuine and PA samples), the
@@ -137,7 +137,7 @@ This two-class case is referred to as the `spoof` scenario.
     :ref:`bob.bio.base.vulnerability_analysis` for more information.
 
 
-PAD evaluation
+PAD Evaluation
 --------------
 
 When a mix of Zero Effort Impostor and PA are present in the input set, two
