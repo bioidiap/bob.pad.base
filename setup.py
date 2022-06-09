@@ -91,14 +91,6 @@ setup(
     # In this simple example we will create a single program that will print
     # the version of bob.
     entry_points={
-        # scripts should be declared using this entry:
-        "console_scripts": [
-            "spoof.py         = bob.pad.base.script.spoof:main",
-        ],
-        "bob.pad.database": [
-            "dummy             = bob.pad.base.test.dummy.database:database",  # for test purposes only
-            "dummysql             = bob.pad.base.test.dummy.database_sql:database",  # for test purposes only
-        ],
         # main entry for bob pad cli
         "bob.cli": [
             "pad               = bob.pad.base.script.pad:pad",
