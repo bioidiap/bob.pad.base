@@ -63,13 +63,13 @@ def finalize_scores(scores, method, backup, verbose):
         df = pd.read_csv(path)
 
         # average the scores of each frame
-        df["score"] = df.groupby("test_label")["score"].transform(mean)
+        df["score"] = df.groupby("video_key")["score"].transform(mean)
 
         # remove frame_id column if it exists
         if "frame_id" in df.columns:
             df.drop("frame_id", axis=1, inplace=True)
 
         # make rows unique based on test_label
-        df.drop_duplicates(subset=["test_label"], inplace=True)
+        df.drop_duplicates(subset=["video_key"], inplace=True)
 
         df.to_csv(path, index=False)
