@@ -1,5 +1,4 @@
 import h5py
-import nose
 import numpy as np
 
 from bob.io.base.test_utils import datafile
@@ -77,10 +76,10 @@ def test_per_pai_apcer():
             ref_thresholds = _read_dict(f, "thresholds")
             ref_metrics = _read_dict(f, "metrics")
 
-        nose.tools.assert_list_equal(pos, ref_pos)
-        nose.tools.assert_dict_equal(negs, ref_negs)
-        nose.tools.assert_dict_equal(thresholds, ref_thresholds)
-        nose.tools.assert_dict_equal(metrics, ref_metrics)
+        assert pos == ref_pos
+        assert negs == ref_negs
+        assert thresholds == ref_thresholds
+        assert metrics == ref_metrics
 
 
 def test_csv_split():
