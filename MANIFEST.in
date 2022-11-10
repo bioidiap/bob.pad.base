@@ -1,8 +1,8 @@
-include README.rst bootstrap-buildout.py buildout.cfg develop.cfg version.txt requirements.txt
+include README.rst
 recursive-include doc *.py *.rst
 recursive-include bob *.txt *.hdf5
 recursive-include bob *.sql3
-recursive-include bob/pad/base/test/data scores-* *.sql3 *.wav
-recursive-include bob/pad/base/test/data/example_filelist *.lst
-recursive-include bob/pad/base/test/ *.csv
-recursive-include bob/pad/base/test/ *.tar.gz
+recursive-include tests/data scores-* *.sql3 *.wav
+recursive-include tests/example_filelist *.lst
+recursive-include tests/ *.csv
+recursive-include tests/ *.tar.gz
