@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 import bob.measure
 import bob.pipelines as mario
 
-from bob.extension.scripts.click_helper import assert_click_runner_result
+from bob.io.base.testing_utils import assert_click_runner_result
 from bob.pad.base.error_utils import split_csv_pad
 from bob.pad.base.pipelines import Database
 from bob.pad.base.script.run_pipeline import run_pipeline as run_pipeline_cli
