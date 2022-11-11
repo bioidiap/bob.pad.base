@@ -5,8 +5,7 @@ import pkg_resources
 from click.testing import CliRunner
 
 from bob.extension.scripts.click_helper import assert_click_runner_result
-
-from ..script import pad_commands
+from bob.pad.base.script import pad_commands
 
 
 def test_gen_pad():
