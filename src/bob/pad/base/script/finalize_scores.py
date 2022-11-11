@@ -1,8 +1,12 @@
 """Finalizes the scores that are produced by bob pad run-pipeline.
 """
+import logging
+
 import click
 
-from bob.extension.scripts.click_helper import log_parameters, verbosity_option
+from exposed.click import log_parameters, verbosity_option
+
+logger = logging.getLogger(__name__)
 
 
 @click.command(
@@ -27,7 +31,7 @@ Examples:
 @click.option(
     "--backup/--no-backup", default=True, help="Whether to backup scores."
 )
-@verbosity_option()
+@verbosity_option(logger)
 def finalize_scores(scores, method, backup, verbose):
     """Finalizes the scores given by bob pad run-pipeline
     When using bob.pad.base, Algorithms can produce several score values for
@@ -37,13 +41,11 @@ def finalize_scores(scores, method, backup, verbose):
     The conversion is done in-place (original files will be backed up).
     The order of scores will change.
     """
-    import logging
     import shutil
 
     import numpy
     import pandas as pd
 
-    logger = logging.getLogger(__name__)
     log_parameters(logger)
 
     mean = {
