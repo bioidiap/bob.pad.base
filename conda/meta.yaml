@@ -38,6 +38,11 @@ requirements:
   run:
     - python
     - setuptools
+    - bob.extension
+    - bob.io.base
+    - bob.pipelines
+    - bob.measure
+    - bob.bio.base
     - {{ pin_compatible('click') }}
     - {{ pin_compatible('click-plugins') }}
     - {{ pin_compatible('dask') }}
