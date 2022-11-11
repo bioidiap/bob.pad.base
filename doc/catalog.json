@@ -11,33 +11,9 @@
         },
         "sources": {}
       },
-      "bob.measure": {
-        "versions": {
-          "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.measure/master/sphinx"
-        },
-        "sources": {}
-      },
-      "bob.io.base": {
-        "versions": {
-          "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.io.base/master/sphinx"
-        },
-        "sources": {}
-      },
       "bob.bio.base": {
         "versions": {
           "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.bio.base/master/sphinx"
-        },
-        "sources": {}
-      },
-      "bob.bio.spear": {
-        "versions": {
-          "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.bio.spear/master"
-        },
-        "sources": {}
-      },
-      "bob.bio.face": {
-        "versions": {
-          "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.bio.face/master"
         },
         "sources": {}
       },
