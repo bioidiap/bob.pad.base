@@ -73,7 +73,7 @@ def _create_config_file(path):
     with open(path, "w") as f:
         f.write(
             """
-from bob.pad.base.test.test_pipelines import DummyPadDatabase, dummy_pipeline
+from tests.test_pipelines import DummyPadDatabase, dummy_pipeline
 database = DummyPadDatabase()
 pipeline = dummy_pipeline()
 """

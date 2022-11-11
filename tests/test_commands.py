@@ -11,10 +11,10 @@ from ..script import pad_commands
 
 def test_gen_pad():
     dev_ref_file = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-dev.csv"
+        __name__, "data/csv_scores/scores-dev.csv"
     )
     eval_ref_file = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-eval.csv"
+        __name__, "data/csv_scores/scores-eval.csv"
     )
     with open(dev_ref_file, "r") as f:
         dev_ref = f.readlines()
@@ -48,10 +48,10 @@ def test_gen_pad():
 
 def test_det_pad():
     dev = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-dev.csv"
+        __name__, "data/csv_scores/scores-dev.csv"
     )
     test = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-eval.csv"
+        __name__, "data/csv_scores/scores-eval.csv"
     )
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -63,10 +63,10 @@ def test_det_pad():
 
 def test_hist_pad():
     dev = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-dev.csv"
+        __name__, "data/csv_scores/scores-dev.csv"
     )
     test = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-eval.csv"
+        __name__, "data/csv_scores/scores-eval.csv"
     )
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -108,10 +108,10 @@ def test_hist_pad():
 
 def test_metrics_pad():
     dev = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-dev.csv"
+        __name__, "data/csv_scores/scores-dev.csv"
     )
     test = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-eval.csv"
+        __name__, "data/csv_scores/scores-eval.csv"
     )
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -121,10 +121,10 @@ def test_metrics_pad():
 
 def test_evaluate_pad():
     dev = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-dev.csv"
+        __name__, "data/csv_scores/scores-dev.csv"
     )
     test = pkg_resources.resource_filename(
-        "bob.pad.base.test", "data/csv_scores/scores-eval.csv"
+        __name__, "data/csv_scores/scores-eval.csv"
     )
     runner = CliRunner()
     with runner.isolated_filesystem():

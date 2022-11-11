@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 
-from bob.io.base.test_utils import datafile
+from bob.io.base.testing_utils import datafile
 from bob.pad.base.error_utils import (
     apcer_bpcer,
     calc_threshold,
