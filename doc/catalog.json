@@ -10,11 +10,5 @@
       "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.bio.base/master/sphinx"
     },
     "sources": {}
-  },
-  "bob.pad.face": {
-    "versions": {
-      "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.pad.face/master"
-    },
-    "sources": {}
   }
 }
