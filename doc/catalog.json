@@ -1,8 +1,7 @@
 {
-
-  "bob.pipelines": {
+  "bob.extension": {
     "versions": {
-      "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.pipelines/master/sphinx"
+      "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.extension/master"
     },
     "sources": {}
   },
