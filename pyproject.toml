@@ -57,7 +57,7 @@
         "auto-intersphinx",
         "sphinxcontrib-programoutput",
         "matplotlib",
-        "bob.pad.face"
+        "bob.pad.face",
         ]
     test = [
         "pytest",
