@@ -18,7 +18,8 @@ dist
 .gdb_history
 build
 *.egg
-src/
 *.sql3
 record.txt
 *.DS_Store
+.gitlab-ci-local*
+html/

@@ -1,5 +1,6 @@
 """The main entry for bob pad commands.
 """
+import logging
 import os
 
 from csv import DictWriter
@@ -8,13 +9,16 @@ from functools import partial
 import click
 import numpy
 
+from exposed.click import verbosity_option
+
 import bob.measure.script.figure as measure_figure
 
-from bob.extension.scripts.click_helper import verbosity_option
 from bob.measure.script import common_options
 
 from ..error_utils import split_csv_pad, split_csv_pad_per_pai
 from . import pad_figure as figure
+
+logger = logging.getLogger(__name__)
 
 SCORE_FORMAT = "Files must be in CSV format."
 CRITERIA = (
@@ -190,7 +194,7 @@ def gen_pad_csv_scores(
 )
 @click.option("-s", "--n-samples", default=2, type=click.INT, show_default=True)
 @click.option("-a", "--n-attacks", default=2, type=click.INT, show_default=True)
-@verbosity_option()
+@verbosity_option(logger)
 @click.pass_context
 def gen(
     ctx,

@@ -10,14 +10,10 @@ import click
 import jinja2
 import yaml
 
+from exposed.click import log_parameters, verbosity_option
 from tabulate import tabulate
 
 from bob.bio.base.score.load import get_negatives_positives, load_score
-from bob.extension.scripts.click_helper import (
-    bool_option,
-    log_parameters,
-    verbosity_option,
-)
 from bob.measure import farfrr
 from bob.measure.script import common_options
 from bob.measure.utils import get_fta
@@ -26,6 +22,47 @@ from ..error_utils import calc_threshold
 from .pad_commands import CRITERIA
 
 logger = logging.getLogger(__name__)
+
+
+def bool_option(name, short_name, desc, dflt=False, **kwargs):
+    """Generic provider for boolean options
+
+    Parameters
+    ----------
+    name : str
+        name of the option
+    short_name : str
+        short name for the option
+    desc : str
+        short description for the option
+    dflt : bool or None
+        Default value
+    **kwargs
+        All kwargs are passed to click.option.
+
+    Returns
+    -------
+    ``callable``
+        A decorator to be used for adding this option.
+    """
+
+    def custom_bool_option(func):
+        def callback(ctx, param, value):
+            ctx.meta[name.replace("-", "_")] = value
+            return value
+
+        return click.option(
+            "-%s/-n%s" % (short_name, short_name),
+            "--%s/--no-%s" % (name, name),
+            default=dflt,
+            help=desc,
+            show_default=True,
+            callback=callback,
+            is_eager=True,
+            **kwargs,
+        )(func)
+
+    return custom_bool_option
 
 
 def _ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=dict):
@@ -234,7 +271,7 @@ Examples:
 @common_options.table_option()
 @common_options.output_log_metric_option()
 @common_options.decimal_option(dflt=2, short="-dec")
-@verbosity_option()
+@verbosity_option(logger)
 @click.pass_context
 def cross(
     ctx,

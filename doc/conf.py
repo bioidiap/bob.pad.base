@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
+    "auto_intersphinx",
 ]
 
 # Be picky about warnings
@@ -234,13 +235,15 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-# For inter-documentation mapping:
-from bob.extension.utils import link_documentation, load_requirements
-
-sphinx_requirements = "extra-intersphinx.txt"
-if os.path.exists(sphinx_requirements):
-    intersphinx_mapping = link_documentation(
-        additional_packages=load_requirements(sphinx_requirements)
-    )
-else:
-    intersphinx_mapping = link_documentation()
+auto_intersphinx_packages = [
+    ("python", "3"),
+    "numpy",
+    "bob.extension",
+    "bob.pipelines",
+    "bob.bio.base",
+    "bob.pad.face",
+    "setuptools",
+    "dask",
+    "scikit-learn",
+]
+auto_intersphinx_catalog = "catalog.json"

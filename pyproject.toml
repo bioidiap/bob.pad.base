@@ -1,7 +1,95 @@
 [build-system]
-    requires = ["setuptools", "wheel", "bob.extension"]
+    requires = ["setuptools>=61.0.0", "wheel"]
     build-backend = "setuptools.build_meta"
 
+[project]
+    name = "bob.pad.base"
+    version = "5.0.5b0"
+    requires-python = ">=3.9"
+    description = "A framework for executing the chain of presentation attack detection (PAD) experiments"
+    dynamic = ["readme"]
+    license = {text = "GPLv3 License"}
+    authors = [
+    {name = "Pavel Korshunov"},
+    {email = "pavel.korshunov@idiap.ch"},
+    ]
+    keywords = ["PAD framework", "grid support", "pipeline organization"]
+
+    classifiers=[
+        "Framework :: Bob",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Natural Language :: English",
+        "Programming Language :: Python",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    ]
+    dependencies = [
+        "setuptools",
+        "bob.extension",
+        "bob.io.base",
+        "bob.pipelines",
+        "bob.measure",
+        "bob.bio.base",
+        "click",
+        "click-plugins",
+        "dask",
+        "matplotlib",
+        "numpy",
+        "scikit-learn",
+        "scipy",
+        "sqlalchemy",
+        "tabulate",
+    ]
+
+[project.urls]
+    documentation = "https://www.idiap.ch/software/bob/docs/bob/bob.pad.base/stable/"
+    homepage = "https://pypi.org/project/bob.pad.base/"
+    repository = "https://gitlab.idiap.ch/bob/bob.pad.base"
+    changelog = "https://gitlab.idiap.ch/bob/bob.pad.base/-/releases"
+
+[project.optional-dependencies]
+    qa = ["pre-commit"]
+    doc = [
+        "sphinx",
+        "sphinx_rtd_theme",
+        "sphinx-autodoc-typehints",
+        "auto-intersphinx",
+        "sphinxcontrib-programoutput",
+        "matplotlib",
+        "bob.pad.face",
+        ]
+    test = [
+        "pytest",
+        "pytest-cov",
+        "coverage",
+        ]
+
+[tool.setuptools]
+    zip-safe = false
+    package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+    readme = {file = "README.rst"}
+
+[project.entry-points."bob.cli"]
+    pad               = "bob.pad.base.script.pad:pad"
+
+[project.entry-points."bob.pad.cli"]
+    metrics          = "bob.pad.base.script.pad_commands:metrics"
+    multi-metrics    = "bob.pad.base.script.pad_commands:multi_metrics"
+    hist             = "bob.pad.base.script.pad_commands:hist"
+    det              = "bob.pad.base.script.pad_commands:det"
+    roc              = "bob.pad.base.script.pad_commands:roc"
+    epc              = "bob.pad.base.script.pad_commands:epc"
+    gen              = "bob.pad.base.script.pad_commands:gen"
+    evaluate         = "bob.pad.base.script.pad_commands:evaluate"
+    cross            = "bob.pad.base.script.cross:cross"
+    finalize-scores  = "bob.pad.base.script.finalize_scores:finalize_scores"
+    run-pipeline     = "bob.pad.base.script.run_pipeline:run_pipeline"
+
+[tool.distutils.bdist_wheel]
+    universal = true
 [tool.isort]
     profile = "black"
     line_length = 80
@@ -10,3 +98,12 @@
 
 [tool.black]
     line-length = 80
+
+[tool.pytest.ini_options]
+    addopts = [
+        "--import-mode=append",
+        "--cov-report=term-missing",
+        "--cov=bob.pad.base",
+    ]
+    junit_logging = "all"
+    junit_log_passing_tests = false

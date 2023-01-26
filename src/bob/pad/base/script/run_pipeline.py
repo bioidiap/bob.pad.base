@@ -5,11 +5,13 @@ import logging
 
 import click
 
-from bob.extension.scripts.click_helper import (
+from exposed.click import (
     ConfigCommand,
     ResourceOption,
+    log_parameters,
     verbosity_option,
 )
+
 from bob.pipelines.distributed import (
     VALID_DASK_CLIENT_STRINGS,
     dask_get_partition_size,
@@ -113,7 +115,7 @@ logger = logging.getLogger(__name__)
     help="If set, it will not use Dask for the execution of the pipeline.",
     cls=ResourceOption,
 )
-@verbosity_option(cls=ResourceOption)
+@verbosity_option(cls=ResourceOption, logger=logger)
 def run_pipeline(
     pipeline,
     decision_function,
@@ -128,8 +130,6 @@ def run_pipeline(
     **kwargs,
 ):
     """Runs the simplest PAD pipeline."""
-
-    from bob.extension.scripts.click_helper import log_parameters
 
     log_parameters(logger)
 
