@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from exposed.click import log_parameters, verbosity_option
+from clapp.click import log_parameters, verbosity_option
 
 logger = logging.getLogger(__name__)
 
