@@ -59,7 +59,6 @@ class DummyPadDatabase(Database):
 
 
 def dummy_pipeline():
-
     classifier = mario.wrap(
         ["sample"],
         LinearDiscriminantAnalysis(),
@@ -81,7 +80,6 @@ pipeline = dummy_pipeline()
 
 
 def test_run_pipeline():
-
     for options in [
         ["--no-dask", "--memory"],
         ["--no-dask"],
