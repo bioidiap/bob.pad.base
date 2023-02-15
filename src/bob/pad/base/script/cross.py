@@ -10,7 +10,7 @@ import click
 import jinja2
 import yaml
 
-from exposed.click import log_parameters, verbosity_option
+from clapp.click import log_parameters, verbosity_option
 from tabulate import tabulate
 
 from bob.bio.base.score.load import get_negatives_positives, load_score

@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from exposed.click import (
+from clapp.click import (
     ConfigCommand,
     ResourceOption,
     log_parameters,

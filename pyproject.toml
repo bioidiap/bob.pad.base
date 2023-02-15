@@ -26,6 +26,7 @@
     ]
     dependencies = [
         "setuptools",
+        "clapp",
         "bob.extension",
         "bob.io.base",
         "bob.pipelines",
@@ -57,7 +58,6 @@
         "auto-intersphinx",
         "sphinxcontrib-programoutput",
         "matplotlib",
-        "bob.pad.face",
         ]
     test = [
         "pytest",

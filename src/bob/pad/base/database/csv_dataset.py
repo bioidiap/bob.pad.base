@@ -4,7 +4,7 @@
 
 from bob.bio.base.database.legacy import check_parameters_for_validity
 from bob.pad.base.pipelines.abstract_classes import Database
-from bob.pipelines.datasets import FileListDatabase
+from bob.pipelines.dataset import FileListDatabase
 
 
 def validate_pad_sample(sample):
