@@ -33,12 +33,14 @@ class FileListPadDatabase(Database, FileListDatabase):
 
     def __init__(
         self,
+        name,
         dataset_protocols_path,
         protocol,
         transformer=None,
         **kwargs,
     ):
         super().__init__(
+            name=name,
             dataset_protocols_path=dataset_protocols_path,
             protocol=protocol,
             transformer=transformer,
