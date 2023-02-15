@@ -4,5 +4,11 @@
       "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.extension/master"
     },
     "sources": {}
+  },
+  "bob.pad.face": {
+    "versions": {
+      "latest": "https://www.idiap.ch/software/bob/docs/bob/bob.pad.face/master/sphinx"
+    },
+    "sources": {}
   }
 }
